@@ -1,0 +1,52 @@
+{
+  "name": "floor-protocol",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "packageManager": "pnpm@10.20.0",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "dev:web": "pnpm --filter @floor/web dev",
+    "dev:api": "tsx apps/api/src/server.ts",
+    "chain": "node scripts/foundry.mjs anvil --host 127.0.0.1 --port 8545 --chain-id 31337 --silent",
+    "contracts:build": "node scripts/foundry.mjs forge build --root packages/contracts",
+    "contracts:test": "node scripts/foundry.mjs forge test --root packages/contracts -vv",
+    "contracts:fmt": "node scripts/foundry.mjs forge fmt --root packages/contracts",
+    "abi": "tsx scripts/generate-abis.ts",
+    "deploy:local": "tsx scripts/deploy.ts",
+    "demo": "tsx scripts/replay-demo.ts",
+    "preflight": "tsx scripts/preflight.ts",
+    "test": "vitest run",
+    "test:differential": "tsx scripts/differential.ts",
+    "typecheck": "tsc --noEmit && pnpm --filter @floor/web typecheck",
+    "build": "pnpm contracts:build && pnpm abi && pnpm --filter @floor/web build && node scripts/package-web.mjs",
+    "e2e": "playwright test",
+    "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm contracts:test && pnpm test:differential",
+    "lint": "node scripts/source-checks.mjs && node scripts/foundry.mjs forge fmt --root packages/contracts --check",
+    "verify": "node scripts/verify.mjs",
+    "sepolia:check": "tsx scripts/check-sepolia.ts",
+    "deploy:sepolia": "tsx scripts/deploy.ts",
+    "test:fork": "node scripts/test-fork.mjs"
+  },
+  "dependencies": {
+    "@floor/proof-engine": "workspace:*",
+    "@floor/shared": "workspace:*",
+    "@hono/node-server": "2.1.6",
+    "@openzeppelin/contracts": "5.6.1",
+    "hono": "4.13.16",
+    "viem": "2.57.16",
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "@foundry-rs/anvil": "1.7.1",
+    "@foundry-rs/forge": "1.7.1",
+    "@playwright/test": "1.64.1",
+    "@types/node": "24.10.1",
+    "tsx": "4.23.15",
+    "typescript": "5.9.3",
+    "vitest": "5.1.0"
+  }
+}
