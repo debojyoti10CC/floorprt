@@ -1,0 +1,15 @@
+import { spawn } from 'node:child_process';
+import { createRequire } from 'node:module';
+import { dirname, join } from 'node:path';
+import { existsSync } from 'node:fs';
+const require = createRequire(import.meta.url);
+const [tool, ...args] = process.argv.slice(2);
+if (!['forge', 'anvil'].includes(tool)) throw new Error('Expected forge or anvil');
+const pkg = dirname(require.resolve(`@foundry-rs/${tool}/package.json`));
+const local = join(pkg, process.platform === 'win32' ? `${tool}.exe` : tool);
+const pkgRequire = createRequire(join(pkg, 'package.json'));
+const arch = process.arch === 'x64' ? 'amd64' : process.arch;
+const binary = existsSync(local) ? local : pkgRequire.resolve(`@foundry-rs/${tool}-${process.platform}-${arch}/bin/${process.platform === 'win32' ? tool + '.exe' : tool}`);
+const child = spawn(binary, args, { stdio: 'inherit', windowsHide: true });
+child.on('error', e => { console.error(e.message); process.exitCode = 1; });
+child.on('close', code => { process.exit(code ?? 1); });

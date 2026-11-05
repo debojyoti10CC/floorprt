@@ -1,0 +1,3 @@
+import {chromium} from '@playwright/test';
+const browser=await chromium.launch();
+try{const page=await browser.newPage({viewport:{width:390,height:844}});await page.goto('http://127.0.0.1:3000/compose/');await page.locator('.outcome-tray-chips button').first().waitFor();console.log(JSON.stringify(await page.evaluate(()=>({width:innerWidth,scroll:document.documentElement.scrollWidth,elements:[...document.querySelectorAll('body *')].map(e=>({tag:e.tagName,class:e.className?.baseVal??e.className,x:e.getBoundingClientRect().x,w:e.getBoundingClientRect().width})).filter(e=>e.x+e.w>innerWidth+1&&e.w>40).slice(0,25)})),null,2));await page.screenshot({path:'evidence/screenshots/mobile-studio.png',fullPage:true});}finally{await browser.close()}

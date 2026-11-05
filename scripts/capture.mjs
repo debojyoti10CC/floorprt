@@ -1,0 +1,16 @@
+import {chromium} from '@playwright/test';
+import {mkdir} from 'node:fs/promises';
+await mkdir('evidence/screenshots',{recursive:true});
+const browser=await chromium.launch({headless:true});
+const page=await browser.newPage({viewport:{width:1440,height:1100},deviceScaleFactor:1});
+page.on('pageerror',error=>console.error('PAGE ERROR:',error.message));
+await page.goto('http://127.0.0.1:3000/',{waitUntil:'networkidle'});
+await page.getByText('LOCAL EVM CONNECTED',{exact:true}).waitFor({state:'visible',timeout:60000});
+await page.evaluate(()=>document.fonts.ready);
+console.log('Overview loaded:', await page.locator('h1').innerText());
+await page.screenshot({path:'evidence/screenshots/overview.png',fullPage:true});
+await page.getByRole('link',{name:'Portfolio studio',exact:true}).click();
+await page.locator('.payoff-chart svg').waitFor({state:'visible',timeout:60000});
+await page.waitForTimeout(400);
+await page.screenshot({path:'evidence/screenshots/studio.png',fullPage:true});
+await browser.close();
