@@ -37,9 +37,9 @@ The adapter creates its registry with itself as the immutable resolver. The regi
 
 The observation's price is the last feed publication at or before its timestamp. The immediately following round must publish strictly after that timestamp. Both rounds must be complete, have positive answers and valid timestamps. The previous publication and its successor must lie within the precommitted maximum window. The adapter finalizes the registry using the prior round's answer; the caller supplies only its ID.
 
-This adapter supports contiguous round IDs within a feed phase. Gaps, missing data and phase transitions fail closed. The source commitment includes chain, feed and maximum window. A shared permissionless longstop cancellation supplies liveness when a supported witness is unavailable. All child markets use the same observation and 50/50 cancellation semantics.
+The adapter snapshots the proxy's active phase at deployment and includes that phase in each observation's source commitment. Both witness rounds must be adjacent in that phase, and the proxy must still report that phase when finalization executes. This prevents retained historical rounds from an archived aggregator being treated as the current feed. Gaps, missing data and phase transitions fail closed. After a Chainlink phase upgrade, deploy a new protocol instance for new observations; observations bound to the previous phase remain unresolved and can use their committed longstop cancellation. This follows Chainlink's documented phase-encoded proxy round IDs and historical aggregator behavior ([historical data](https://docs.chain.link/data-feeds/price-feeds/historical-data)).
 
-Chainlink rounds need not be globally consecutive; the supported limitation is deliberate and covered by [the official historical-data model](https://docs.chain.link/data-feeds/price-feeds/historical-data). The UI's witness lookup does not override onchain validation. This adapter is distinct from CRE, which remains a separate future integration.
+The UI's witness lookup does not override onchain validation. This adapter is distinct from CRE, which remains a separate future integration.
 
 ## Repayment and settlement races
 
