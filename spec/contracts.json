@@ -1,0 +1,35 @@
+{
+  "schema": "floor-protocol-spec-index/v1",
+  "date": "2026-11-05",
+  "status": "DESIGN_ONLY_NO_DEPLOYED_ABI",
+  "settlementTokenDecimals": 6,
+  "wholeErc1155UnitsOnly": true,
+  "winningPayoutUsdcBasePerUnit": "1000000",
+  "losingPayoutUsdcBasePerUnit": "0",
+  "commonCancellationPayoutUsdcBasePerUnit": "500000",
+  "firstSupportedProof": {
+    "id": "FLOOR_PAIR_GEQ_V1",
+    "lowerLeg": "YES(price >= lowerStrike)",
+    "upperLeg": "NO(price >= upperStrike)",
+    "constraint": "lowerStrike < upperStrike; exact same observationId, asset, issuer, collateral, payout/cancel policy",
+    "floorFormula": "min(lowerYesWholeUnits, upperNoWholeUnits) * 1000000"
+  },
+  "modules": [
+    {"name": "MockUSDC", "scope": "TESTNET_ONLY"},
+    {"name": "SharedObservationRegistry", "scope": "P0"},
+    {"name": "OutcomeMarketFactory", "scope": "P0"},
+    {"name": "OutcomeTokens", "scope": "P0"},
+    {"name": "FloorVerifier", "scope": "P0"},
+    {"name": "FloorVault", "scope": "P0"},
+    {"name": "CreditDesk", "scope": "P0"},
+    {"name": "CREOracleWorkflow", "scope": "P1_SPONSOR"},
+    {"name": "StructuredTrancheVault", "scope": "P2"}
+  ],
+  "securityAssumptions": [
+    "Trusted common observation registry with eventual terminal state",
+    "Immutable allowlisted fully collateralized outcome token issuer",
+    "Same single-chain custody of claims and loans",
+    "Accepted stablecoin settlement token remains transferable and redeemable",
+    "Fixed total due bounded below certified terminal floor"
+  ]
+}
