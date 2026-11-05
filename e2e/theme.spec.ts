@@ -14,6 +14,7 @@ test('Kimia foundations, contrast, keyboard chart and wallet focus are usable',a
   });
   expect(ratios.textRaised).toBeGreaterThanOrEqual(4.5);expect(ratios.textMuted).toBeGreaterThanOrEqual(4.5);expect(ratios.accentText).toBeGreaterThanOrEqual(4.5);expect(ratios.control).toBeGreaterThanOrEqual(3);expect(ratios.focus).toBeGreaterThanOrEqual(3);
   const svg=page.getByTestId('payoff-surface').locator('svg');await svg.focus();const before=await svg.locator('polygon').first().getAttribute('points');await svg.press('ArrowRight');expect(await svg.locator('polygon').first().getAttribute('points')).not.toBe(before);
+  const account=page.getByTestId('sidebar-account-menu');await account.click();await expect(page.getByRole('dialog',{name:'Connect wallet'})).toBeVisible();await expect(page.getByTestId('connect-borrower')).toBeVisible();await page.keyboard.press('Escape');await expect(page.getByRole('dialog')).toBeHidden();await expect(account).toBeFocused();
   const menu=page.getByTestId('wallet-menu');await menu.click();await expect(page.getByRole('button',{name:'Close wallet dialog'})).toBeFocused();
   await page.keyboard.press('Shift+Tab');expect(await page.evaluate(()=>!!document.activeElement?.closest('[role=dialog]'))).toBe(true);
   await page.keyboard.press('Escape');await expect(page.getByRole('dialog')).toBeHidden();await expect(menu).toBeFocused();

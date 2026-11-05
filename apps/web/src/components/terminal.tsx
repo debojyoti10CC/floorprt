@@ -4,7 +4,7 @@ import Link from 'next/link';
 
 import {useState,useEffect,useRef} from 'react';
 
-import {Activity,ArrowDownToLine,ArrowRight,ArrowUpRight,BookOpen,Check,ChevronDown,ChevronsUpDown,Command,ExternalLink,FlaskConical,LayoutDashboard,Layers3,Menu,Network,RefreshCw,Search,Settings2,ShieldCheck,Wallet,X} from 'lucide-react';
+import {Activity,ArrowDownToLine,ArrowRight,ArrowUpRight,BookOpen,Check,ChevronDown,Command,ExternalLink,FlaskConical,LayoutDashboard,Layers3,Menu,Network,RefreshCw,Search,Settings2,ShieldCheck,Wallet,X} from 'lucide-react';
 
 import {useProtocol,message,short} from '../lib/protocol';
 
@@ -42,7 +42,7 @@ export function Terminal({initialPage}:{initialPage:string}){
 
       <Link href="/terminal/" className="brand"><span className="brand-mark"><i/><i/><i/></span><span>AQRA</span><span className="brand-beta">BETA</span></Link>
 
-      <div className="workspace-selector"><Identicon address={p.address??p.deployment?.roles.borrower??'AQRA'} size={32}/><div>AQRA workspace<small>Outcome terminal</small></div><ChevronsUpDown size={13}/></div>
+      <button type="button" className="workspace-selector" data-testid="sidebar-account-menu" aria-label={p.address?`Manage wallet ${short(p.address)}`:'Connect wallet'} aria-haspopup="dialog" onClick={()=>setWalletOpen(true)}>{p.address?<Identicon address={p.address} size={32}/>:<span className="workspace-avatar"><Wallet size={16}/></span>}<span className="workspace-account-copy"><strong>{p.address?(role==='resolver'?'Curator':role??'Connected wallet'):'Connect wallet'}</strong><small>{p.address?short(p.address):'Choose a signing account'}</small></span><ChevronDown size={14}/></button>
 
       <div className="nav-label">WORKSPACE</div>
 
