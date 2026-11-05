@@ -1,0 +1,2274 @@
+{
+  "schema": "floor-recorded-run/v1",
+  "notice": "Historical local Anvil execution evidence. Not a live public deployment. Wallet writes disabled when RPC is offline.",
+  "recordedAt": "2026-11-05T19:13:23.440Z",
+  "deployment": {
+    "schema": "floor-deployment/v1",
+    "chainId": 31337,
+    "chainName": "Anvil local devnet",
+    "rpcUrl": "http://127.0.0.1:8545",
+    "explorerUrl": "",
+    "deploymentBlock": "599",
+    "deployedAt": "2026-11-05T19:13:11.302Z",
+    "contracts": {
+      "CollateralToken": "0x8fc8cfb7f7362e44e472c690a6e025b80e406458",
+      "SharedObservationRegistry": "0xc7143d5ba86553c06f5730c8dc9f8187a621a8d4",
+      "OutcomeMarketFactory": "0x359570b3a0437805d0a71457d61ad26a28cac9a2",
+      "OutcomeTokens": "0xe3686721b062Da0B181140362A1ca5f2d3E43fBA",
+      "FloorVerifier": "0xc9952fc93fa9be383ccb39008c786b9f94eac95d",
+      "FloorVault": "0xdde063ebe8e85d666ad99f731b4dbf8c98f29708",
+      "CreditDesk": "0xd5724171c2b7f0aa717a324626050bd05767e2c6"
+    },
+    "codeHashes": {
+      "CollateralToken": "0xf2261789473cde7636c55dcc791b89626951360542cab3c93ca90a6b1feef8b2",
+      "SharedObservationRegistry": "0x1e3bd6b31347b542b2203a868a2c395c0754d6a16d101b1030300a989ffe50ca",
+      "OutcomeMarketFactory": "0xb0d64a52aca23ddd82626e567b1937d8bef24135fa6ac80d14c6997ffdc5d140",
+      "OutcomeTokens": "0x9e30a3d55ea72fcac5d0229a2c03b7a458aa259b9f92fefa610104d5d59c4823",
+      "FloorVerifier": "0x98c65832821e44d06f740737d028c5043416637777586c15d4d9e2db49ee093f",
+      "FloorVault": "0x0e2e49d24b6db809ae9b23847d6fdc5825c95b46862d7c6a06e68d1dc79210f9",
+      "CreditDesk": "0x664e5af870f4785377740a1130c60781dc3fdc26286603c179163ebf34c48658"
+    },
+    "roles": {
+      "curator": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "resolver": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "borrower": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+      "lender": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC"
+    },
+    "mockCollateral": true,
+    "oracleMode": "TRUSTED_TEST_RESOLVER",
+    "seededBlock": "624",
+    "defaultPair": {
+      "lower": "24",
+      "upper": "25"
+    }
+  },
+  "snapshot": {
+    "chainId": 31337,
+    "blockNumber": "721",
+    "blockHash": "0x989c135bbcb5e8ef4340dd8672d02b4bd6869f39e4487b8875313f7e90ed310e",
+    "timestamp": "1794089536",
+    "observations": [
+      {
+        "id": "1",
+        "assetId": "0x0b43555ace6b39aae1b894097d0a9fc17f504c62fea598fa206cc6f5088e6e45",
+        "observationTime": "1794067857",
+        "priceDecimals": 8,
+        "sourceId": "0x863aff072f176f93918fa0ddfa272c7da2aa448e7ba9f0fba8d2701b34346b47",
+        "resolutionPolicyHash": "0x85343dfe4e34e7de6b2d1e0bb14cf456730d6eb70dc101908914c057b8c8457b",
+        "cancelAfter": "1794154257",
+        "state": 0,
+        "price": "0",
+        "resolver": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+      },
+      {
+        "id": "2",
+        "assetId": "0x0b43555ace6b39aae1b894097d0a9fc17f504c62fea598fa206cc6f5088e6e45",
+        "observationTime": "1794068457",
+        "priceDecimals": 8,
+        "sourceId": "0x863aff072f176f93918fa0ddfa272c7da2aa448e7ba9f0fba8d2701b34346b47",
+        "resolutionPolicyHash": "0x85343dfe4e34e7de6b2d1e0bb14cf456730d6eb70dc101908914c057b8c8457b",
+        "cancelAfter": "1794154857",
+        "state": 0,
+        "price": "0",
+        "resolver": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+      },
+      {
+        "id": "3",
+        "assetId": "0xee62665949c883f9e0f6f002eac32e00bd59dfe6c34e92a91c37d6a8322d6489",
+        "observationTime": "1794069057",
+        "priceDecimals": 8,
+        "sourceId": "0x863aff072f176f93918fa0ddfa272c7da2aa448e7ba9f0fba8d2701b34346b47",
+        "resolutionPolicyHash": "0x85343dfe4e34e7de6b2d1e0bb14cf456730d6eb70dc101908914c057b8c8457b",
+        "cancelAfter": "1794155457",
+        "state": 0,
+        "price": "0",
+        "resolver": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+      },
+      {
+        "id": "4",
+        "assetId": "0x0b43555ace6b39aae1b894097d0a9fc17f504c62fea598fa206cc6f5088e6e45",
+        "observationTime": "1794067934",
+        "priceDecimals": 8,
+        "sourceId": "0x863aff072f176f93918fa0ddfa272c7da2aa448e7ba9f0fba8d2701b34346b47",
+        "resolutionPolicyHash": "0x85343dfe4e34e7de6b2d1e0bb14cf456730d6eb70dc101908914c057b8c8457b",
+        "cancelAfter": "1794071534",
+        "state": 1,
+        "price": "450000000000",
+        "resolver": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+      },
+      {
+        "id": "5",
+        "assetId": "0x0b43555ace6b39aae1b894097d0a9fc17f504c62fea598fa206cc6f5088e6e45",
+        "observationTime": "1794071534",
+        "priceDecimals": 8,
+        "sourceId": "0x863aff072f176f93918fa0ddfa272c7da2aa448e7ba9f0fba8d2701b34346b47",
+        "resolutionPolicyHash": "0x85343dfe4e34e7de6b2d1e0bb14cf456730d6eb70dc101908914c057b8c8457b",
+        "cancelAfter": "1794075134",
+        "state": 1,
+        "price": "500000000000",
+        "resolver": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+      },
+      {
+        "id": "6",
+        "assetId": "0x0b43555ace6b39aae1b894097d0a9fc17f504c62fea598fa206cc6f5088e6e45",
+        "observationTime": "1794075135",
+        "priceDecimals": 8,
+        "sourceId": "0x863aff072f176f93918fa0ddfa272c7da2aa448e7ba9f0fba8d2701b34346b47",
+        "resolutionPolicyHash": "0x85343dfe4e34e7de6b2d1e0bb14cf456730d6eb70dc101908914c057b8c8457b",
+        "cancelAfter": "1794078735",
+        "state": 1,
+        "price": "550000000000",
+        "resolver": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+      },
+      {
+        "id": "7",
+        "assetId": "0x0b43555ace6b39aae1b894097d0a9fc17f504c62fea598fa206cc6f5088e6e45",
+        "observationTime": "1794078735",
+        "priceDecimals": 8,
+        "sourceId": "0x863aff072f176f93918fa0ddfa272c7da2aa448e7ba9f0fba8d2701b34346b47",
+        "resolutionPolicyHash": "0x85343dfe4e34e7de6b2d1e0bb14cf456730d6eb70dc101908914c057b8c8457b",
+        "cancelAfter": "1794082335",
+        "state": 1,
+        "price": "600000000000",
+        "resolver": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+      },
+      {
+        "id": "8",
+        "assetId": "0x0b43555ace6b39aae1b894097d0a9fc17f504c62fea598fa206cc6f5088e6e45",
+        "observationTime": "1794082335",
+        "priceDecimals": 8,
+        "sourceId": "0x863aff072f176f93918fa0ddfa272c7da2aa448e7ba9f0fba8d2701b34346b47",
+        "resolutionPolicyHash": "0x85343dfe4e34e7de6b2d1e0bb14cf456730d6eb70dc101908914c057b8c8457b",
+        "cancelAfter": "1794085935",
+        "state": 1,
+        "price": "650000000000",
+        "resolver": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+      },
+      {
+        "id": "9",
+        "assetId": "0x0b43555ace6b39aae1b894097d0a9fc17f504c62fea598fa206cc6f5088e6e45",
+        "observationTime": "1794085935",
+        "priceDecimals": 8,
+        "sourceId": "0x863aff072f176f93918fa0ddfa272c7da2aa448e7ba9f0fba8d2701b34346b47",
+        "resolutionPolicyHash": "0x85343dfe4e34e7de6b2d1e0bb14cf456730d6eb70dc101908914c057b8c8457b",
+        "cancelAfter": "1794089535",
+        "state": 2,
+        "price": "0",
+        "resolver": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+      },
+      {
+        "id": "10",
+        "assetId": "0x0b43555ace6b39aae1b894097d0a9fc17f504c62fea598fa206cc6f5088e6e45",
+        "observationTime": "1794093135",
+        "priceDecimals": 8,
+        "sourceId": "0x863aff072f176f93918fa0ddfa272c7da2aa448e7ba9f0fba8d2701b34346b47",
+        "resolutionPolicyHash": "0x85343dfe4e34e7de6b2d1e0bb14cf456730d6eb70dc101908914c057b8c8457b",
+        "cancelAfter": "1794096735",
+        "state": 0,
+        "price": "0",
+        "resolver": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+      }
+    ],
+    "markets": [
+      {
+        "id": "1",
+        "observationId": "1",
+        "strike": "450000000000",
+        "enabledForNewCollateral": true,
+        "yesTokenId": "3",
+        "noTokenId": "4",
+        "escrow": "0",
+        "yesBalance": "0",
+        "noBalance": "0"
+      },
+      {
+        "id": "2",
+        "observationId": "1",
+        "strike": "500000000000",
+        "enabledForNewCollateral": true,
+        "yesTokenId": "5",
+        "noTokenId": "6",
+        "escrow": "10000000",
+        "yesBalance": "10",
+        "noBalance": "10"
+      },
+      {
+        "id": "3",
+        "observationId": "1",
+        "strike": "600000000000",
+        "enabledForNewCollateral": true,
+        "yesTokenId": "7",
+        "noTokenId": "8",
+        "escrow": "10000000",
+        "yesBalance": "10",
+        "noBalance": "10"
+      },
+      {
+        "id": "4",
+        "observationId": "1",
+        "strike": "650000000000",
+        "enabledForNewCollateral": true,
+        "yesTokenId": "9",
+        "noTokenId": "10",
+        "escrow": "0",
+        "yesBalance": "0",
+        "noBalance": "0"
+      },
+      {
+        "id": "5",
+        "observationId": "2",
+        "strike": "450000000000",
+        "enabledForNewCollateral": true,
+        "yesTokenId": "11",
+        "noTokenId": "12",
+        "escrow": "0",
+        "yesBalance": "0",
+        "noBalance": "0"
+      },
+      {
+        "id": "6",
+        "observationId": "2",
+        "strike": "500000000000",
+        "enabledForNewCollateral": true,
+        "yesTokenId": "13",
+        "noTokenId": "14",
+        "escrow": "0",
+        "yesBalance": "0",
+        "noBalance": "0"
+      },
+      {
+        "id": "7",
+        "observationId": "2",
+        "strike": "600000000000",
+        "enabledForNewCollateral": true,
+        "yesTokenId": "15",
+        "noTokenId": "16",
+        "escrow": "0",
+        "yesBalance": "0",
+        "noBalance": "0"
+      },
+      {
+        "id": "8",
+        "observationId": "2",
+        "strike": "650000000000",
+        "enabledForNewCollateral": true,
+        "yesTokenId": "17",
+        "noTokenId": "18",
+        "escrow": "0",
+        "yesBalance": "0",
+        "noBalance": "0"
+      },
+      {
+        "id": "9",
+        "observationId": "3",
+        "strike": "9000000000000",
+        "enabledForNewCollateral": true,
+        "yesTokenId": "19",
+        "noTokenId": "20",
+        "escrow": "0",
+        "yesBalance": "0",
+        "noBalance": "0"
+      },
+      {
+        "id": "10",
+        "observationId": "3",
+        "strike": "10000000000000",
+        "enabledForNewCollateral": true,
+        "yesTokenId": "21",
+        "noTokenId": "22",
+        "escrow": "0",
+        "yesBalance": "0",
+        "noBalance": "0"
+      },
+      {
+        "id": "11",
+        "observationId": "3",
+        "strike": "11000000000000",
+        "enabledForNewCollateral": true,
+        "yesTokenId": "23",
+        "noTokenId": "24",
+        "escrow": "0",
+        "yesBalance": "0",
+        "noBalance": "0"
+      },
+      {
+        "id": "12",
+        "observationId": "4",
+        "strike": "500000000000",
+        "enabledForNewCollateral": true,
+        "yesTokenId": "25",
+        "noTokenId": "26",
+        "escrow": "1000000",
+        "yesBalance": "0",
+        "noBalance": "1"
+      },
+      {
+        "id": "13",
+        "observationId": "4",
+        "strike": "600000000000",
+        "enabledForNewCollateral": true,
+        "yesTokenId": "27",
+        "noTokenId": "28",
+        "escrow": "0",
+        "yesBalance": "1",
+        "noBalance": "0"
+      },
+      {
+        "id": "14",
+        "observationId": "5",
+        "strike": "500000000000",
+        "enabledForNewCollateral": true,
+        "yesTokenId": "29",
+        "noTokenId": "30",
+        "escrow": "0",
+        "yesBalance": "0",
+        "noBalance": "1"
+      },
+      {
+        "id": "15",
+        "observationId": "5",
+        "strike": "600000000000",
+        "enabledForNewCollateral": true,
+        "yesTokenId": "31",
+        "noTokenId": "32",
+        "escrow": "0",
+        "yesBalance": "1",
+        "noBalance": "0"
+      },
+      {
+        "id": "16",
+        "observationId": "6",
+        "strike": "500000000000",
+        "enabledForNewCollateral": true,
+        "yesTokenId": "33",
+        "noTokenId": "34",
+        "escrow": "0",
+        "yesBalance": "0",
+        "noBalance": "1"
+      },
+      {
+        "id": "17",
+        "observationId": "6",
+        "strike": "600000000000",
+        "enabledForNewCollateral": true,
+        "yesTokenId": "35",
+        "noTokenId": "36",
+        "escrow": "0",
+        "yesBalance": "1",
+        "noBalance": "0"
+      },
+      {
+        "id": "18",
+        "observationId": "7",
+        "strike": "500000000000",
+        "enabledForNewCollateral": true,
+        "yesTokenId": "37",
+        "noTokenId": "38",
+        "escrow": "0",
+        "yesBalance": "0",
+        "noBalance": "1"
+      },
+      {
+        "id": "19",
+        "observationId": "7",
+        "strike": "600000000000",
+        "enabledForNewCollateral": true,
+        "yesTokenId": "39",
+        "noTokenId": "40",
+        "escrow": "1000000",
+        "yesBalance": "1",
+        "noBalance": "0"
+      },
+      {
+        "id": "20",
+        "observationId": "8",
+        "strike": "500000000000",
+        "enabledForNewCollateral": true,
+        "yesTokenId": "41",
+        "noTokenId": "42",
+        "escrow": "0",
+        "yesBalance": "0",
+        "noBalance": "1"
+      },
+      {
+        "id": "21",
+        "observationId": "8",
+        "strike": "600000000000",
+        "enabledForNewCollateral": true,
+        "yesTokenId": "43",
+        "noTokenId": "44",
+        "escrow": "1000000",
+        "yesBalance": "1",
+        "noBalance": "0"
+      },
+      {
+        "id": "22",
+        "observationId": "9",
+        "strike": "500000000000",
+        "enabledForNewCollateral": true,
+        "yesTokenId": "45",
+        "noTokenId": "46",
+        "escrow": "500000",
+        "yesBalance": "0",
+        "noBalance": "1"
+      },
+      {
+        "id": "23",
+        "observationId": "9",
+        "strike": "600000000000",
+        "enabledForNewCollateral": true,
+        "yesTokenId": "47",
+        "noTokenId": "48",
+        "escrow": "500000",
+        "yesBalance": "1",
+        "noBalance": "0"
+      },
+      {
+        "id": "24",
+        "observationId": "10",
+        "strike": "500000000000",
+        "enabledForNewCollateral": true,
+        "yesTokenId": "49",
+        "noTokenId": "50",
+        "escrow": "10000000",
+        "yesBalance": "8",
+        "noBalance": "10"
+      },
+      {
+        "id": "25",
+        "observationId": "10",
+        "strike": "600000000000",
+        "enabledForNewCollateral": true,
+        "yesTokenId": "51",
+        "noTokenId": "52",
+        "escrow": "10000000",
+        "yesBalance": "10",
+        "noBalance": "8"
+      }
+    ],
+    "positions": [
+      {
+        "id": "1",
+        "owner": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+        "beneficiary": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+        "marketLower": "12",
+        "marketUpper": "13",
+        "unitsLower": "1",
+        "unitsUpper": "1",
+        "observationId": "4",
+        "certifiedFloor": "1000000",
+        "state": 4,
+        "lienLoanId": "1",
+        "request": {
+          "principal": "750000",
+          "maximumDue": "780000",
+          "expiry": "1794067934",
+          "active": false
+        }
+      },
+      {
+        "id": "2",
+        "owner": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+        "beneficiary": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+        "marketLower": "14",
+        "marketUpper": "15",
+        "unitsLower": "1",
+        "unitsUpper": "1",
+        "observationId": "5",
+        "certifiedFloor": "1000000",
+        "state": 4,
+        "lienLoanId": "2",
+        "request": {
+          "principal": "750000",
+          "maximumDue": "780000",
+          "expiry": "1794071534",
+          "active": false
+        }
+      },
+      {
+        "id": "3",
+        "owner": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+        "beneficiary": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+        "marketLower": "16",
+        "marketUpper": "17",
+        "unitsLower": "1",
+        "unitsUpper": "1",
+        "observationId": "6",
+        "certifiedFloor": "1000000",
+        "state": 4,
+        "lienLoanId": "3",
+        "request": {
+          "principal": "750000",
+          "maximumDue": "780000",
+          "expiry": "1794075135",
+          "active": false
+        }
+      },
+      {
+        "id": "4",
+        "owner": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+        "beneficiary": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+        "marketLower": "18",
+        "marketUpper": "19",
+        "unitsLower": "1",
+        "unitsUpper": "1",
+        "observationId": "7",
+        "certifiedFloor": "1000000",
+        "state": 4,
+        "lienLoanId": "4",
+        "request": {
+          "principal": "750000",
+          "maximumDue": "780000",
+          "expiry": "1794078735",
+          "active": false
+        }
+      },
+      {
+        "id": "5",
+        "owner": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+        "beneficiary": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+        "marketLower": "20",
+        "marketUpper": "21",
+        "unitsLower": "1",
+        "unitsUpper": "1",
+        "observationId": "8",
+        "certifiedFloor": "1000000",
+        "state": 4,
+        "lienLoanId": "5",
+        "request": {
+          "principal": "750000",
+          "maximumDue": "780000",
+          "expiry": "1794082335",
+          "active": false
+        }
+      },
+      {
+        "id": "6",
+        "owner": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+        "beneficiary": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+        "marketLower": "22",
+        "marketUpper": "23",
+        "unitsLower": "1",
+        "unitsUpper": "1",
+        "observationId": "9",
+        "certifiedFloor": "1000000",
+        "state": 4,
+        "lienLoanId": "6",
+        "request": {
+          "principal": "750000",
+          "maximumDue": "780000",
+          "expiry": "1794085935",
+          "active": false
+        }
+      },
+      {
+        "id": "7",
+        "owner": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+        "beneficiary": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+        "marketLower": "24",
+        "marketUpper": "25",
+        "unitsLower": "1",
+        "unitsUpper": "1",
+        "observationId": "10",
+        "certifiedFloor": "1000000",
+        "state": 2,
+        "lienLoanId": "7",
+        "request": {
+          "principal": "750000",
+          "maximumDue": "780000",
+          "expiry": "1794093135",
+          "active": false
+        }
+      },
+      {
+        "id": "8",
+        "owner": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+        "beneficiary": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+        "marketLower": "24",
+        "marketUpper": "25",
+        "unitsLower": "1",
+        "unitsUpper": "1",
+        "observationId": "10",
+        "certifiedFloor": "1000000",
+        "state": 1,
+        "lienLoanId": "0",
+        "request": {
+          "principal": "750000",
+          "maximumDue": "780000",
+          "expiry": "1794093135",
+          "active": true
+        }
+      }
+    ],
+    "loans": [
+      {
+        "id": "1",
+        "positionId": "1",
+        "lender": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+        "borrower": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+        "principal": "750000",
+        "due": "780000",
+        "certifiedFloor": "1000000",
+        "fundedAt": "1794064345",
+        "targetMaturity": "1794067934",
+        "state": 2
+      },
+      {
+        "id": "2",
+        "positionId": "2",
+        "lender": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+        "borrower": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+        "principal": "750000",
+        "due": "780000",
+        "certifiedFloor": "1000000",
+        "fundedAt": "1794067934",
+        "targetMaturity": "1794071534",
+        "state": 2
+      },
+      {
+        "id": "3",
+        "positionId": "3",
+        "lender": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+        "borrower": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+        "principal": "750000",
+        "due": "780000",
+        "certifiedFloor": "1000000",
+        "fundedAt": "1794071535",
+        "targetMaturity": "1794075135",
+        "state": 2
+      },
+      {
+        "id": "4",
+        "positionId": "4",
+        "lender": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+        "borrower": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+        "principal": "750000",
+        "due": "780000",
+        "certifiedFloor": "1000000",
+        "fundedAt": "1794075136",
+        "targetMaturity": "1794078735",
+        "state": 2
+      },
+      {
+        "id": "5",
+        "positionId": "5",
+        "lender": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+        "borrower": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+        "principal": "750000",
+        "due": "780000",
+        "certifiedFloor": "1000000",
+        "fundedAt": "1794078736",
+        "targetMaturity": "1794082335",
+        "state": 2
+      },
+      {
+        "id": "6",
+        "positionId": "6",
+        "lender": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+        "borrower": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+        "principal": "750000",
+        "due": "780000",
+        "certifiedFloor": "1000000",
+        "fundedAt": "1794082336",
+        "targetMaturity": "1794085935",
+        "state": 2
+      },
+      {
+        "id": "7",
+        "positionId": "7",
+        "lender": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+        "borrower": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+        "principal": "750000",
+        "due": "780000",
+        "certifiedFloor": "1000000",
+        "fundedAt": "1794089536",
+        "targetMaturity": "1794093135",
+        "state": 1
+      }
+    ],
+    "activity": [
+      {
+        "event": "CreditDeskBound",
+        "args": {
+          "desk": "0xD5724171C2b7f0AA717a324626050BD05767e2C6"
+        },
+        "transactionHash": "0x856b496ffbb1b20b95af95534e8ef076a9161b79b02391963162dd0f31763e6a",
+        "blockNumber": "605",
+        "blockHash": "0x01f4d97eb8822a1b09cf593f4097d5d6e735c14ab43c1cb5de3ed7709a252909",
+        "logIndex": 0,
+        "address": "0xdde063ebe8e85d666ad99f731b4dbf8c98f29708"
+      },
+      {
+        "event": "ObservationRegistered",
+        "args": {
+          "observationId": "1",
+          "assetId": "0x0b43555ace6b39aae1b894097d0a9fc17f504c62fea598fa206cc6f5088e6e45",
+          "observationTime": "1794067857"
+        },
+        "transactionHash": "0x7f81c04a78fd57dc4c9246b2b0b3ac9f0eecce6a292e9db2854c965c4675ebd9",
+        "blockNumber": "606",
+        "blockHash": "0x2acc5512de15280050ee3f2204fd42dd98c070e033f3c0b3231924d39eb25be1",
+        "logIndex": 0,
+        "address": "0xc7143d5ba86553c06f5730c8dc9f8187a621a8d4"
+      },
+      {
+        "event": "MarketCreated",
+        "args": {
+          "marketId": "1",
+          "observationId": "1",
+          "strike": "450000000000"
+        },
+        "transactionHash": "0xe370957cce8c61c5d742a3f0baf8cdf92c9ae6eb40ec99105b3955eaef4d8104",
+        "blockNumber": "607",
+        "blockHash": "0x6f4ad8722ef67be371c7f4dc668ebecd31eb0e887c3480fdbb8a0c51e4f24dd6",
+        "logIndex": 0,
+        "address": "0x359570b3a0437805d0a71457d61ad26a28cac9a2"
+      },
+      {
+        "event": "MarketCreated",
+        "args": {
+          "marketId": "2",
+          "observationId": "1",
+          "strike": "500000000000"
+        },
+        "transactionHash": "0xbdb3b1562431eef0b326d247d6975c30a3b6ef5bdaf7bcd50c0b900c1a1862ef",
+        "blockNumber": "608",
+        "blockHash": "0x66edcaf54d3f4a811d94bd7ed244911d32043bb60f23d189a9c7e364e185920e",
+        "logIndex": 0,
+        "address": "0x359570b3a0437805d0a71457d61ad26a28cac9a2"
+      },
+      {
+        "event": "MarketCreated",
+        "args": {
+          "marketId": "3",
+          "observationId": "1",
+          "strike": "600000000000"
+        },
+        "transactionHash": "0x583a44115c2c174ff53535d5d5f98fd06b5bbc67d2c44332f758867672fdb50d",
+        "blockNumber": "609",
+        "blockHash": "0xd52cb2bf35a838d2242feb55db09f804b262894ca227eefeaaf52ca009486033",
+        "logIndex": 0,
+        "address": "0x359570b3a0437805d0a71457d61ad26a28cac9a2"
+      },
+      {
+        "event": "MarketCreated",
+        "args": {
+          "marketId": "4",
+          "observationId": "1",
+          "strike": "650000000000"
+        },
+        "transactionHash": "0x4628dc50f106ce94232bcb78157b8d8cb1edca3823b214bedb31361e20471790",
+        "blockNumber": "610",
+        "blockHash": "0xe0ba6e94050f7609a18bcb59b96623d39b2f2e942ea872598b72aaf1a21ce696",
+        "logIndex": 0,
+        "address": "0x359570b3a0437805d0a71457d61ad26a28cac9a2"
+      },
+      {
+        "event": "ObservationRegistered",
+        "args": {
+          "observationId": "2",
+          "assetId": "0x0b43555ace6b39aae1b894097d0a9fc17f504c62fea598fa206cc6f5088e6e45",
+          "observationTime": "1794068457"
+        },
+        "transactionHash": "0xbf110c515345645c45a2b7829c8acee78ea185fa28632b358e48260de248a323",
+        "blockNumber": "611",
+        "blockHash": "0x02e2de2a9b1f8adef9cacfc202c142e1ca8e6d7e3f414520191517836960bb8a",
+        "logIndex": 0,
+        "address": "0xc7143d5ba86553c06f5730c8dc9f8187a621a8d4"
+      },
+      {
+        "event": "MarketCreated",
+        "args": {
+          "marketId": "5",
+          "observationId": "2",
+          "strike": "450000000000"
+        },
+        "transactionHash": "0xc5a150754ec3132f5f139212ddc1e2166dbaa36bd8552ea8323f91fbf68934d1",
+        "blockNumber": "612",
+        "blockHash": "0x0a8db008c1f02baa84d0ba533c9259c78e558b6254816abbe575066c33e47cd1",
+        "logIndex": 0,
+        "address": "0x359570b3a0437805d0a71457d61ad26a28cac9a2"
+      },
+      {
+        "event": "MarketCreated",
+        "args": {
+          "marketId": "6",
+          "observationId": "2",
+          "strike": "500000000000"
+        },
+        "transactionHash": "0xa130e3257bfcead5c1ac864ea3b049ee062f66f5d18e579480b82b2137e71481",
+        "blockNumber": "613",
+        "blockHash": "0x12a264e06da463de121d367fe75e46962f69cae809d27f412a9b0580e7a2c331",
+        "logIndex": 0,
+        "address": "0x359570b3a0437805d0a71457d61ad26a28cac9a2"
+      },
+      {
+        "event": "MarketCreated",
+        "args": {
+          "marketId": "7",
+          "observationId": "2",
+          "strike": "600000000000"
+        },
+        "transactionHash": "0x8fac66e7b012338bc2dad93ff56fe62ec845763a8d8e1d669c781e0a5c4198a9",
+        "blockNumber": "614",
+        "blockHash": "0xd7248f3be06285c5939fba0713ea16a2af873fdcce79a469a54847d4efa21f7e",
+        "logIndex": 0,
+        "address": "0x359570b3a0437805d0a71457d61ad26a28cac9a2"
+      },
+      {
+        "event": "MarketCreated",
+        "args": {
+          "marketId": "8",
+          "observationId": "2",
+          "strike": "650000000000"
+        },
+        "transactionHash": "0xf16372ef4652c08984f05824099d65d7ebe43f622488f9d0e5ff7916a6ce9129",
+        "blockNumber": "615",
+        "blockHash": "0xfa0f11e41e775140222436ca4ce626ce125467f3e7f6fc47620ff1d5fac03d1a",
+        "logIndex": 0,
+        "address": "0x359570b3a0437805d0a71457d61ad26a28cac9a2"
+      },
+      {
+        "event": "ObservationRegistered",
+        "args": {
+          "observationId": "3",
+          "assetId": "0xee62665949c883f9e0f6f002eac32e00bd59dfe6c34e92a91c37d6a8322d6489",
+          "observationTime": "1794069057"
+        },
+        "transactionHash": "0xe33454da320d5d3faf19adf1c49fa630ce84b86805e7f0dec204338f30b26f44",
+        "blockNumber": "616",
+        "blockHash": "0x9b1d6856b6b32fce849a7636dc625d521dd6661dfd85e351e86c4723d971a0cf",
+        "logIndex": 0,
+        "address": "0xc7143d5ba86553c06f5730c8dc9f8187a621a8d4"
+      },
+      {
+        "event": "MarketCreated",
+        "args": {
+          "marketId": "9",
+          "observationId": "3",
+          "strike": "9000000000000"
+        },
+        "transactionHash": "0xa98866f774c62cb8339cc04f787c81659fbbc5f76a837679e90935b8091bdc28",
+        "blockNumber": "617",
+        "blockHash": "0xccbc82a355c99beda41b03ff43dd38c840c947b7c36fb5e94ba2b700214cb588",
+        "logIndex": 0,
+        "address": "0x359570b3a0437805d0a71457d61ad26a28cac9a2"
+      },
+      {
+        "event": "MarketCreated",
+        "args": {
+          "marketId": "10",
+          "observationId": "3",
+          "strike": "10000000000000"
+        },
+        "transactionHash": "0x8a7da5929f4245bd9371a5fb49cbb35a467738bbc2cad6a8af519e51940e9599",
+        "blockNumber": "618",
+        "blockHash": "0x0348f78cc01c6e332172d7a1c477ddd4c4fa80d7c45a8e127897ec399d66dcb7",
+        "logIndex": 0,
+        "address": "0x359570b3a0437805d0a71457d61ad26a28cac9a2"
+      },
+      {
+        "event": "MarketCreated",
+        "args": {
+          "marketId": "11",
+          "observationId": "3",
+          "strike": "11000000000000"
+        },
+        "transactionHash": "0x48e77461bedbe9add15d8dd05d0e0e209aca013fb3b189ea77e40a2e4c9555f4",
+        "blockNumber": "619",
+        "blockHash": "0x6b9796304e9552535b68b29967d59f830b66c4e6c1313e0f65a32bcfb97ef28a",
+        "logIndex": 0,
+        "address": "0x359570b3a0437805d0a71457d61ad26a28cac9a2"
+      },
+      {
+        "event": "CompleteSetMinted",
+        "args": {
+          "marketId": "2",
+          "user": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+          "units": "10",
+          "collateral": "10000000"
+        },
+        "transactionHash": "0x42e63568b624e0adc2d37d880bdf9cd7a0c101301fb2a1702f6e332eb7616e0c",
+        "blockNumber": "623",
+        "blockHash": "0x16d935b5e4af6c9c0b12711749aa0407e3e79b17a4628b7aaa6d3a626f54d2e4",
+        "logIndex": 2,
+        "address": "0xe3686721b062da0b181140362a1ca5f2d3e43fba"
+      },
+      {
+        "event": "CompleteSetMinted",
+        "args": {
+          "marketId": "3",
+          "user": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+          "units": "10",
+          "collateral": "10000000"
+        },
+        "transactionHash": "0x71fd123180d2a00d5b68ebeb148c758e87dca47b137c21c431088db0632125d1",
+        "blockNumber": "624",
+        "blockHash": "0x565b550399bb80495c1556585070249f12a1085160023450ba347ad65862ea03",
+        "logIndex": 2,
+        "address": "0xe3686721b062da0b181140362a1ca5f2d3e43fba"
+      },
+      {
+        "event": "ObservationRegistered",
+        "args": {
+          "observationId": "4",
+          "assetId": "0x0b43555ace6b39aae1b894097d0a9fc17f504c62fea598fa206cc6f5088e6e45",
+          "observationTime": "1794067934"
+        },
+        "transactionHash": "0x26bc3859726d5f19f374bc51800c457855244aaa9a84b5dc4f45e4ab2459bbae",
+        "blockNumber": "625",
+        "blockHash": "0x9d5661db90ca0cc135e1d77168d093ce070d5ca7e64b93d84cbee497e5e5ca1d",
+        "logIndex": 0,
+        "address": "0xc7143d5ba86553c06f5730c8dc9f8187a621a8d4"
+      },
+      {
+        "event": "MarketCreated",
+        "args": {
+          "marketId": "12",
+          "observationId": "4",
+          "strike": "500000000000"
+        },
+        "transactionHash": "0x089fcbbdcd18fcf3deac6045ce92d8c342a142f625478396c31b117721dd1c6d",
+        "blockNumber": "626",
+        "blockHash": "0x15e2ebc97a25c466e5311f53c460593e287094f399618916d33345f2c77bfef3",
+        "logIndex": 0,
+        "address": "0x359570b3a0437805d0a71457d61ad26a28cac9a2"
+      },
+      {
+        "event": "MarketCreated",
+        "args": {
+          "marketId": "13",
+          "observationId": "4",
+          "strike": "600000000000"
+        },
+        "transactionHash": "0x99694afb4e03410e7861a41d89881e42170ff50ffd0cdbb4df0aa7377e85eb69",
+        "blockNumber": "627",
+        "blockHash": "0x03f3fb545b10a81966a5d911424dc70b43363461bb44f331dd4448e2d4470df8",
+        "logIndex": 0,
+        "address": "0x359570b3a0437805d0a71457d61ad26a28cac9a2"
+      },
+      {
+        "event": "CompleteSetMinted",
+        "args": {
+          "marketId": "12",
+          "user": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+          "units": "1",
+          "collateral": "1000000"
+        },
+        "transactionHash": "0x49374b2da6c69b72a8edb9bc5903a29d404a2521ae93deb21ab784a00d7bdb49",
+        "blockNumber": "629",
+        "blockHash": "0x8f79652e7e6165d745dd8efef91ce941a79384f2b1c2a458b369d83bca4f056d",
+        "logIndex": 2,
+        "address": "0xe3686721b062da0b181140362a1ca5f2d3e43fba"
+      },
+      {
+        "event": "CompleteSetMinted",
+        "args": {
+          "marketId": "13",
+          "user": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+          "units": "1",
+          "collateral": "1000000"
+        },
+        "transactionHash": "0xfdfa9fba24d824f9a55f48a1e51360ad0e18b8ea320101d2d9ea22a320a5b6bb",
+        "blockNumber": "630",
+        "blockHash": "0x77ed9ac0a58a2e21cc346392022aa0274acdd14af0c0a9411beb43b65b83af61",
+        "logIndex": 2,
+        "address": "0xe3686721b062da0b181140362a1ca5f2d3e43fba"
+      },
+      {
+        "event": "VaultPositionCreated",
+        "args": {
+          "positionId": "1",
+          "owner": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+          "floorUsdc": "1000000"
+        },
+        "transactionHash": "0x9fbaa03ae3d50d57ae7ee98bfadf23b05c9d05b2f3c4eba44b69955c4639b590",
+        "blockNumber": "632",
+        "blockHash": "0xbf4ed5465b985e56f236a9b569314ff0cd6cbaf5dabedaba32ea3c51559caeee",
+        "logIndex": 1,
+        "address": "0xdde063ebe8e85d666ad99f731b4dbf8c98f29708"
+      },
+      {
+        "event": "BorrowRequested",
+        "args": {
+          "positionId": "1",
+          "borrower": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+          "requestedPrincipal": "750000",
+          "maxDue": "780000"
+        },
+        "transactionHash": "0x20e15edf5fc490b9ee35bde7686983fb15ef8f46c50413ddd0a0e749e9447b5c",
+        "blockNumber": "633",
+        "blockHash": "0xb76244641226dc5faa47b458639445f6d69a9e12485980451da58006a2da19d0",
+        "logIndex": 0,
+        "address": "0xd5724171c2b7f0aa717a324626050bd05767e2c6"
+      },
+      {
+        "event": "PositionEncumbered",
+        "args": {
+          "positionId": "1",
+          "loanId": "1"
+        },
+        "transactionHash": "0x0cbc025601902348f3936a95525b31d05ba65ef27b2292412372a41698dcb459",
+        "blockNumber": "635",
+        "blockHash": "0x4db12ed7e105213bd3e71f11bda3a3194d0c901c4675cf797c3a041513626e7b",
+        "logIndex": 0,
+        "address": "0xdde063ebe8e85d666ad99f731b4dbf8c98f29708"
+      },
+      {
+        "event": "LoanFunded",
+        "args": {
+          "loanId": "1",
+          "positionId": "1",
+          "lender": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+          "borrower": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+          "principal": "750000",
+          "due": "780000"
+        },
+        "transactionHash": "0x0cbc025601902348f3936a95525b31d05ba65ef27b2292412372a41698dcb459",
+        "blockNumber": "635",
+        "blockHash": "0x4db12ed7e105213bd3e71f11bda3a3194d0c901c4675cf797c3a041513626e7b",
+        "logIndex": 2,
+        "address": "0xd5724171c2b7f0aa717a324626050bd05767e2c6"
+      },
+      {
+        "event": "ObservationFinalized",
+        "args": {
+          "observationId": "4",
+          "price": "450000000000"
+        },
+        "transactionHash": "0x88323cbf006e031785531d92d397ebac33898188dd57b941235c80054b091740",
+        "blockNumber": "637",
+        "blockHash": "0xd8d64997f75e5010e611d052ad79b747a11d65c574445d8e8dc57c99f918203c",
+        "logIndex": 0,
+        "address": "0xc7143d5ba86553c06f5730c8dc9f8187a621a8d4"
+      },
+      {
+        "event": "ClaimRedeemed",
+        "args": {
+          "marketId": "12",
+          "user": "0xDde063eBe8E85D666AD99f731B4Dbf8C98F29708",
+          "side": 0,
+          "units": "1",
+          "payout": "0"
+        },
+        "transactionHash": "0xc520682a432669921c3a98e2b3f337fa383190f0721cf81896e2686f401d4b15",
+        "blockNumber": "638",
+        "blockHash": "0x820b9e80079d18739b070887588b3b4370b636c5f17f2b4bcd8ef02011bab25c",
+        "logIndex": 1,
+        "address": "0xe3686721b062da0b181140362a1ca5f2d3e43fba"
+      },
+      {
+        "event": "ClaimRedeemed",
+        "args": {
+          "marketId": "13",
+          "user": "0xDde063eBe8E85D666AD99f731B4Dbf8C98F29708",
+          "side": 1,
+          "units": "1",
+          "payout": "1000000"
+        },
+        "transactionHash": "0xc520682a432669921c3a98e2b3f337fa383190f0721cf81896e2686f401d4b15",
+        "blockNumber": "638",
+        "blockHash": "0x820b9e80079d18739b070887588b3b4370b636c5f17f2b4bcd8ef02011bab25c",
+        "logIndex": 4,
+        "address": "0xe3686721b062da0b181140362a1ca5f2d3e43fba"
+      },
+      {
+        "event": "PositionRedeemed",
+        "args": {
+          "positionId": "1",
+          "amount": "1000000"
+        },
+        "transactionHash": "0xc520682a432669921c3a98e2b3f337fa383190f0721cf81896e2686f401d4b15",
+        "blockNumber": "638",
+        "blockHash": "0x820b9e80079d18739b070887588b3b4370b636c5f17f2b4bcd8ef02011bab25c",
+        "logIndex": 6,
+        "address": "0xdde063ebe8e85d666ad99f731b4dbf8c98f29708"
+      },
+      {
+        "event": "LoanSettled",
+        "args": {
+          "loanId": "1",
+          "redeemed": "1000000",
+          "lenderPaid": "780000",
+          "borrowerPaid": "220000"
+        },
+        "transactionHash": "0xc520682a432669921c3a98e2b3f337fa383190f0721cf81896e2686f401d4b15",
+        "blockNumber": "638",
+        "blockHash": "0x820b9e80079d18739b070887588b3b4370b636c5f17f2b4bcd8ef02011bab25c",
+        "logIndex": 9,
+        "address": "0xd5724171c2b7f0aa717a324626050bd05767e2c6"
+      },
+      {
+        "event": "ObservationRegistered",
+        "args": {
+          "observationId": "5",
+          "assetId": "0x0b43555ace6b39aae1b894097d0a9fc17f504c62fea598fa206cc6f5088e6e45",
+          "observationTime": "1794071534"
+        },
+        "transactionHash": "0x03230c640b0c80a8851320fda4a68829f98f31e45655d4c578dedbbbd7a8ba3d",
+        "blockNumber": "639",
+        "blockHash": "0x33d6653c5a99df0564f22393439671fdcc37ccf75330f20da400c39bfec05ab9",
+        "logIndex": 0,
+        "address": "0xc7143d5ba86553c06f5730c8dc9f8187a621a8d4"
+      },
+      {
+        "event": "MarketCreated",
+        "args": {
+          "marketId": "14",
+          "observationId": "5",
+          "strike": "500000000000"
+        },
+        "transactionHash": "0xbf5dce0dd479d53f9da8c6fa1e1279f813d600bef8c9aa3757b489a90dab2da7",
+        "blockNumber": "640",
+        "blockHash": "0x067c2d65f3e5cf23e92b7f0d5eeaa09a4ca1819eae15b38fd01f556ef85dd399",
+        "logIndex": 0,
+        "address": "0x359570b3a0437805d0a71457d61ad26a28cac9a2"
+      },
+      {
+        "event": "MarketCreated",
+        "args": {
+          "marketId": "15",
+          "observationId": "5",
+          "strike": "600000000000"
+        },
+        "transactionHash": "0xdbf2125b071ec0a80577996ba9b28a88eb980c599775c1987ccd01ce264a8053",
+        "blockNumber": "641",
+        "blockHash": "0xf550625c49daee41e97eefe57081cfb02c2a18c3fd73e83a07df1aebb7437ee3",
+        "logIndex": 0,
+        "address": "0x359570b3a0437805d0a71457d61ad26a28cac9a2"
+      },
+      {
+        "event": "CompleteSetMinted",
+        "args": {
+          "marketId": "14",
+          "user": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+          "units": "1",
+          "collateral": "1000000"
+        },
+        "transactionHash": "0x7ccb73e4dfb62b848218134d41f6d29690482ab2baacf99f4f2929c166229a43",
+        "blockNumber": "643",
+        "blockHash": "0x76847486ee6b47698bb1a36c0f822a94888504575c63de050c7d17214e9763f0",
+        "logIndex": 2,
+        "address": "0xe3686721b062da0b181140362a1ca5f2d3e43fba"
+      },
+      {
+        "event": "CompleteSetMinted",
+        "args": {
+          "marketId": "15",
+          "user": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+          "units": "1",
+          "collateral": "1000000"
+        },
+        "transactionHash": "0x4b89f75461aa9e0db649f0caf61f95ff29a32def7fe8a0cbb9b8e23014e23660",
+        "blockNumber": "644",
+        "blockHash": "0x73eea48d46de4f3395b0e51c4c17c742de9487ac3a99a18b0cf3aa9443a4f0ec",
+        "logIndex": 2,
+        "address": "0xe3686721b062da0b181140362a1ca5f2d3e43fba"
+      },
+      {
+        "event": "VaultPositionCreated",
+        "args": {
+          "positionId": "2",
+          "owner": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+          "floorUsdc": "1000000"
+        },
+        "transactionHash": "0xcd5c084e4bc010f8ec0d497b79d5baf24b304c60574a14cc88ae5b61a6f3d6a1",
+        "blockNumber": "646",
+        "blockHash": "0x862407dcd09dbe7b6d4a034994c36c112c7f3e546dc18d856446851bcc3fa4de",
+        "logIndex": 1,
+        "address": "0xdde063ebe8e85d666ad99f731b4dbf8c98f29708"
+      },
+      {
+        "event": "BorrowRequested",
+        "args": {
+          "positionId": "2",
+          "borrower": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+          "requestedPrincipal": "750000",
+          "maxDue": "780000"
+        },
+        "transactionHash": "0xbc6f948b105e739ff98421771163dd22816ef20bcd31bf36bc0e21a1d022f691",
+        "blockNumber": "647",
+        "blockHash": "0xd07eba7f107027572427ac751bc85ec032b9da9444503e44336f6f81360d14a4",
+        "logIndex": 0,
+        "address": "0xd5724171c2b7f0aa717a324626050bd05767e2c6"
+      },
+      {
+        "event": "PositionEncumbered",
+        "args": {
+          "positionId": "2",
+          "loanId": "2"
+        },
+        "transactionHash": "0x6f51927ef593a294f7ae5b67af474d2f0ca9301ef38e377538c806299d5c9936",
+        "blockNumber": "649",
+        "blockHash": "0x1d0c16df8550a1a7dc9e3bd55da2b854d541d3f7387f87800f6c63888f695d2e",
+        "logIndex": 0,
+        "address": "0xdde063ebe8e85d666ad99f731b4dbf8c98f29708"
+      },
+      {
+        "event": "LoanFunded",
+        "args": {
+          "loanId": "2",
+          "positionId": "2",
+          "lender": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+          "borrower": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+          "principal": "750000",
+          "due": "780000"
+        },
+        "transactionHash": "0x6f51927ef593a294f7ae5b67af474d2f0ca9301ef38e377538c806299d5c9936",
+        "blockNumber": "649",
+        "blockHash": "0x1d0c16df8550a1a7dc9e3bd55da2b854d541d3f7387f87800f6c63888f695d2e",
+        "logIndex": 2,
+        "address": "0xd5724171c2b7f0aa717a324626050bd05767e2c6"
+      },
+      {
+        "event": "ObservationFinalized",
+        "args": {
+          "observationId": "5",
+          "price": "500000000000"
+        },
+        "transactionHash": "0xaf7ec3e58d4ed29c905821aa26b74e51ef5ce6e1c9c8868f50978f7d3871a654",
+        "blockNumber": "651",
+        "blockHash": "0x71968952f3a2065fbbdaa5832b7a4f09099391329535acf5a79891ad9f436c28",
+        "logIndex": 0,
+        "address": "0xc7143d5ba86553c06f5730c8dc9f8187a621a8d4"
+      },
+      {
+        "event": "ClaimRedeemed",
+        "args": {
+          "marketId": "14",
+          "user": "0xDde063eBe8E85D666AD99f731B4Dbf8C98F29708",
+          "side": 0,
+          "units": "1",
+          "payout": "1000000"
+        },
+        "transactionHash": "0xeb4b9289d55172088bc6fd71e509953acf5cf2b5e02777d1b0ac234d165594fb",
+        "blockNumber": "652",
+        "blockHash": "0x0bf2d5c7f018b5f4cb786c5b3ee28ac21f6c057ade534b6e323b5e5d12f57015",
+        "logIndex": 2,
+        "address": "0xe3686721b062da0b181140362a1ca5f2d3e43fba"
+      },
+      {
+        "event": "ClaimRedeemed",
+        "args": {
+          "marketId": "15",
+          "user": "0xDde063eBe8E85D666AD99f731B4Dbf8C98F29708",
+          "side": 1,
+          "units": "1",
+          "payout": "1000000"
+        },
+        "transactionHash": "0xeb4b9289d55172088bc6fd71e509953acf5cf2b5e02777d1b0ac234d165594fb",
+        "blockNumber": "652",
+        "blockHash": "0x0bf2d5c7f018b5f4cb786c5b3ee28ac21f6c057ade534b6e323b5e5d12f57015",
+        "logIndex": 5,
+        "address": "0xe3686721b062da0b181140362a1ca5f2d3e43fba"
+      },
+      {
+        "event": "PositionRedeemed",
+        "args": {
+          "positionId": "2",
+          "amount": "2000000"
+        },
+        "transactionHash": "0xeb4b9289d55172088bc6fd71e509953acf5cf2b5e02777d1b0ac234d165594fb",
+        "blockNumber": "652",
+        "blockHash": "0x0bf2d5c7f018b5f4cb786c5b3ee28ac21f6c057ade534b6e323b5e5d12f57015",
+        "logIndex": 7,
+        "address": "0xdde063ebe8e85d666ad99f731b4dbf8c98f29708"
+      },
+      {
+        "event": "LoanSettled",
+        "args": {
+          "loanId": "2",
+          "redeemed": "2000000",
+          "lenderPaid": "780000",
+          "borrowerPaid": "1220000"
+        },
+        "transactionHash": "0xeb4b9289d55172088bc6fd71e509953acf5cf2b5e02777d1b0ac234d165594fb",
+        "blockNumber": "652",
+        "blockHash": "0x0bf2d5c7f018b5f4cb786c5b3ee28ac21f6c057ade534b6e323b5e5d12f57015",
+        "logIndex": 10,
+        "address": "0xd5724171c2b7f0aa717a324626050bd05767e2c6"
+      },
+      {
+        "event": "ObservationRegistered",
+        "args": {
+          "observationId": "6",
+          "assetId": "0x0b43555ace6b39aae1b894097d0a9fc17f504c62fea598fa206cc6f5088e6e45",
+          "observationTime": "1794075135"
+        },
+        "transactionHash": "0xa344b92e2ccf22a82ec35789cb4425b7a5ee2a1e271a0728c769439207f50c19",
+        "blockNumber": "653",
+        "blockHash": "0x28a324a06acea2a37a3c4e9542693e9fd6472fc3f5ba7744794acd00c4a8cd86",
+        "logIndex": 0,
+        "address": "0xc7143d5ba86553c06f5730c8dc9f8187a621a8d4"
+      },
+      {
+        "event": "MarketCreated",
+        "args": {
+          "marketId": "16",
+          "observationId": "6",
+          "strike": "500000000000"
+        },
+        "transactionHash": "0xe8507c57c052fedcfc8c6796b6d3f0ea431bbc6e17c27e26129ffdc0c5375a73",
+        "blockNumber": "654",
+        "blockHash": "0x8eef9fb8a6dd2acc9b29e80f999ba1ec1bd4afdf7812cf82638666d1ab761738",
+        "logIndex": 0,
+        "address": "0x359570b3a0437805d0a71457d61ad26a28cac9a2"
+      },
+      {
+        "event": "MarketCreated",
+        "args": {
+          "marketId": "17",
+          "observationId": "6",
+          "strike": "600000000000"
+        },
+        "transactionHash": "0x1e131ee2700782adfed9a79118993b58de1011c19c1a62b0791183f350aee315",
+        "blockNumber": "655",
+        "blockHash": "0xdbe039a46e1e5d539e788197f0f9ea7ed260eb30487c64277ff3c0e26976be2c",
+        "logIndex": 0,
+        "address": "0x359570b3a0437805d0a71457d61ad26a28cac9a2"
+      },
+      {
+        "event": "CompleteSetMinted",
+        "args": {
+          "marketId": "16",
+          "user": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+          "units": "1",
+          "collateral": "1000000"
+        },
+        "transactionHash": "0x521fea5b04e62466b50acc2fe9d0c22ae4f0543a1dfe4643d3ab0e0afe67bc43",
+        "blockNumber": "657",
+        "blockHash": "0x04227d1048adabc259bb07ddf87d050f38dbe8b6aaf9e3ae7b10a9d3ebface7e",
+        "logIndex": 2,
+        "address": "0xe3686721b062da0b181140362a1ca5f2d3e43fba"
+      },
+      {
+        "event": "CompleteSetMinted",
+        "args": {
+          "marketId": "17",
+          "user": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+          "units": "1",
+          "collateral": "1000000"
+        },
+        "transactionHash": "0xe8ac0f4560745b203f9d0f7aa2b55ef510e0548931d50c15e450b0756185d230",
+        "blockNumber": "658",
+        "blockHash": "0x376d00c2d22b163d63ad797b1019dbef3176bd04736ed3a784f5de09a08a09bd",
+        "logIndex": 2,
+        "address": "0xe3686721b062da0b181140362a1ca5f2d3e43fba"
+      },
+      {
+        "event": "VaultPositionCreated",
+        "args": {
+          "positionId": "3",
+          "owner": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+          "floorUsdc": "1000000"
+        },
+        "transactionHash": "0x60047b2a20a0d4af347799e246069a72f3fc21216f44a0e854eed246b2802886",
+        "blockNumber": "660",
+        "blockHash": "0xffce7e3377197e6a23733b33e07a5f7404dd90c0128bf54a39b7f58a4e9867d4",
+        "logIndex": 1,
+        "address": "0xdde063ebe8e85d666ad99f731b4dbf8c98f29708"
+      },
+      {
+        "event": "BorrowRequested",
+        "args": {
+          "positionId": "3",
+          "borrower": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+          "requestedPrincipal": "750000",
+          "maxDue": "780000"
+        },
+        "transactionHash": "0x3c948fa8443ac5232d1c32533ef5ba00f7a03a3a1568cc71175589f54a64bea1",
+        "blockNumber": "661",
+        "blockHash": "0x231da6c21fdc139bd36d4763f125927a4ae9a82da2c88fa6085398d04b430d06",
+        "logIndex": 0,
+        "address": "0xd5724171c2b7f0aa717a324626050bd05767e2c6"
+      },
+      {
+        "event": "PositionEncumbered",
+        "args": {
+          "positionId": "3",
+          "loanId": "3"
+        },
+        "transactionHash": "0x41fae812019d66eaaae74617394482d7408efe0c6d69bd871e9ad65b931e91c3",
+        "blockNumber": "663",
+        "blockHash": "0x295bd9ad5de5d0853245935f989f11692bacea282b5255e369a1b3bef77bcc6c",
+        "logIndex": 0,
+        "address": "0xdde063ebe8e85d666ad99f731b4dbf8c98f29708"
+      },
+      {
+        "event": "LoanFunded",
+        "args": {
+          "loanId": "3",
+          "positionId": "3",
+          "lender": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+          "borrower": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+          "principal": "750000",
+          "due": "780000"
+        },
+        "transactionHash": "0x41fae812019d66eaaae74617394482d7408efe0c6d69bd871e9ad65b931e91c3",
+        "blockNumber": "663",
+        "blockHash": "0x295bd9ad5de5d0853245935f989f11692bacea282b5255e369a1b3bef77bcc6c",
+        "logIndex": 2,
+        "address": "0xd5724171c2b7f0aa717a324626050bd05767e2c6"
+      },
+      {
+        "event": "ObservationFinalized",
+        "args": {
+          "observationId": "6",
+          "price": "550000000000"
+        },
+        "transactionHash": "0xee0111b10d64c7995238a4019b7eb036c9811bdbab92117a8832a0351d0e68ba",
+        "blockNumber": "665",
+        "blockHash": "0xcef8bfa9323975aa742bf9d3ade7bb7adbd3053f364fe2d4aaee0374aa5d8ed7",
+        "logIndex": 0,
+        "address": "0xc7143d5ba86553c06f5730c8dc9f8187a621a8d4"
+      },
+      {
+        "event": "ClaimRedeemed",
+        "args": {
+          "marketId": "16",
+          "user": "0xDde063eBe8E85D666AD99f731B4Dbf8C98F29708",
+          "side": 0,
+          "units": "1",
+          "payout": "1000000"
+        },
+        "transactionHash": "0xead4e19435cfc804d45559b4f4e4c58af9b6f567ef38d660b2096b2bbeba0d5f",
+        "blockNumber": "666",
+        "blockHash": "0x61634b3025bbe7feb2e086acade36dec72c9e33d9537abfaddc255a2feb015e6",
+        "logIndex": 2,
+        "address": "0xe3686721b062da0b181140362a1ca5f2d3e43fba"
+      },
+      {
+        "event": "ClaimRedeemed",
+        "args": {
+          "marketId": "17",
+          "user": "0xDde063eBe8E85D666AD99f731B4Dbf8C98F29708",
+          "side": 1,
+          "units": "1",
+          "payout": "1000000"
+        },
+        "transactionHash": "0xead4e19435cfc804d45559b4f4e4c58af9b6f567ef38d660b2096b2bbeba0d5f",
+        "blockNumber": "666",
+        "blockHash": "0x61634b3025bbe7feb2e086acade36dec72c9e33d9537abfaddc255a2feb015e6",
+        "logIndex": 5,
+        "address": "0xe3686721b062da0b181140362a1ca5f2d3e43fba"
+      },
+      {
+        "event": "PositionRedeemed",
+        "args": {
+          "positionId": "3",
+          "amount": "2000000"
+        },
+        "transactionHash": "0xead4e19435cfc804d45559b4f4e4c58af9b6f567ef38d660b2096b2bbeba0d5f",
+        "blockNumber": "666",
+        "blockHash": "0x61634b3025bbe7feb2e086acade36dec72c9e33d9537abfaddc255a2feb015e6",
+        "logIndex": 7,
+        "address": "0xdde063ebe8e85d666ad99f731b4dbf8c98f29708"
+      },
+      {
+        "event": "LoanSettled",
+        "args": {
+          "loanId": "3",
+          "redeemed": "2000000",
+          "lenderPaid": "780000",
+          "borrowerPaid": "1220000"
+        },
+        "transactionHash": "0xead4e19435cfc804d45559b4f4e4c58af9b6f567ef38d660b2096b2bbeba0d5f",
+        "blockNumber": "666",
+        "blockHash": "0x61634b3025bbe7feb2e086acade36dec72c9e33d9537abfaddc255a2feb015e6",
+        "logIndex": 10,
+        "address": "0xd5724171c2b7f0aa717a324626050bd05767e2c6"
+      },
+      {
+        "event": "ObservationRegistered",
+        "args": {
+          "observationId": "7",
+          "assetId": "0x0b43555ace6b39aae1b894097d0a9fc17f504c62fea598fa206cc6f5088e6e45",
+          "observationTime": "1794078735"
+        },
+        "transactionHash": "0x7688b52e92f3e886fe1857a544db701ee4bad6eba66c828508f6977b3bfedbaa",
+        "blockNumber": "667",
+        "blockHash": "0x6388e6970710e99cc257908c6b0dd4da302b91bf52601333b6c4487b4ae994bb",
+        "logIndex": 0,
+        "address": "0xc7143d5ba86553c06f5730c8dc9f8187a621a8d4"
+      },
+      {
+        "event": "MarketCreated",
+        "args": {
+          "marketId": "18",
+          "observationId": "7",
+          "strike": "500000000000"
+        },
+        "transactionHash": "0x26002a5e21b9b777604ecf934267c13262549f4390635473afc983c1fb8a9c42",
+        "blockNumber": "668",
+        "blockHash": "0x9e4c4863b5837819b2824169ab901ede1272a6f017c939d07f747cdffe5938f9",
+        "logIndex": 0,
+        "address": "0x359570b3a0437805d0a71457d61ad26a28cac9a2"
+      },
+      {
+        "event": "MarketCreated",
+        "args": {
+          "marketId": "19",
+          "observationId": "7",
+          "strike": "600000000000"
+        },
+        "transactionHash": "0x3a7345b764c2b6cc619acd4fa16198f7458e5f666e179e13536123102f721fb3",
+        "blockNumber": "669",
+        "blockHash": "0xd646dca8db8977f764292483218210368eba55250c5a641ecf980db7305f4730",
+        "logIndex": 0,
+        "address": "0x359570b3a0437805d0a71457d61ad26a28cac9a2"
+      },
+      {
+        "event": "CompleteSetMinted",
+        "args": {
+          "marketId": "18",
+          "user": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+          "units": "1",
+          "collateral": "1000000"
+        },
+        "transactionHash": "0x7bd479a5a02ad5cbfa4be0ef312ac69fa6958d6b339656a827a8186d8282df93",
+        "blockNumber": "671",
+        "blockHash": "0x0a810b5d88de285d95a476eb349002a346dc73b5aa4679df707f5be3df55ddf6",
+        "logIndex": 2,
+        "address": "0xe3686721b062da0b181140362a1ca5f2d3e43fba"
+      },
+      {
+        "event": "CompleteSetMinted",
+        "args": {
+          "marketId": "19",
+          "user": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+          "units": "1",
+          "collateral": "1000000"
+        },
+        "transactionHash": "0x1f949b7604aca8dbcfe21331caa49997de941dc10a63a0e283b877e592530b9a",
+        "blockNumber": "672",
+        "blockHash": "0xd360e3d337095d8af06316425c71af15d4094cda4de2efc8b3b0b7aa7cb2d7bc",
+        "logIndex": 2,
+        "address": "0xe3686721b062da0b181140362a1ca5f2d3e43fba"
+      },
+      {
+        "event": "VaultPositionCreated",
+        "args": {
+          "positionId": "4",
+          "owner": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+          "floorUsdc": "1000000"
+        },
+        "transactionHash": "0xf32d504398537e376e3e38bbe879c364d7e09fd4fea514e193e8ff9d6fe14cac",
+        "blockNumber": "674",
+        "blockHash": "0xef285c413ff0007dbb35985f88a5a6274d9854a756b16ef76de8c463c9caddff",
+        "logIndex": 1,
+        "address": "0xdde063ebe8e85d666ad99f731b4dbf8c98f29708"
+      },
+      {
+        "event": "BorrowRequested",
+        "args": {
+          "positionId": "4",
+          "borrower": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+          "requestedPrincipal": "750000",
+          "maxDue": "780000"
+        },
+        "transactionHash": "0x9fa78a1a65b5ce126967f0d44cf8d32764aa597088ffc8cc4c337836368a016c",
+        "blockNumber": "675",
+        "blockHash": "0x007c3c1245e7af36ead57ac2722be963f308d100fca5c41298dbeb189e2028fb",
+        "logIndex": 0,
+        "address": "0xd5724171c2b7f0aa717a324626050bd05767e2c6"
+      },
+      {
+        "event": "PositionEncumbered",
+        "args": {
+          "positionId": "4",
+          "loanId": "4"
+        },
+        "transactionHash": "0x8ad1d8168a67baf1913c510e8a2d81e90c321e482a0e739c2e8ce5b4fe32e89d",
+        "blockNumber": "677",
+        "blockHash": "0x2d03444b9598e3951748e254c7ab35cf44289c008422b889fbcd51d4f57010da",
+        "logIndex": 0,
+        "address": "0xdde063ebe8e85d666ad99f731b4dbf8c98f29708"
+      },
+      {
+        "event": "LoanFunded",
+        "args": {
+          "loanId": "4",
+          "positionId": "4",
+          "lender": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+          "borrower": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+          "principal": "750000",
+          "due": "780000"
+        },
+        "transactionHash": "0x8ad1d8168a67baf1913c510e8a2d81e90c321e482a0e739c2e8ce5b4fe32e89d",
+        "blockNumber": "677",
+        "blockHash": "0x2d03444b9598e3951748e254c7ab35cf44289c008422b889fbcd51d4f57010da",
+        "logIndex": 2,
+        "address": "0xd5724171c2b7f0aa717a324626050bd05767e2c6"
+      },
+      {
+        "event": "ObservationFinalized",
+        "args": {
+          "observationId": "7",
+          "price": "600000000000"
+        },
+        "transactionHash": "0x257de40a4bae929f957e0e8f8d2203bc4c9e9972dfc8eba1e82e14be7a1614f6",
+        "blockNumber": "679",
+        "blockHash": "0x23817e241074a162c76f051ca2fdcb37d5ed06bee05c23c89a95e9d23be9ee00",
+        "logIndex": 0,
+        "address": "0xc7143d5ba86553c06f5730c8dc9f8187a621a8d4"
+      },
+      {
+        "event": "ClaimRedeemed",
+        "args": {
+          "marketId": "18",
+          "user": "0xDde063eBe8E85D666AD99f731B4Dbf8C98F29708",
+          "side": 0,
+          "units": "1",
+          "payout": "1000000"
+        },
+        "transactionHash": "0x35253cd4a62d28455ab805d9446eefeafb7362a2962fdc403dd127faac6c5381",
+        "blockNumber": "680",
+        "blockHash": "0xf6186fbe202b936d60cd3163c776ed87c82414844634e3fca90e166cc3fc4b1a",
+        "logIndex": 2,
+        "address": "0xe3686721b062da0b181140362a1ca5f2d3e43fba"
+      },
+      {
+        "event": "ClaimRedeemed",
+        "args": {
+          "marketId": "19",
+          "user": "0xDde063eBe8E85D666AD99f731B4Dbf8C98F29708",
+          "side": 1,
+          "units": "1",
+          "payout": "0"
+        },
+        "transactionHash": "0x35253cd4a62d28455ab805d9446eefeafb7362a2962fdc403dd127faac6c5381",
+        "blockNumber": "680",
+        "blockHash": "0xf6186fbe202b936d60cd3163c776ed87c82414844634e3fca90e166cc3fc4b1a",
+        "logIndex": 4,
+        "address": "0xe3686721b062da0b181140362a1ca5f2d3e43fba"
+      },
+      {
+        "event": "PositionRedeemed",
+        "args": {
+          "positionId": "4",
+          "amount": "1000000"
+        },
+        "transactionHash": "0x35253cd4a62d28455ab805d9446eefeafb7362a2962fdc403dd127faac6c5381",
+        "blockNumber": "680",
+        "blockHash": "0xf6186fbe202b936d60cd3163c776ed87c82414844634e3fca90e166cc3fc4b1a",
+        "logIndex": 6,
+        "address": "0xdde063ebe8e85d666ad99f731b4dbf8c98f29708"
+      },
+      {
+        "event": "LoanSettled",
+        "args": {
+          "loanId": "4",
+          "redeemed": "1000000",
+          "lenderPaid": "780000",
+          "borrowerPaid": "220000"
+        },
+        "transactionHash": "0x35253cd4a62d28455ab805d9446eefeafb7362a2962fdc403dd127faac6c5381",
+        "blockNumber": "680",
+        "blockHash": "0xf6186fbe202b936d60cd3163c776ed87c82414844634e3fca90e166cc3fc4b1a",
+        "logIndex": 9,
+        "address": "0xd5724171c2b7f0aa717a324626050bd05767e2c6"
+      },
+      {
+        "event": "ObservationRegistered",
+        "args": {
+          "observationId": "8",
+          "assetId": "0x0b43555ace6b39aae1b894097d0a9fc17f504c62fea598fa206cc6f5088e6e45",
+          "observationTime": "1794082335"
+        },
+        "transactionHash": "0x4ada63ea50f6fbbcb3b0dc332933bf2da7f297491203ca4344ca306c505848a1",
+        "blockNumber": "681",
+        "blockHash": "0xf086c72ca6a4062f979328c0ee55fbc78411f1802be55e28fc08df24a6f26b03",
+        "logIndex": 0,
+        "address": "0xc7143d5ba86553c06f5730c8dc9f8187a621a8d4"
+      },
+      {
+        "event": "MarketCreated",
+        "args": {
+          "marketId": "20",
+          "observationId": "8",
+          "strike": "500000000000"
+        },
+        "transactionHash": "0x537ba2df6672448f7760a5eed8ba00facef70815f910b1957f0032049b1450b8",
+        "blockNumber": "682",
+        "blockHash": "0x84f698105b7deb6ae89d97073e1bf8e6d6cf98491df4a0735792856323d63f00",
+        "logIndex": 0,
+        "address": "0x359570b3a0437805d0a71457d61ad26a28cac9a2"
+      },
+      {
+        "event": "MarketCreated",
+        "args": {
+          "marketId": "21",
+          "observationId": "8",
+          "strike": "600000000000"
+        },
+        "transactionHash": "0x6be8507247fc320e0aee7405fde3da0d6f780b9798956bd633c8ca620ab9ca1e",
+        "blockNumber": "683",
+        "blockHash": "0xf9365169305f9eb88eb32293d8c4bda3e74c9f858725ebe876498df9c2e44bd5",
+        "logIndex": 0,
+        "address": "0x359570b3a0437805d0a71457d61ad26a28cac9a2"
+      },
+      {
+        "event": "CompleteSetMinted",
+        "args": {
+          "marketId": "20",
+          "user": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+          "units": "1",
+          "collateral": "1000000"
+        },
+        "transactionHash": "0x07b009110e0954f567fd088b1a37617c0586c9016af388f77b484bcd2d16d7cf",
+        "blockNumber": "685",
+        "blockHash": "0x48bae6e95d851bd634adeb4f30dfca65f4ff168b5c28415c6d3ede8bfcd29cd1",
+        "logIndex": 2,
+        "address": "0xe3686721b062da0b181140362a1ca5f2d3e43fba"
+      },
+      {
+        "event": "CompleteSetMinted",
+        "args": {
+          "marketId": "21",
+          "user": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+          "units": "1",
+          "collateral": "1000000"
+        },
+        "transactionHash": "0xcb8a3b5b58a42e96d755321c72e93fd27491ee1769d6c6567569f27a1cec248f",
+        "blockNumber": "686",
+        "blockHash": "0xdc75a3620d9ffa860de5a8e959de3ae2c9c5d1b339de8b7330e9c4e6aaf7b70a",
+        "logIndex": 2,
+        "address": "0xe3686721b062da0b181140362a1ca5f2d3e43fba"
+      },
+      {
+        "event": "VaultPositionCreated",
+        "args": {
+          "positionId": "5",
+          "owner": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+          "floorUsdc": "1000000"
+        },
+        "transactionHash": "0xad5af1bbc19b9a418a1c2f3eb9ce6b00a23487435f1e125974f5b1e4ae7cb6c2",
+        "blockNumber": "688",
+        "blockHash": "0xcb5f6b246a23c9c437717dfc77cfed4a3fd1ec7e36c14b281fa9094f0b248457",
+        "logIndex": 1,
+        "address": "0xdde063ebe8e85d666ad99f731b4dbf8c98f29708"
+      },
+      {
+        "event": "BorrowRequested",
+        "args": {
+          "positionId": "5",
+          "borrower": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+          "requestedPrincipal": "750000",
+          "maxDue": "780000"
+        },
+        "transactionHash": "0x12540c03030b10889589fced0fe37fb3d63d9b66da94c7864f89a945ed024db6",
+        "blockNumber": "689",
+        "blockHash": "0x5ca8787f25f6a2d5b8469ec3744d4ee89093e17b8b423d3edf1119885acc3cc4",
+        "logIndex": 0,
+        "address": "0xd5724171c2b7f0aa717a324626050bd05767e2c6"
+      },
+      {
+        "event": "PositionEncumbered",
+        "args": {
+          "positionId": "5",
+          "loanId": "5"
+        },
+        "transactionHash": "0xe943a49ebbe82a0a9ad8de3276598c92aef7d3e3bc377f1839c442fb4649e378",
+        "blockNumber": "691",
+        "blockHash": "0x3eaadb56c3bfa8b358628823b8917fde30e646bed3ab71ba2bc33fc057f51198",
+        "logIndex": 0,
+        "address": "0xdde063ebe8e85d666ad99f731b4dbf8c98f29708"
+      },
+      {
+        "event": "LoanFunded",
+        "args": {
+          "loanId": "5",
+          "positionId": "5",
+          "lender": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+          "borrower": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+          "principal": "750000",
+          "due": "780000"
+        },
+        "transactionHash": "0xe943a49ebbe82a0a9ad8de3276598c92aef7d3e3bc377f1839c442fb4649e378",
+        "blockNumber": "691",
+        "blockHash": "0x3eaadb56c3bfa8b358628823b8917fde30e646bed3ab71ba2bc33fc057f51198",
+        "logIndex": 2,
+        "address": "0xd5724171c2b7f0aa717a324626050bd05767e2c6"
+      },
+      {
+        "event": "ObservationFinalized",
+        "args": {
+          "observationId": "8",
+          "price": "650000000000"
+        },
+        "transactionHash": "0xf5443a6b64e9996cfaae28ada3e710d46f198e4cd535f7fdfe1583357552b66b",
+        "blockNumber": "693",
+        "blockHash": "0x4199c4bf4b50176590c6c077aa5aa326a6b3e047bd5329521bbf3e4b1b2ba71c",
+        "logIndex": 0,
+        "address": "0xc7143d5ba86553c06f5730c8dc9f8187a621a8d4"
+      },
+      {
+        "event": "ClaimRedeemed",
+        "args": {
+          "marketId": "20",
+          "user": "0xDde063eBe8E85D666AD99f731B4Dbf8C98F29708",
+          "side": 0,
+          "units": "1",
+          "payout": "1000000"
+        },
+        "transactionHash": "0xccb64c982b2237d6af108dcc664ba78f0e023c49953ddfe0157d1148e588f4dc",
+        "blockNumber": "694",
+        "blockHash": "0xe0216d4333117e38a27b26b059091ea08644f2861e90162899c0d70b643c7331",
+        "logIndex": 2,
+        "address": "0xe3686721b062da0b181140362a1ca5f2d3e43fba"
+      },
+      {
+        "event": "ClaimRedeemed",
+        "args": {
+          "marketId": "21",
+          "user": "0xDde063eBe8E85D666AD99f731B4Dbf8C98F29708",
+          "side": 1,
+          "units": "1",
+          "payout": "0"
+        },
+        "transactionHash": "0xccb64c982b2237d6af108dcc664ba78f0e023c49953ddfe0157d1148e588f4dc",
+        "blockNumber": "694",
+        "blockHash": "0xe0216d4333117e38a27b26b059091ea08644f2861e90162899c0d70b643c7331",
+        "logIndex": 4,
+        "address": "0xe3686721b062da0b181140362a1ca5f2d3e43fba"
+      },
+      {
+        "event": "PositionRedeemed",
+        "args": {
+          "positionId": "5",
+          "amount": "1000000"
+        },
+        "transactionHash": "0xccb64c982b2237d6af108dcc664ba78f0e023c49953ddfe0157d1148e588f4dc",
+        "blockNumber": "694",
+        "blockHash": "0xe0216d4333117e38a27b26b059091ea08644f2861e90162899c0d70b643c7331",
+        "logIndex": 6,
+        "address": "0xdde063ebe8e85d666ad99f731b4dbf8c98f29708"
+      },
+      {
+        "event": "LoanSettled",
+        "args": {
+          "loanId": "5",
+          "redeemed": "1000000",
+          "lenderPaid": "780000",
+          "borrowerPaid": "220000"
+        },
+        "transactionHash": "0xccb64c982b2237d6af108dcc664ba78f0e023c49953ddfe0157d1148e588f4dc",
+        "blockNumber": "694",
+        "blockHash": "0xe0216d4333117e38a27b26b059091ea08644f2861e90162899c0d70b643c7331",
+        "logIndex": 9,
+        "address": "0xd5724171c2b7f0aa717a324626050bd05767e2c6"
+      },
+      {
+        "event": "ObservationRegistered",
+        "args": {
+          "observationId": "9",
+          "assetId": "0x0b43555ace6b39aae1b894097d0a9fc17f504c62fea598fa206cc6f5088e6e45",
+          "observationTime": "1794085935"
+        },
+        "transactionHash": "0x190c0c2b41311dae5569ca7780ecb735f51779e77e2a4048d890d7ba419ed508",
+        "blockNumber": "695",
+        "blockHash": "0x2c1fe9c0f4991ac10d3bd23620aa77ae43a68c77be0af5f90826d61b7d40e0e4",
+        "logIndex": 0,
+        "address": "0xc7143d5ba86553c06f5730c8dc9f8187a621a8d4"
+      },
+      {
+        "event": "MarketCreated",
+        "args": {
+          "marketId": "22",
+          "observationId": "9",
+          "strike": "500000000000"
+        },
+        "transactionHash": "0x64e947ae3a7a85631c09d22a1751c205be4d58e40e2d8b3885ff7931f6b02709",
+        "blockNumber": "696",
+        "blockHash": "0x42a82e11b99d6cdd8b210262c548f7cf113409ba209d6490fbe253ccece42bd9",
+        "logIndex": 0,
+        "address": "0x359570b3a0437805d0a71457d61ad26a28cac9a2"
+      },
+      {
+        "event": "MarketCreated",
+        "args": {
+          "marketId": "23",
+          "observationId": "9",
+          "strike": "600000000000"
+        },
+        "transactionHash": "0x89d67740b16c1330b19b8704736a0417334272507b9fb43b8efa38026a703f1d",
+        "blockNumber": "697",
+        "blockHash": "0xdf6ff82c09b060ed4084a467d8ee9d144088e04f6d003d0a572bcb903f5b8228",
+        "logIndex": 0,
+        "address": "0x359570b3a0437805d0a71457d61ad26a28cac9a2"
+      },
+      {
+        "event": "CompleteSetMinted",
+        "args": {
+          "marketId": "22",
+          "user": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+          "units": "1",
+          "collateral": "1000000"
+        },
+        "transactionHash": "0x13b1a5cdb7a6f8c071768d3256d4e4123388a4719a715b9494a1fc7cb046f399",
+        "blockNumber": "699",
+        "blockHash": "0x913b9db6d792b6f17021f5afc92a049933d2153648cef9c0d72752a343d595df",
+        "logIndex": 2,
+        "address": "0xe3686721b062da0b181140362a1ca5f2d3e43fba"
+      },
+      {
+        "event": "CompleteSetMinted",
+        "args": {
+          "marketId": "23",
+          "user": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+          "units": "1",
+          "collateral": "1000000"
+        },
+        "transactionHash": "0x2ae5b5c9cde470f835e721a756e313553c6d5aca84fd2ca507901aece46b8554",
+        "blockNumber": "700",
+        "blockHash": "0x407c420b0c7bcf933f2e190b6dc286f35688abc9ff7df901a7608d2e1733ff0c",
+        "logIndex": 2,
+        "address": "0xe3686721b062da0b181140362a1ca5f2d3e43fba"
+      },
+      {
+        "event": "VaultPositionCreated",
+        "args": {
+          "positionId": "6",
+          "owner": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+          "floorUsdc": "1000000"
+        },
+        "transactionHash": "0x18bdd2deda29082c16adb8dc16263a06d7a9e4a6c876705a91f1754322223aab",
+        "blockNumber": "702",
+        "blockHash": "0x724404d1a195f43326f973b78ce496c296f5f4f84d261174a8ab4034dae90a6d",
+        "logIndex": 1,
+        "address": "0xdde063ebe8e85d666ad99f731b4dbf8c98f29708"
+      },
+      {
+        "event": "BorrowRequested",
+        "args": {
+          "positionId": "6",
+          "borrower": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+          "requestedPrincipal": "750000",
+          "maxDue": "780000"
+        },
+        "transactionHash": "0x71b169a63367086ccf5d28da87060af06b2552eaa2630d09fbb6b9645b8e9563",
+        "blockNumber": "703",
+        "blockHash": "0x55a417b8296ac633e7f12459b701dee71b143cbefcde070bf9e844b227043f54",
+        "logIndex": 0,
+        "address": "0xd5724171c2b7f0aa717a324626050bd05767e2c6"
+      },
+      {
+        "event": "PositionEncumbered",
+        "args": {
+          "positionId": "6",
+          "loanId": "6"
+        },
+        "transactionHash": "0x91810f7b07efc6c06e0e3390ed11a6303cc68d11ec52326b839b688af468d527",
+        "blockNumber": "705",
+        "blockHash": "0x3bb20b925ab441d46eb7121380a5e5aabf66f77a6bf51c5ce19280515745713a",
+        "logIndex": 0,
+        "address": "0xdde063ebe8e85d666ad99f731b4dbf8c98f29708"
+      },
+      {
+        "event": "LoanFunded",
+        "args": {
+          "loanId": "6",
+          "positionId": "6",
+          "lender": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+          "borrower": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+          "principal": "750000",
+          "due": "780000"
+        },
+        "transactionHash": "0x91810f7b07efc6c06e0e3390ed11a6303cc68d11ec52326b839b688af468d527",
+        "blockNumber": "705",
+        "blockHash": "0x3bb20b925ab441d46eb7121380a5e5aabf66f77a6bf51c5ce19280515745713a",
+        "logIndex": 2,
+        "address": "0xd5724171c2b7f0aa717a324626050bd05767e2c6"
+      },
+      {
+        "event": "ObservationCancelled",
+        "args": {
+          "observationId": "9"
+        },
+        "transactionHash": "0x3f04b64cac4f552ea3c2e1468113f590c79055bc11b44e4ebde38274c3e40e6d",
+        "blockNumber": "707",
+        "blockHash": "0x37a364ea72ab7ae69a237c1f93521ed2ba4847c84308f24ebe6bc705d926b70b",
+        "logIndex": 0,
+        "address": "0xc7143d5ba86553c06f5730c8dc9f8187a621a8d4"
+      },
+      {
+        "event": "ClaimRedeemed",
+        "args": {
+          "marketId": "22",
+          "user": "0xDde063eBe8E85D666AD99f731B4Dbf8C98F29708",
+          "side": 0,
+          "units": "1",
+          "payout": "500000"
+        },
+        "transactionHash": "0x6bb1cb794e07631f0f6445d28f47a2016a4512746341923b84b870c8d6cf565e",
+        "blockNumber": "708",
+        "blockHash": "0xb900d89f70d166e1d171f3614484610d8a4c79185da93b23cc6eb9d87787c289",
+        "logIndex": 2,
+        "address": "0xe3686721b062da0b181140362a1ca5f2d3e43fba"
+      },
+      {
+        "event": "ClaimRedeemed",
+        "args": {
+          "marketId": "23",
+          "user": "0xDde063eBe8E85D666AD99f731B4Dbf8C98F29708",
+          "side": 1,
+          "units": "1",
+          "payout": "500000"
+        },
+        "transactionHash": "0x6bb1cb794e07631f0f6445d28f47a2016a4512746341923b84b870c8d6cf565e",
+        "blockNumber": "708",
+        "blockHash": "0xb900d89f70d166e1d171f3614484610d8a4c79185da93b23cc6eb9d87787c289",
+        "logIndex": 5,
+        "address": "0xe3686721b062da0b181140362a1ca5f2d3e43fba"
+      },
+      {
+        "event": "PositionRedeemed",
+        "args": {
+          "positionId": "6",
+          "amount": "1000000"
+        },
+        "transactionHash": "0x6bb1cb794e07631f0f6445d28f47a2016a4512746341923b84b870c8d6cf565e",
+        "blockNumber": "708",
+        "blockHash": "0xb900d89f70d166e1d171f3614484610d8a4c79185da93b23cc6eb9d87787c289",
+        "logIndex": 7,
+        "address": "0xdde063ebe8e85d666ad99f731b4dbf8c98f29708"
+      },
+      {
+        "event": "LoanSettled",
+        "args": {
+          "loanId": "6",
+          "redeemed": "1000000",
+          "lenderPaid": "780000",
+          "borrowerPaid": "220000"
+        },
+        "transactionHash": "0x6bb1cb794e07631f0f6445d28f47a2016a4512746341923b84b870c8d6cf565e",
+        "blockNumber": "708",
+        "blockHash": "0xb900d89f70d166e1d171f3614484610d8a4c79185da93b23cc6eb9d87787c289",
+        "logIndex": 10,
+        "address": "0xd5724171c2b7f0aa717a324626050bd05767e2c6"
+      },
+      {
+        "event": "ObservationRegistered",
+        "args": {
+          "observationId": "10",
+          "assetId": "0x0b43555ace6b39aae1b894097d0a9fc17f504c62fea598fa206cc6f5088e6e45",
+          "observationTime": "1794093135"
+        },
+        "transactionHash": "0x1b1844d5eb3bcd886ba47209e844705cd32d7cc35ee261a5cb5f33da1bb6a5d1",
+        "blockNumber": "709",
+        "blockHash": "0x267efc4f9ec8e2d4996e59e2c3bf7b95f971636a2068d00f9df8e08d65ce900b",
+        "logIndex": 0,
+        "address": "0xc7143d5ba86553c06f5730c8dc9f8187a621a8d4"
+      },
+      {
+        "event": "MarketCreated",
+        "args": {
+          "marketId": "24",
+          "observationId": "10",
+          "strike": "500000000000"
+        },
+        "transactionHash": "0x1faf85df004108a2126419a165ad1fe44ec9902949525420efe685da701cc855",
+        "blockNumber": "710",
+        "blockHash": "0xf182e8e12afe1dedaa66e2f5e7701f4a7832a0e4f02bd71dd34c677c74797d41",
+        "logIndex": 0,
+        "address": "0x359570b3a0437805d0a71457d61ad26a28cac9a2"
+      },
+      {
+        "event": "MarketCreated",
+        "args": {
+          "marketId": "25",
+          "observationId": "10",
+          "strike": "600000000000"
+        },
+        "transactionHash": "0x52acd5469bebda0333b8695b279607fd17976cbe939c0d7b39e72f03e65b8688",
+        "blockNumber": "711",
+        "blockHash": "0x6cd09243ca89a2f8590ff736f7ea43f3ee3ede3880431e82999aa337231d045d",
+        "logIndex": 0,
+        "address": "0x359570b3a0437805d0a71457d61ad26a28cac9a2"
+      },
+      {
+        "event": "CompleteSetMinted",
+        "args": {
+          "marketId": "24",
+          "user": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+          "units": "10",
+          "collateral": "10000000"
+        },
+        "transactionHash": "0xda573f0d45290ad11c0f1806d0a2bf9d8a3f1c1a454d5e535c45f1bd626705d8",
+        "blockNumber": "713",
+        "blockHash": "0x08bc3f881338b87bc6188e358f0a97675b360fe4d086f8cf86e58b7e5a2d9528",
+        "logIndex": 2,
+        "address": "0xe3686721b062da0b181140362a1ca5f2d3e43fba"
+      },
+      {
+        "event": "CompleteSetMinted",
+        "args": {
+          "marketId": "25",
+          "user": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+          "units": "10",
+          "collateral": "10000000"
+        },
+        "transactionHash": "0x0559892370eafae2e5a727a792bd882509d28b794c0164fd27d5f74066d9be66",
+        "blockNumber": "714",
+        "blockHash": "0x9d743056916e21a82e7cbedc06c4b84a9a13beb31c0736547a7951ed72e7a350",
+        "logIndex": 2,
+        "address": "0xe3686721b062da0b181140362a1ca5f2d3e43fba"
+      },
+      {
+        "event": "VaultPositionCreated",
+        "args": {
+          "positionId": "7",
+          "owner": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+          "floorUsdc": "1000000"
+        },
+        "transactionHash": "0x3e799fdf6c760cf31b78d0348b04465725899694daab5dcb4723d1da5e97d189",
+        "blockNumber": "716",
+        "blockHash": "0xee01749cc6985c1fcb9ef49f6d2c3b50d45ce01b9f17e7a1f1692579232d81f2",
+        "logIndex": 1,
+        "address": "0xdde063ebe8e85d666ad99f731b4dbf8c98f29708"
+      },
+      {
+        "event": "BorrowRequested",
+        "args": {
+          "positionId": "7",
+          "borrower": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+          "requestedPrincipal": "750000",
+          "maxDue": "780000"
+        },
+        "transactionHash": "0x53dbbc19bb281148e0c4ee9fa3dfd360a7aca8b4e9f2fa3ddbba9dcb852d325d",
+        "blockNumber": "717",
+        "blockHash": "0x0040a8a8636101cf33c03e52320c4e373d13a3412f996a9ee9ea9e02316f4d37",
+        "logIndex": 0,
+        "address": "0xd5724171c2b7f0aa717a324626050bd05767e2c6"
+      },
+      {
+        "event": "PositionEncumbered",
+        "args": {
+          "positionId": "7",
+          "loanId": "7"
+        },
+        "transactionHash": "0x24d0d7e8f125774064e6a98fc63828344526c901fb1835d49064ec04736c260b",
+        "blockNumber": "719",
+        "blockHash": "0x1e912e93d673a2a6b355bf3dfec92e839aa521e3383939c7856898800e1a05bf",
+        "logIndex": 0,
+        "address": "0xdde063ebe8e85d666ad99f731b4dbf8c98f29708"
+      },
+      {
+        "event": "LoanFunded",
+        "args": {
+          "loanId": "7",
+          "positionId": "7",
+          "lender": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+          "borrower": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+          "principal": "750000",
+          "due": "780000"
+        },
+        "transactionHash": "0x24d0d7e8f125774064e6a98fc63828344526c901fb1835d49064ec04736c260b",
+        "blockNumber": "719",
+        "blockHash": "0x1e912e93d673a2a6b355bf3dfec92e839aa521e3383939c7856898800e1a05bf",
+        "logIndex": 2,
+        "address": "0xd5724171c2b7f0aa717a324626050bd05767e2c6"
+      },
+      {
+        "event": "VaultPositionCreated",
+        "args": {
+          "positionId": "8",
+          "owner": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+          "floorUsdc": "1000000"
+        },
+        "transactionHash": "0xe76430c7275148b2218e26892286442fbc44029350850dda7e741f7177d761fa",
+        "blockNumber": "720",
+        "blockHash": "0xbd8bf45bc4ff080e3090f197094416f498bf7356c59684e6776544de398df38e",
+        "logIndex": 1,
+        "address": "0xdde063ebe8e85d666ad99f731b4dbf8c98f29708"
+      },
+      {
+        "event": "BorrowRequested",
+        "args": {
+          "positionId": "8",
+          "borrower": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+          "requestedPrincipal": "750000",
+          "maxDue": "780000"
+        },
+        "transactionHash": "0xcef201bd8ea9ba261f3616cd359840a74bd50e47ddbd3f8301e1fe31137fabed",
+        "blockNumber": "721",
+        "blockHash": "0x989c135bbcb5e8ef4340dd8672d02b4bd6869f39e4487b8875313f7e90ed310e",
+        "logIndex": 0,
+        "address": "0xd5724171c2b7f0aa717a324626050bd05767e2c6"
+      }
+    ],
+    "walletAddress": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+    "walletBalance": "956570000",
+    "bufferBps": 2000,
+    "source": "DIRECT_CHAIN",
+    "fetchedAt": "2026-11-05T19:13:23.439Z"
+  },
+  "scenarios": [
+    {
+      "scenario": "below",
+      "observationId": "4",
+      "positionId": "1",
+      "loanId": "1",
+      "redeemed": "1000000",
+      "lenderPaid": "780000",
+      "borrowerPaid": "220000",
+      "transactionHash": "0xc520682a432669921c3a98e2b3f337fa383190f0721cf81896e2686f401d4b15",
+      "blockNumber": "638"
+    },
+    {
+      "scenario": "lower_equal",
+      "observationId": "5",
+      "positionId": "2",
+      "loanId": "2",
+      "redeemed": "2000000",
+      "lenderPaid": "780000",
+      "borrowerPaid": "1220000",
+      "transactionHash": "0xeb4b9289d55172088bc6fd71e509953acf5cf2b5e02777d1b0ac234d165594fb",
+      "blockNumber": "652"
+    },
+    {
+      "scenario": "inside",
+      "observationId": "6",
+      "positionId": "3",
+      "loanId": "3",
+      "redeemed": "2000000",
+      "lenderPaid": "780000",
+      "borrowerPaid": "1220000",
+      "transactionHash": "0xead4e19435cfc804d45559b4f4e4c58af9b6f567ef38d660b2096b2bbeba0d5f",
+      "blockNumber": "666"
+    },
+    {
+      "scenario": "upper_equal",
+      "observationId": "7",
+      "positionId": "4",
+      "loanId": "4",
+      "redeemed": "1000000",
+      "lenderPaid": "780000",
+      "borrowerPaid": "220000",
+      "transactionHash": "0x35253cd4a62d28455ab805d9446eefeafb7362a2962fdc403dd127faac6c5381",
+      "blockNumber": "680"
+    },
+    {
+      "scenario": "above",
+      "observationId": "8",
+      "positionId": "5",
+      "loanId": "5",
+      "redeemed": "1000000",
+      "lenderPaid": "780000",
+      "borrowerPaid": "220000",
+      "transactionHash": "0xccb64c982b2237d6af108dcc664ba78f0e023c49953ddfe0157d1148e588f4dc",
+      "blockNumber": "694"
+    },
+    {
+      "scenario": "cancelled",
+      "observationId": "9",
+      "positionId": "6",
+      "loanId": "6",
+      "redeemed": "1000000",
+      "lenderPaid": "780000",
+      "borrowerPaid": "220000",
+      "transactionHash": "0x6bb1cb794e07631f0f6445d28f47a2016a4512746341923b84b870c8d6cf565e",
+      "blockNumber": "708"
+    }
+  ]
+}
