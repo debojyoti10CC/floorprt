@@ -1,0 +1,78 @@
+
+> floor-protocol@0.1.0 e2e C:\Users\Debojyoti De Majumde\Documents\Codex\2026-11-05\c-users-debojyoti-de-majumde-downloads\outputs\floor-protocol
+> playwright test
+
+
+Running 12 tests using 1 worker
+
+(node:33256) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok  1 e2e\offline.spec.ts:2:1 › recorded evidence loads promptly without RPC and cannot authorize wallet writes (3.1s)
+PASS: 10000 independent Python/TypeScript vectors; 100 Solidity/TypeScript comparisons.
+  ok  2 e2e\protocol.spec.ts:13:3 › wallet-signed outcome collateral lifecycle › interactive command center changes exact payouts and rotates its 3D surface (4.0s)
+  ok  3 e2e\protocol.spec.ts:24:3 › wallet-signed outcome collateral lifecycle › outcome palette supports drag and keyboard selection (2.7s)
+  ok  4 e2e\protocol.spec.ts:42:5 › wallet-signed outcome collateral lifecycle › inside: separate borrower and lender contexts, actual redemption waterfall (25.0s)
+  ok  5 e2e\protocol.spec.ts:42:5 › wallet-signed outcome collateral lifecycle › below: separate borrower and lender contexts, actual redemption waterfall (23.0s)
+  ok  6 e2e\protocol.spec.ts:42:5 › wallet-signed outcome collateral lifecycle › above: separate borrower and lender contexts, actual redemption waterfall (23.7s)
+  ok  7 e2e\protocol.spec.ts:42:5 › wallet-signed outcome collateral lifecycle › cancelled: separate borrower and lender contexts, actual redemption waterfall (16.1s)
+  x   8 e2e\protocol.spec.ts:42:5 › wallet-signed outcome collateral lifecycle › repaid: separate borrower and lender contexts, actual redemption waterfall (49.1s)
+  -   9 e2e\protocol.spec.ts:104:3 › wallet-signed outcome collateral lifecycle › incompatible observation is rejected in the browser
+  -  10 e2e\protocol.spec.ts:110:3 › wallet-signed outcome collateral lifecycle › expired collateral offers an open pair without overwriting claim units
+  -  11 e2e\protocol.spec.ts:117:3 › wallet-signed outcome collateral lifecycle › responsive studio has no document overflow and keyboard controls remain usable
+(node:36548) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 12 e2e\theme.spec.ts:2:1 › Kimia foundations, contrast, keyboard chart and wallet focus are usable (2.3s)
+
+
+  1) e2e\protocol.spec.ts:42:5 › wallet-signed outcome collateral lifecycle › repaid: separate borrower and lender contexts, actual redemption waterfall 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByText('Repaid', { exact: true })
+    Expected: visible
+    Timeout: 30000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByText('Repaid', { exact: true }) with timeout 30000ms
+      - waiting for getByText('Repaid', { exact: true })
+
+
+      82 |         expect(b-await balance('borrower')).toBe(780000n);expect(await balance('lender')-l).toBe(780000n);
+      83 |         expect((await client.readContract({address:d.contracts.FloorVault,abi:FloorVaultAbi,functionName:'getPosition',args:[positionId]})).state).toBe(3);
+    > 84 |         await bp.reload();await expect(bp.getByText('Repaid',{exact:true})).toBeVisible();
+         |                                                                             ^
+      85 |         const snap=await readSnapshot(d,d.roles.borrower),event=snap.activity.find(e=>e.event==='LoanRepaid'&&String(e.args.loanId)===loanId.toString());expect(event).toBeDefined();
+      86 |         results.push({scenario,loanId:String(loanId),paid:'780000',transactionHash:event!.transactionHash,blockNumber:event!.blockNumber});
+      87 |         await operator.close();await borrower.close();await lender.close();return;
+        at C:\Users\Debojyoti De Majumde\Documents\Codex\2026-11-05\c-users-debojyoti-de-majumde-downloads\outputs\floor-protocol\e2e\protocol.spec.ts:84:77
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\protocol-wallet-signed-out-902e7-actual-redemption-waterfall\test-failed-3.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\protocol-wallet-signed-out-902e7-actual-redemption-waterfall\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #3: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\protocol-wallet-signed-out-902e7-actual-redemption-waterfall\test-failed-2.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\protocol-wallet-signed-out-902e7-actual-redemption-waterfall\error-context.md
+
+    Error Context: test-results\protocol-wallet-signed-out-902e7-actual-redemption-waterfall\error-context.md
+
+    attachment #6: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\protocol-wallet-signed-out-902e7-actual-redemption-waterfall\trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results\protocol-wallet-signed-out-902e7-actual-redemption-waterfall\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    e2e\protocol.spec.ts:42:5 › wallet-signed outcome collateral lifecycle › repaid: separate borrower and lender contexts, actual redemption waterfall 
+  3 did not run
+  8 passed (2.7m)
+ ELIFECYCLE  Command failed with exit code 1.

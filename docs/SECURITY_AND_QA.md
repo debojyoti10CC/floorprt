@@ -1,0 +1,127 @@
+# Security, Correctness, QA and Release Gates
+
+**Security status:** unimplemented design. Neither repository's self-audit proves this new protocol safe. No mainnet or real customer funds until independent expert review.
+
+## 1. Threat model
+
+| Threat | Impact | Mitigation / release gate |
+|---|---|---|
+| Forged 'similar' markets with different oracles/timestamps | Certified floor can be zero | Only allow same immutable observation ID from onchain factory, independent verifier reread |
+| Resolver malicious/mistaken price | Misallocates payout/upside | P0 test key clearly labeled; P1 trusted data-feed/CRE verification, dispute/monitoring; floor remains structural for any numeric price, not fairness |
+| Oracle indefinite non-resolution | Lender capital frozen indefinitely | Longstop shared cancellation mechanism; time risk disclosed; governance constraints; liveness tests |
+| One-market void different from the other | Floor destroyed | One shared observation terminal state; 50/50 cancellation applies atomically to all child markets |
+| Non-backed complete set mint | Insolvency | Transfer matching collateral before mint; no role can mint unbacked shares; escrow accounting tests |
+| Double-pledged ERC-1155 tokens | Loan undercollateralized | Actual custody in vault, one lien ID, immutable ownership, non-transferable locked position |
+| Mint/claim quantity rounding | Cancellation floor off by dust | Whole-unit ERC-1155 units; 6-decimal USDC; exact payouts; fuzzy varied quantities |
+| Reentrancy through ERC-1155 receiver / token calls | Double redeem or loan settlement | CEI, nonReentrant, allowlisted settlement token, exact callback context |
+| Unlimited dynamic market creation | spam and gas griefing | Owner-curated observations and markets P0; caps on active markets, max token units |
+| Front-running loan terms | Lender extracts unreasonable fee | Borrower pre-signs bounded request, lender must meet max due + expiry; position owner consent |
+| Unauthorized market resolver routes | Manipulated settlements | Test-only resolver role, no unguarded POST API with hot key on public internet |
+| Unlimited price feed result / negative asset price | Comparison semantics corrupted | Canonical fixed precision, bounded uint, approved feed, strict observation timestamp |
+| External API injects malicious text | UI injection / SSRF | Escape render, URL allowlist, Zod, rate-limit, no HTML passthrough |
+| Frontend stale wrong contract address | Funds routed incorrectly | Pinned ABI/address manifest; chain and codehash checks; explorer validation |
+| Transaction 'success' from UI cache only | Misleading financial state | Receipt then event reconciliation; no fake amount transfers |
+| Indexer reorg / duplicate event | Incorrect wallet reporting | Blockhash tracking, confirm threshold, deterministic idempotency keys |
+| Access to private secrets | Wallet/API compromise | `.env` secret scanning, least privilege, rotation, never commit keys |
+| Admin pause blocks redemptions forever | Funds stuck | Separate pause rights for funding vs redeem; governance policy and recovery |
+| Regulatory noncompliance | Exposure to restricted markets/credit rules | Jurisdiction access review, risk disclosure, no real-money demo or false protected labels |
+
+## 2. Foundry test directory
+
+```text
+packages/contracts/test/
+  fixtures/
+    Fixture.t.sol
+  unit/
+    ObservationRegistry.t.sol
+    OutcomeTokens.t.sol
+    FloorVerifier.t.sol
+    FloorVault.t.sol
+    CreditDesk.t.sol
+  invariant/
+    BackingInvariant.t.sol
+    OneLienInvariant.t.sol
+    RepaymentInvariant.t.sol
+    FixedPayoutInvariant.t.sol
+  fuzz/
+    IntervalProofFuzz.t.sol
+    CancellationFuzz.t.sol
+    DebtBoundFuzz.t.sol
+  adversarial/
+    ReentrancyReceiver.t.sol
+    MaliciousToken.t.sol
+    StaleOracle.t.sol
+    WrongPolicy.t.sol
+    DoubleSettle.t.sol
+  integration/
+    HappyPath.t.sol
+    BorrowAndCancel.t.sol
+    BadOffer.t.sol
+```
+
+### Mandatory property families
+
+- **Payout:** all integer observations and cancel state; lower==upper rejects; lower>upper rejects; wrong side rejects; unequal units supported.
+- **Backing:** separate escrow accounting for each market, complete-set mint/merge, win, loss and cancel redemption, multiple holders, partial redemption, no over-withdraw.
+- **Lending:** lender and borrower separate accounts; independent recipient roles; high loan due reverted; underbuffered request rejected; second lender cannot fund already-funded position; full settlement yields proper balances.
+- **Time:** can't finalize early; can finalize once; can't fund after finalized; deadline expiry behaves correctly.
+- **Failure:** malicious ERC-1155 callback tries reentrancy; odd amounts blocked; fee rounded conservatively; wrong chain / wrong factory / different asset rejected.
+
+## 3. Differential proof tests
+
+Implement the same **pure** payoff evaluator in TypeScript BigInt and in an isolated Python reference harness for QA, without sharing code. Generate randomized `(L,U,qL,qU,p,state)` with `L<U`. Verify:
+
+`minPayAcrossAdmissibleStates = min(qL,qU)*1e6` and `payout >= floor` in all cases. Include large price ranges and boundary points. Compare TS preview and Solidity view result on Anvil. No acceptance of 'proof status' solely from TypeScript.
+
+## 4. Playwright E2E and wallet scenarios
+
+- **E2E-01** connect simulated wallet A, obtain test USDC, mint complete sets for two markets and verify onchain ERC-1155 balances.
+- **E2E-02** composer's graph updates for price slider and cancellation; all values match engine outputs.
+- **E2E-03** open Proof Inspector; eligible true, floor=1e6; inspect chain metadata.
+- **E2E-04** approve ERC-1155, lock; second lock attempt for same held quantity fails.
+- **E2E-05** wallet B pre-funded, lender supplies 0.75 USDC; loan `FUNDED` and borrower balance delta match receipt.
+- **E2E-06** resolver finalizes `5500` after time warp; keeper settle yields 2 USDC, sends lender 0.78, borrower 1.22. Refresh app and verify still SETTLED.
+- **E2E-07** rerun price=`4500`, `6500`, and CANCELLED cases; lender gets 0.78, borrower gets 0.22.
+- **E2E-08** incompatible observation/strike/side cannot progress past Lock, and contract direct call independently reverts.
+- **E2E-09** unauthorized resolver fails; user cannot manually claim vault collateral.
+- **E2E-10** RPC disconnect while transaction pending; UI recovers from chain receipt without duplicate send.
+
+## 5. CI commands (to create in project)
+
+```bash
+pnpm install --frozen-lockfile
+pnpm lint
+pnpm typecheck
+pnpm test
+cd packages/contracts && forge fmt --check && forge build && forge test -vv
+cd packages/contracts && forge test --match-path 'test/invariant/*' -vv
+pnpm e2e
+pnpm audit --audit-level high   # triage tool output; not blind pass/fail
+```
+
+For a reliable CI pipeline, pin Foundry, Node and dependencies, use ephemeral Anvil, deterministic test wallets, seeded data, artifacts and screenshots on failure. Add `slither .` and gas benchmarks in P1. Require coverage on critical privilege and settlement paths; high percentages alone cannot prove safety.
+
+## 6. Release gates
+
+| Gate | P0 proof | Failing it means |
+|---|---|---|
+| G0 Source and legal provenance | Source audit cited, no unlicensed copied code | Stop external release |
+| G1 Contract compile | Foundry build clean, no warnings overlooked | Stop demo |
+| G2 Math proof | Fuzz+boundary+cancel invariants pass | Stop certification UI |
+| G3 Money correctness | Backing, lien, loan, waterfall tests pass | Stop borrowing |
+| G4 Browser E2E | Two wallet end-to-end pass on Anvil | Do not claim live integration |
+| G5 Public testnet | Same flow on one testnet with explorer links | Mark demo local-only if missing |
+| G6 External integrations | CRE CLI simulation artifact; UI accurately labels source | Don't claim sponsor eligibility until proven |
+| G7 Operational review | No exposed keys, working recovery/cancel, launch banner | Stop public testnet invite |
+| G8 Mainnet (later) | Expert audit, legal, incident response, monitoring, multisig, risk reserves | Absolutely no real-money deployment |
+
+## 7. Known unsolved risks
+
+- Trusted resolver/price source and cancellation authority.
+- Stablecoin peg/depeg, freezes, blacklist, bridge custodial risk if added.
+- Unresolved outcomes after expected maturity; contractual final payout is not a market-priced liquid asset.
+- Real lender risk/required return; availability of capital and market depth.
+- Market identity across venues; natural-language semantic equality is insufficient.
+- Secondary-market cost vs floor; a guaranteed *settlement* floor need not exceed purchase cost.
+- Permissioned venue policy and legal jurisdictions for prediction markets and lending.
+- Security of new contracts remains unverified until implemented and reviewed.

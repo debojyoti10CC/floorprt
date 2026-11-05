@@ -1,0 +1,20 @@
+{
+  "status": "FAIL",
+  "results": [
+    {
+      "command": "pnpm check",
+      "exitCode": 0,
+      "durationMs": 26373
+    },
+    {
+      "command": "pnpm preflight",
+      "exitCode": 0,
+      "durationMs": 1724
+    },
+    {
+      "command": "pnpm e2e",
+      "exitCode": 1,
+      "durationMs": 164828
+    }
+  ]
+}

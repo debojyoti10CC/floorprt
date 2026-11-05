@@ -1,0 +1,26 @@
+{
+  "status": "PASS",
+  "authority": "PUBLIC_SEPOLIA_READ_ONLY",
+  "checkedAt": "2026-11-05T19:14:07.638Z",
+  "chainId": 11155111,
+  "block": "12071482",
+  "usdc": "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",
+  "tokenCodeHash": "0xcd3f29e2ea9c61dadd48bfeaf8b2884b6de9dfee7bf45329452c4c33d0868ceb",
+  "decimals": 6,
+  "feed": "0x694AA1769357215DE4FAC081bf1f309aDC325306",
+  "feedCodeHash": "0x9190afba2a699a9627d64ed68c7cc60e4005a8830b33183c4413b4e1a93b9ccd",
+  "latestRound": [
+    "18446744073709588973",
+    "224590000000",
+    "1793905368",
+    "1793905368",
+    "18446744073709588973"
+  ],
+  "witness": {
+    "roundId": "18446744073709588972",
+    "price": "224853026749",
+    "publishedAt": "1793901732",
+    "successorAt": "1793905368"
+  },
+  "transactionsSent": 0
+}

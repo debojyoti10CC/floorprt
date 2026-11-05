@@ -1,0 +1,45 @@
+{
+  "source": "PLAYWRIGHT_REAL_LOCAL_EVM",
+  "results": [
+    {
+      "scenario": "inside",
+      "loanId": "8",
+      "positionId": "9",
+      "gross": "2000000",
+      "lenderPaid": "780000",
+      "borrowerPaid": "1220000",
+      "transactionHash": "0xb9c6e124d8dffcd816a84831c58b953dcbd7eacd5dac260306b861e9d0f16bc3",
+      "blockNumber": "735"
+    },
+    {
+      "scenario": "below",
+      "loanId": "9",
+      "positionId": "10",
+      "gross": "1000000",
+      "lenderPaid": "780000",
+      "borrowerPaid": "220000",
+      "transactionHash": "0x6194448796f8a7009f18c25ea7d4490715c1aa996975c67101c129b652fa864d",
+      "blockNumber": "749"
+    },
+    {
+      "scenario": "above",
+      "loanId": "10",
+      "positionId": "11",
+      "gross": "1000000",
+      "lenderPaid": "780000",
+      "borrowerPaid": "220000",
+      "transactionHash": "0x9b819aa6fa39dc9393853b9bcb55695a301b970b2bcfb10cee0b9f3d6123d500",
+      "blockNumber": "763"
+    },
+    {
+      "scenario": "cancelled",
+      "loanId": "11",
+      "positionId": "12",
+      "gross": "1000000",
+      "lenderPaid": "780000",
+      "borrowerPaid": "220000",
+      "transactionHash": "0x68c84596fe9024cba43472d8639bdf96d4d9e01171351db7ac487600e8777ea4",
+      "blockNumber": "777"
+    }
+  ]
+}

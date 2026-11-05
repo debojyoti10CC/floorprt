@@ -1,0 +1,9 @@
+{
+  "status": "PASS",
+  "checkedAt": "2026-11-05T19:20:23.739Z",
+  "authority": "LOCAL_EVM_FORK_OF_PUBLIC_SEPOLIA",
+  "forkBlock": 12071482,
+  "publicTransactionsSent": 0,
+  "balanceProvisioning": "FOUNDRY_TEST_CHEATCODE",
+  "command": "pnpm test:fork"
+}

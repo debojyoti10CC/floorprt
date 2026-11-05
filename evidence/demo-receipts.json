@@ -1,0 +1,618 @@
+{
+  "scenarios": [
+    {
+      "scenario": "below",
+      "observationId": "4",
+      "positionId": "1",
+      "loanId": "1",
+      "redeemed": "1000000",
+      "lenderPaid": "780000",
+      "borrowerPaid": "220000",
+      "transactionHash": "0xc520682a432669921c3a98e2b3f337fa383190f0721cf81896e2686f401d4b15",
+      "blockNumber": "638"
+    },
+    {
+      "scenario": "lower_equal",
+      "observationId": "5",
+      "positionId": "2",
+      "loanId": "2",
+      "redeemed": "2000000",
+      "lenderPaid": "780000",
+      "borrowerPaid": "1220000",
+      "transactionHash": "0xeb4b9289d55172088bc6fd71e509953acf5cf2b5e02777d1b0ac234d165594fb",
+      "blockNumber": "652"
+    },
+    {
+      "scenario": "inside",
+      "observationId": "6",
+      "positionId": "3",
+      "loanId": "3",
+      "redeemed": "2000000",
+      "lenderPaid": "780000",
+      "borrowerPaid": "1220000",
+      "transactionHash": "0xead4e19435cfc804d45559b4f4e4c58af9b6f567ef38d660b2096b2bbeba0d5f",
+      "blockNumber": "666"
+    },
+    {
+      "scenario": "upper_equal",
+      "observationId": "7",
+      "positionId": "4",
+      "loanId": "4",
+      "redeemed": "1000000",
+      "lenderPaid": "780000",
+      "borrowerPaid": "220000",
+      "transactionHash": "0x35253cd4a62d28455ab805d9446eefeafb7362a2962fdc403dd127faac6c5381",
+      "blockNumber": "680"
+    },
+    {
+      "scenario": "above",
+      "observationId": "8",
+      "positionId": "5",
+      "loanId": "5",
+      "redeemed": "1000000",
+      "lenderPaid": "780000",
+      "borrowerPaid": "220000",
+      "transactionHash": "0xccb64c982b2237d6af108dcc664ba78f0e023c49953ddfe0157d1148e588f4dc",
+      "blockNumber": "694"
+    },
+    {
+      "scenario": "cancelled",
+      "observationId": "9",
+      "positionId": "6",
+      "loanId": "6",
+      "redeemed": "1000000",
+      "lenderPaid": "780000",
+      "borrowerPaid": "220000",
+      "transactionHash": "0x6bb1cb794e07631f0f6445d28f47a2016a4512746341923b84b870c8d6cf565e",
+      "blockNumber": "708"
+    }
+  ],
+  "receipts": [
+    {
+      "role": "resolver",
+      "action": "registerObservation",
+      "transactionHash": "0x26bc3859726d5f19f374bc51800c457855244aaa9a84b5dc4f45e4ab2459bbae",
+      "blockNumber": "625"
+    },
+    {
+      "role": "resolver",
+      "action": "createMarket",
+      "transactionHash": "0x089fcbbdcd18fcf3deac6045ce92d8c342a142f625478396c31b117721dd1c6d",
+      "blockNumber": "626"
+    },
+    {
+      "role": "resolver",
+      "action": "createMarket",
+      "transactionHash": "0x99694afb4e03410e7861a41d89881e42170ff50ffd0cdbb4df0aa7377e85eb69",
+      "blockNumber": "627"
+    },
+    {
+      "role": "borrower",
+      "action": "approve",
+      "transactionHash": "0x00bc5fd61a73ad543a9b7c04b79daabaf49310a96bb3ef0de167c180c30fb090",
+      "blockNumber": "628"
+    },
+    {
+      "role": "borrower",
+      "action": "mintCompleteSet",
+      "transactionHash": "0x49374b2da6c69b72a8edb9bc5903a29d404a2521ae93deb21ab784a00d7bdb49",
+      "blockNumber": "629"
+    },
+    {
+      "role": "borrower",
+      "action": "mintCompleteSet",
+      "transactionHash": "0xfdfa9fba24d824f9a55f48a1e51360ad0e18b8ea320101d2d9ea22a320a5b6bb",
+      "blockNumber": "630"
+    },
+    {
+      "role": "borrower",
+      "action": "setApprovalForAll",
+      "transactionHash": "0x4a0b1eafd81470beee40af0c69164a0263a58f530ec742bafb6d07d7e565fd17",
+      "blockNumber": "631"
+    },
+    {
+      "role": "borrower",
+      "action": "lockPair",
+      "transactionHash": "0x9fbaa03ae3d50d57ae7ee98bfadf23b05c9d05b2f3c4eba44b69955c4639b590",
+      "blockNumber": "632"
+    },
+    {
+      "role": "borrower",
+      "action": "requestLoan",
+      "transactionHash": "0x20e15edf5fc490b9ee35bde7686983fb15ef8f46c50413ddd0a0e749e9447b5c",
+      "blockNumber": "633"
+    },
+    {
+      "role": "lender",
+      "action": "approve",
+      "transactionHash": "0xa26752066e3d01e1db63b9299671d4bcf716bf724df55744c034ed72b6562888",
+      "blockNumber": "634"
+    },
+    {
+      "role": "lender",
+      "action": "fundLoan",
+      "transactionHash": "0x0cbc025601902348f3936a95525b31d05ba65ef27b2292412372a41698dcb459",
+      "blockNumber": "635"
+    },
+    {
+      "role": "resolver",
+      "action": "finalize",
+      "transactionHash": "0x88323cbf006e031785531d92d397ebac33898188dd57b941235c80054b091740",
+      "blockNumber": "637"
+    },
+    {
+      "role": "resolver",
+      "action": "settle",
+      "transactionHash": "0xc520682a432669921c3a98e2b3f337fa383190f0721cf81896e2686f401d4b15",
+      "blockNumber": "638"
+    },
+    {
+      "role": "resolver",
+      "action": "registerObservation",
+      "transactionHash": "0x03230c640b0c80a8851320fda4a68829f98f31e45655d4c578dedbbbd7a8ba3d",
+      "blockNumber": "639"
+    },
+    {
+      "role": "resolver",
+      "action": "createMarket",
+      "transactionHash": "0xbf5dce0dd479d53f9da8c6fa1e1279f813d600bef8c9aa3757b489a90dab2da7",
+      "blockNumber": "640"
+    },
+    {
+      "role": "resolver",
+      "action": "createMarket",
+      "transactionHash": "0xdbf2125b071ec0a80577996ba9b28a88eb980c599775c1987ccd01ce264a8053",
+      "blockNumber": "641"
+    },
+    {
+      "role": "borrower",
+      "action": "approve",
+      "transactionHash": "0x0680df7f92ff8705ac7a99af9f09569d4b35b931ce67e4969324f6297899d01b",
+      "blockNumber": "642"
+    },
+    {
+      "role": "borrower",
+      "action": "mintCompleteSet",
+      "transactionHash": "0x7ccb73e4dfb62b848218134d41f6d29690482ab2baacf99f4f2929c166229a43",
+      "blockNumber": "643"
+    },
+    {
+      "role": "borrower",
+      "action": "mintCompleteSet",
+      "transactionHash": "0x4b89f75461aa9e0db649f0caf61f95ff29a32def7fe8a0cbb9b8e23014e23660",
+      "blockNumber": "644"
+    },
+    {
+      "role": "borrower",
+      "action": "setApprovalForAll",
+      "transactionHash": "0x3598d09d9eeef5fc4336e6ffc312a122a0ac3ef51af12807b8561191abe48d46",
+      "blockNumber": "645"
+    },
+    {
+      "role": "borrower",
+      "action": "lockPair",
+      "transactionHash": "0xcd5c084e4bc010f8ec0d497b79d5baf24b304c60574a14cc88ae5b61a6f3d6a1",
+      "blockNumber": "646"
+    },
+    {
+      "role": "borrower",
+      "action": "requestLoan",
+      "transactionHash": "0xbc6f948b105e739ff98421771163dd22816ef20bcd31bf36bc0e21a1d022f691",
+      "blockNumber": "647"
+    },
+    {
+      "role": "lender",
+      "action": "approve",
+      "transactionHash": "0x747161a3eb8558af9f33535fa520f5819afbbe3ad2d6fd2a00223633c99d2ef6",
+      "blockNumber": "648"
+    },
+    {
+      "role": "lender",
+      "action": "fundLoan",
+      "transactionHash": "0x6f51927ef593a294f7ae5b67af474d2f0ca9301ef38e377538c806299d5c9936",
+      "blockNumber": "649"
+    },
+    {
+      "role": "resolver",
+      "action": "finalize",
+      "transactionHash": "0xaf7ec3e58d4ed29c905821aa26b74e51ef5ce6e1c9c8868f50978f7d3871a654",
+      "blockNumber": "651"
+    },
+    {
+      "role": "resolver",
+      "action": "settle",
+      "transactionHash": "0xeb4b9289d55172088bc6fd71e509953acf5cf2b5e02777d1b0ac234d165594fb",
+      "blockNumber": "652"
+    },
+    {
+      "role": "resolver",
+      "action": "registerObservation",
+      "transactionHash": "0xa344b92e2ccf22a82ec35789cb4425b7a5ee2a1e271a0728c769439207f50c19",
+      "blockNumber": "653"
+    },
+    {
+      "role": "resolver",
+      "action": "createMarket",
+      "transactionHash": "0xe8507c57c052fedcfc8c6796b6d3f0ea431bbc6e17c27e26129ffdc0c5375a73",
+      "blockNumber": "654"
+    },
+    {
+      "role": "resolver",
+      "action": "createMarket",
+      "transactionHash": "0x1e131ee2700782adfed9a79118993b58de1011c19c1a62b0791183f350aee315",
+      "blockNumber": "655"
+    },
+    {
+      "role": "borrower",
+      "action": "approve",
+      "transactionHash": "0x307bccc2b0f2ae1af59e7c266905a30cd83986ace3480315a534e5cc3062538c",
+      "blockNumber": "656"
+    },
+    {
+      "role": "borrower",
+      "action": "mintCompleteSet",
+      "transactionHash": "0x521fea5b04e62466b50acc2fe9d0c22ae4f0543a1dfe4643d3ab0e0afe67bc43",
+      "blockNumber": "657"
+    },
+    {
+      "role": "borrower",
+      "action": "mintCompleteSet",
+      "transactionHash": "0xe8ac0f4560745b203f9d0f7aa2b55ef510e0548931d50c15e450b0756185d230",
+      "blockNumber": "658"
+    },
+    {
+      "role": "borrower",
+      "action": "setApprovalForAll",
+      "transactionHash": "0x3871cad4c4aed62e720aa273fc1c2eef1750cb33b53aa15bbaccdce3d4d7307a",
+      "blockNumber": "659"
+    },
+    {
+      "role": "borrower",
+      "action": "lockPair",
+      "transactionHash": "0x60047b2a20a0d4af347799e246069a72f3fc21216f44a0e854eed246b2802886",
+      "blockNumber": "660"
+    },
+    {
+      "role": "borrower",
+      "action": "requestLoan",
+      "transactionHash": "0x3c948fa8443ac5232d1c32533ef5ba00f7a03a3a1568cc71175589f54a64bea1",
+      "blockNumber": "661"
+    },
+    {
+      "role": "lender",
+      "action": "approve",
+      "transactionHash": "0x572e84d32ed2591043347044878af25148126927c069731ba09da8817931953f",
+      "blockNumber": "662"
+    },
+    {
+      "role": "lender",
+      "action": "fundLoan",
+      "transactionHash": "0x41fae812019d66eaaae74617394482d7408efe0c6d69bd871e9ad65b931e91c3",
+      "blockNumber": "663"
+    },
+    {
+      "role": "resolver",
+      "action": "finalize",
+      "transactionHash": "0xee0111b10d64c7995238a4019b7eb036c9811bdbab92117a8832a0351d0e68ba",
+      "blockNumber": "665"
+    },
+    {
+      "role": "resolver",
+      "action": "settle",
+      "transactionHash": "0xead4e19435cfc804d45559b4f4e4c58af9b6f567ef38d660b2096b2bbeba0d5f",
+      "blockNumber": "666"
+    },
+    {
+      "role": "resolver",
+      "action": "registerObservation",
+      "transactionHash": "0x7688b52e92f3e886fe1857a544db701ee4bad6eba66c828508f6977b3bfedbaa",
+      "blockNumber": "667"
+    },
+    {
+      "role": "resolver",
+      "action": "createMarket",
+      "transactionHash": "0x26002a5e21b9b777604ecf934267c13262549f4390635473afc983c1fb8a9c42",
+      "blockNumber": "668"
+    },
+    {
+      "role": "resolver",
+      "action": "createMarket",
+      "transactionHash": "0x3a7345b764c2b6cc619acd4fa16198f7458e5f666e179e13536123102f721fb3",
+      "blockNumber": "669"
+    },
+    {
+      "role": "borrower",
+      "action": "approve",
+      "transactionHash": "0x641cefe83e7419ab41f829230559b6cb017724d1ff49c83adc1df5690f779af8",
+      "blockNumber": "670"
+    },
+    {
+      "role": "borrower",
+      "action": "mintCompleteSet",
+      "transactionHash": "0x7bd479a5a02ad5cbfa4be0ef312ac69fa6958d6b339656a827a8186d8282df93",
+      "blockNumber": "671"
+    },
+    {
+      "role": "borrower",
+      "action": "mintCompleteSet",
+      "transactionHash": "0x1f949b7604aca8dbcfe21331caa49997de941dc10a63a0e283b877e592530b9a",
+      "blockNumber": "672"
+    },
+    {
+      "role": "borrower",
+      "action": "setApprovalForAll",
+      "transactionHash": "0x88fbd0273f663898c6e814bfac6c073ac788529d3720f7ae413d564b0aea7177",
+      "blockNumber": "673"
+    },
+    {
+      "role": "borrower",
+      "action": "lockPair",
+      "transactionHash": "0xf32d504398537e376e3e38bbe879c364d7e09fd4fea514e193e8ff9d6fe14cac",
+      "blockNumber": "674"
+    },
+    {
+      "role": "borrower",
+      "action": "requestLoan",
+      "transactionHash": "0x9fa78a1a65b5ce126967f0d44cf8d32764aa597088ffc8cc4c337836368a016c",
+      "blockNumber": "675"
+    },
+    {
+      "role": "lender",
+      "action": "approve",
+      "transactionHash": "0x772634418d9f6581fb4c91dfcc8b936041c48b71010310d58fd129152dc5eb0e",
+      "blockNumber": "676"
+    },
+    {
+      "role": "lender",
+      "action": "fundLoan",
+      "transactionHash": "0x8ad1d8168a67baf1913c510e8a2d81e90c321e482a0e739c2e8ce5b4fe32e89d",
+      "blockNumber": "677"
+    },
+    {
+      "role": "resolver",
+      "action": "finalize",
+      "transactionHash": "0x257de40a4bae929f957e0e8f8d2203bc4c9e9972dfc8eba1e82e14be7a1614f6",
+      "blockNumber": "679"
+    },
+    {
+      "role": "resolver",
+      "action": "settle",
+      "transactionHash": "0x35253cd4a62d28455ab805d9446eefeafb7362a2962fdc403dd127faac6c5381",
+      "blockNumber": "680"
+    },
+    {
+      "role": "resolver",
+      "action": "registerObservation",
+      "transactionHash": "0x4ada63ea50f6fbbcb3b0dc332933bf2da7f297491203ca4344ca306c505848a1",
+      "blockNumber": "681"
+    },
+    {
+      "role": "resolver",
+      "action": "createMarket",
+      "transactionHash": "0x537ba2df6672448f7760a5eed8ba00facef70815f910b1957f0032049b1450b8",
+      "blockNumber": "682"
+    },
+    {
+      "role": "resolver",
+      "action": "createMarket",
+      "transactionHash": "0x6be8507247fc320e0aee7405fde3da0d6f780b9798956bd633c8ca620ab9ca1e",
+      "blockNumber": "683"
+    },
+    {
+      "role": "borrower",
+      "action": "approve",
+      "transactionHash": "0x264e62a9ef7e039a49bf1a130793c4827caa7c10e4132242602b4e1e69e3e81d",
+      "blockNumber": "684"
+    },
+    {
+      "role": "borrower",
+      "action": "mintCompleteSet",
+      "transactionHash": "0x07b009110e0954f567fd088b1a37617c0586c9016af388f77b484bcd2d16d7cf",
+      "blockNumber": "685"
+    },
+    {
+      "role": "borrower",
+      "action": "mintCompleteSet",
+      "transactionHash": "0xcb8a3b5b58a42e96d755321c72e93fd27491ee1769d6c6567569f27a1cec248f",
+      "blockNumber": "686"
+    },
+    {
+      "role": "borrower",
+      "action": "setApprovalForAll",
+      "transactionHash": "0x14ff6cc90156423141adf86417b89892a6267bfa4330b68b4a287d54e0ebddd2",
+      "blockNumber": "687"
+    },
+    {
+      "role": "borrower",
+      "action": "lockPair",
+      "transactionHash": "0xad5af1bbc19b9a418a1c2f3eb9ce6b00a23487435f1e125974f5b1e4ae7cb6c2",
+      "blockNumber": "688"
+    },
+    {
+      "role": "borrower",
+      "action": "requestLoan",
+      "transactionHash": "0x12540c03030b10889589fced0fe37fb3d63d9b66da94c7864f89a945ed024db6",
+      "blockNumber": "689"
+    },
+    {
+      "role": "lender",
+      "action": "approve",
+      "transactionHash": "0xcceaeaf34ff75e7d4149d866e8960a2257e6944757c9571c90b296ce90baf21c",
+      "blockNumber": "690"
+    },
+    {
+      "role": "lender",
+      "action": "fundLoan",
+      "transactionHash": "0xe943a49ebbe82a0a9ad8de3276598c92aef7d3e3bc377f1839c442fb4649e378",
+      "blockNumber": "691"
+    },
+    {
+      "role": "resolver",
+      "action": "finalize",
+      "transactionHash": "0xf5443a6b64e9996cfaae28ada3e710d46f198e4cd535f7fdfe1583357552b66b",
+      "blockNumber": "693"
+    },
+    {
+      "role": "resolver",
+      "action": "settle",
+      "transactionHash": "0xccb64c982b2237d6af108dcc664ba78f0e023c49953ddfe0157d1148e588f4dc",
+      "blockNumber": "694"
+    },
+    {
+      "role": "resolver",
+      "action": "registerObservation",
+      "transactionHash": "0x190c0c2b41311dae5569ca7780ecb735f51779e77e2a4048d890d7ba419ed508",
+      "blockNumber": "695"
+    },
+    {
+      "role": "resolver",
+      "action": "createMarket",
+      "transactionHash": "0x64e947ae3a7a85631c09d22a1751c205be4d58e40e2d8b3885ff7931f6b02709",
+      "blockNumber": "696"
+    },
+    {
+      "role": "resolver",
+      "action": "createMarket",
+      "transactionHash": "0x89d67740b16c1330b19b8704736a0417334272507b9fb43b8efa38026a703f1d",
+      "blockNumber": "697"
+    },
+    {
+      "role": "borrower",
+      "action": "approve",
+      "transactionHash": "0x823029f60156740e86a02ef1d5571f68e887dc0b21af815a34f2c460b8c9e0a5",
+      "blockNumber": "698"
+    },
+    {
+      "role": "borrower",
+      "action": "mintCompleteSet",
+      "transactionHash": "0x13b1a5cdb7a6f8c071768d3256d4e4123388a4719a715b9494a1fc7cb046f399",
+      "blockNumber": "699"
+    },
+    {
+      "role": "borrower",
+      "action": "mintCompleteSet",
+      "transactionHash": "0x2ae5b5c9cde470f835e721a756e313553c6d5aca84fd2ca507901aece46b8554",
+      "blockNumber": "700"
+    },
+    {
+      "role": "borrower",
+      "action": "setApprovalForAll",
+      "transactionHash": "0xaa587893e26201e94a374b99c9b7458e24a4fd887b655812800e3e7074eaab9c",
+      "blockNumber": "701"
+    },
+    {
+      "role": "borrower",
+      "action": "lockPair",
+      "transactionHash": "0x18bdd2deda29082c16adb8dc16263a06d7a9e4a6c876705a91f1754322223aab",
+      "blockNumber": "702"
+    },
+    {
+      "role": "borrower",
+      "action": "requestLoan",
+      "transactionHash": "0x71b169a63367086ccf5d28da87060af06b2552eaa2630d09fbb6b9645b8e9563",
+      "blockNumber": "703"
+    },
+    {
+      "role": "lender",
+      "action": "approve",
+      "transactionHash": "0xcb6135e67e4d980ea0977c86995d4f87d1ac97e442e830ccf444fa59a6774e36",
+      "blockNumber": "704"
+    },
+    {
+      "role": "lender",
+      "action": "fundLoan",
+      "transactionHash": "0x91810f7b07efc6c06e0e3390ed11a6303cc68d11ec52326b839b688af468d527",
+      "blockNumber": "705"
+    },
+    {
+      "role": "resolver",
+      "action": "cancel",
+      "transactionHash": "0x3f04b64cac4f552ea3c2e1468113f590c79055bc11b44e4ebde38274c3e40e6d",
+      "blockNumber": "707"
+    },
+    {
+      "role": "resolver",
+      "action": "settle",
+      "transactionHash": "0x6bb1cb794e07631f0f6445d28f47a2016a4512746341923b84b870c8d6cf565e",
+      "blockNumber": "708"
+    },
+    {
+      "role": "resolver",
+      "action": "registerObservation",
+      "transactionHash": "0x1b1844d5eb3bcd886ba47209e844705cd32d7cc35ee261a5cb5f33da1bb6a5d1",
+      "blockNumber": "709"
+    },
+    {
+      "role": "resolver",
+      "action": "createMarket",
+      "transactionHash": "0x1faf85df004108a2126419a165ad1fe44ec9902949525420efe685da701cc855",
+      "blockNumber": "710"
+    },
+    {
+      "role": "resolver",
+      "action": "createMarket",
+      "transactionHash": "0x52acd5469bebda0333b8695b279607fd17976cbe939c0d7b39e72f03e65b8688",
+      "blockNumber": "711"
+    },
+    {
+      "role": "borrower",
+      "action": "approve",
+      "transactionHash": "0x1bf7c4b42f1e86b5e51d223255ca9f9ff364575bebb7fef06daa494a39047976",
+      "blockNumber": "712"
+    },
+    {
+      "role": "borrower",
+      "action": "mintCompleteSet",
+      "transactionHash": "0xda573f0d45290ad11c0f1806d0a2bf9d8a3f1c1a454d5e535c45f1bd626705d8",
+      "blockNumber": "713"
+    },
+    {
+      "role": "borrower",
+      "action": "mintCompleteSet",
+      "transactionHash": "0x0559892370eafae2e5a727a792bd882509d28b794c0164fd27d5f74066d9be66",
+      "blockNumber": "714"
+    },
+    {
+      "role": "borrower",
+      "action": "setApprovalForAll",
+      "transactionHash": "0xb1faaddf3432d91e546078f5d83a257732e6876f4f3dcff21788b1b2f0c5e43e",
+      "blockNumber": "715"
+    },
+    {
+      "role": "borrower",
+      "action": "lockPair",
+      "transactionHash": "0x3e799fdf6c760cf31b78d0348b04465725899694daab5dcb4723d1da5e97d189",
+      "blockNumber": "716"
+    },
+    {
+      "role": "borrower",
+      "action": "requestLoan",
+      "transactionHash": "0x53dbbc19bb281148e0c4ee9fa3dfd360a7aca8b4e9f2fa3ddbba9dcb852d325d",
+      "blockNumber": "717"
+    },
+    {
+      "role": "lender",
+      "action": "approve",
+      "transactionHash": "0xb06b46524f997435ccd415ca208534cdc58e2ec07105e34306ecd7a9a739d718",
+      "blockNumber": "718"
+    },
+    {
+      "role": "lender",
+      "action": "fundLoan",
+      "transactionHash": "0x24d0d7e8f125774064e6a98fc63828344526c901fb1835d49064ec04736c260b",
+      "blockNumber": "719"
+    },
+    {
+      "role": "borrower",
+      "action": "lockPair",
+      "transactionHash": "0xe76430c7275148b2218e26892286442fbc44029350850dda7e741f7177d761fa",
+      "blockNumber": "720"
+    },
+    {
+      "role": "borrower",
+      "action": "requestLoan",
+      "transactionHash": "0xcef201bd8ea9ba261f3616cd359840a74bd50e47ddbd3f8301e1fe31137fabed",
+      "blockNumber": "721"
+    }
+  ]
+}

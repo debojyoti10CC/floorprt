@@ -1,0 +1,11 @@
+
+> floor-protocol@0.1.0 demo C:\Users\Debojyoti De Majumde\Documents\Codex\2026-11-05\c-users-debojyoti-de-majumde-downloads\outputs\floor-protocol
+> tsx scripts/replay-demo.ts
+
+PASS below: redeemed 1000000, lender 780000, borrower 220000 micro-USDC
+PASS lower_equal: redeemed 2000000, lender 780000, borrower 1220000 micro-USDC
+PASS inside: redeemed 2000000, lender 780000, borrower 1220000 micro-USDC
+PASS upper_equal: redeemed 1000000, lender 780000, borrower 220000 micro-USDC
+PASS above: redeemed 1000000, lender 780000, borrower 220000 micro-USDC
+PASS cancelled: redeemed 1000000, lender 780000, borrower 220000 micro-USDC
+Recorded 6 settlement scenarios and left two fresh vault positions on observation 44.

@@ -1,0 +1,113 @@
+# Floor UI system — Kimia reference
+
+## Context and goals
+
+The interface must combine a readable outcome-risk terminal with Kimia's charcoal palette, Poppins typography, rounded shapes and inset/raised control depth. The product remains **Floor Protocol**. The user's Kimia screenshots and supplied tokens are the visual reference; no Kimia logos, trading figures or brand assets are transplanted.
+
+The supplied extraction called the surface a documentation site and flagged that inference as low confidence. The screenshots depict trading and portfolio interfaces. These rules therefore cover Floor's terminal and its protocol documentation view.
+
+## Design tokens and foundations
+
+`apps/web/src/app/kimia.css` must own the final semantic tokens. Component guidance and new components must refer to tokens rather than raw color, spacing or shadow values.
+
+| Role | Semantic token |
+|---|---|
+| Main canvas, raised card, muted control | `--color-surface-base`, `--color-surface-raised`, `--color-surface-muted` |
+| Main, secondary, tertiary and inverse text | `--color-text-primary`, `--color-text-secondary`, `--color-text-tertiary`, `--color-text-inverse` |
+| Decorative divider / essential control boundary | `--color-border-default` / `--color-border-interactive` |
+| Pale periwinkle / text on its fill | `--color-accent` / `--color-on-accent` |
+| Positive, negative, warning | `--color-positive`, `--color-negative`, `--color-warning` |
+| Payoff geometry and chart fill | `--chart-low`, `--chart-mid`, `--chart-high`, `--chart-fill` |
+| Spacing | `--space-1` through `--space-8` |
+| Small, card/control, pill radius | `--radius-xs`, `--radius-sm`, `--radius-pill` |
+| Concave well / convex control | `--shadow-inset` / `--shadow-raised` |
+| Interaction timing | `--duration-instant` / `--duration-fast` |
+
+The primary stack must use Poppins at 400 weight, 16px base and 24px line height. Interface sizes must use the supplied 11/12/13/14/15/16/20 scale. Page titles and monetary metrics should use the explicit display/metric roles consistently. Numeric data should use the shared mono role with tabular numerals.
+
+The extracted enormous pill-radius sentinel is normalized to `--radius-pill`. Decorative borders must not substitute for essential control boundaries: the interactive-border extension must meet 3:1 against its adjacent surfaces. Text on the pale accent must use the dark on-accent token; the near-white inverse token must only appear over dark surfaces.
+
+## Component-level rules
+
+### Buttons and toggles
+
+Anatomy must be action label, optional icon and optional loading indicator. Controls must use shared spacing tokens and at least a 44px effective touch target.
+
+| State | Required treatment |
+|---|---|
+| Default | Primary must use accent/on-accent and raised depth; secondary must use neutral control surfaces and inset depth. |
+| Hover | The fill must change using the shared hover token; text must retain contrast. |
+| Focus-visible | A 2px accent outline with a 3px offset must remain visible. |
+| Active | The control must use the active token and inset/pressed depth. |
+| Disabled | Native disabled behavior must block activation; the label must remain legible. |
+| Loading | The action must show progress text or a spinner, announce status, and prevent duplicate monetary submission. |
+| Error | The action must show a descriptive reason in its context; color alone must not convey failure. |
+
+Keyboard activation must use native Enter/Space behavior. Pointer and touch activation must execute the same action. Long labels should wrap in narrow forms; destructive clipping must not hide the action's meaning.
+
+### Links and navigation
+
+Links must have descriptive destinations and visible keyboard focus. Current-page navigation must expose `aria-current`. Hover should add a surface or underline treatment. Active states must remain distinguishable without relying solely on hue. An unavailable destination must render explanatory text rather than an apparently functioning dead link. Loading and route failure must preserve context and expose a readable status/error.
+
+Navigation must use Tab and Enter as native links. It must not claim menu semantics without implementing the corresponding keyboard model. Mobile navigation must expose a labeled open/close control. Wrapped labels must retain a usable target area.
+
+### Inputs and amount fields
+
+Inputs must use a visible label, the shared primary/mono type roles, inset depth, interactive border, and focus-visible outline. Default and hover must retain the boundary; focus must use the accent; active editing must preserve exact text. Disabled/read-only, loading and validation-error states must be explicit.
+
+Amount validation must reject fractional outcome units, scientific notation and excessive USDC precision. A delayed manifest response must not overwrite quantity edits. Errors must identify the failed constraint. Placeholder text must not replace the label. Long hashes should use a copy action with a complete accessible label; long financial values must remain inspectable.
+
+### Cards, tables and diagrams
+
+Cards must use raised surfaces, shared card radius, default dividers and restrained inset depth. Hover must not imply clickability for a noninteractive card. Focus and active states belong to real actions inside the card. Disabled actions must stay explained; loading must distinguish pending reads from confirmed data; errors must remain visible.
+
+Grid children must allow shrinking. Tables must scroll inside their own container on narrow screens. Empty states must explain the next valid action. A recorded snapshot must remain labeled and must never authorize a wallet transaction.
+
+Address avatars must be generated deterministically from the normalized wallet address and must not imply a verified personal identity. Their hash-derived pixel colors are a deliberate identity role.
+
+The payoff surface must offer pointer rotation, keyboard rotation and an exact state-table alternative. The state matrix and scenario buttons must remain usable without dragging. Outcome chips must support click/keyboard selection as well as drag/drop. Touch must not trap document scrolling. A chart must not invent probability, correlation or risk measurements.
+
+### Dialogs and transaction feedback
+
+Dialogs must have an accessible name, close action, keyboard focus containment, Escape dismissal and focus restoration. Wallet identities and test-only conditions must remain visible. Pending/error/confirmed transaction states must be distinct and announced politely. A failed receipt read must not trigger a duplicate send or a success label.
+
+### Reference density
+
+The supplied extraction listed buttons **120**, links **13**, navigation **5**, inputs **3**, cards **1**. These are reference inventory observations, not a quota for Floor. Teams must review every category and its states. They should prefer coherent shared components over one-off controls added to match an extraction count.
+
+## Accessibility requirements and acceptance criteria
+
+- Normal text must reach 4.5:1 against its rendered background; large text must reach 3:1. Pass/fail must use computed colors, including transparent surface composition.
+- Essential control boundaries and focus indicators must reach 3:1. Decorative hairlines may use the default border token.
+- Tab navigation must reach every action; Enter/Space must operate native buttons; focus must never disappear.
+- Wallet dialogs must contain Tab/Shift+Tab, close with Escape, and restore focus to the opener.
+- The 3D surface must respond to left/right arrows and Home while focused; a state table must expose exact values.
+- At 390px width, document width must not exceed the viewport. Long tables may scroll in a named local region.
+- Reduced-motion preference must suppress nonessential animation and transitions.
+- Labels, errors and statuses must remain meaningful with color removed. Pending monetary actions must prevent duplicate submission.
+
+## Content and tone standards
+
+Copy must be concise and specific. Use “Lock pair in vault,” “Publish loan request,” “Fixed total due,” and “Redeem claims & settle.” Avoid vague “Go,” unexplained “Execute,” or “Guaranteed profit.”
+
+Examples: “Connect the lender wallet to fund this request.” “The observation has matured; release the unfunded claims or select a fresh pair.” “Recorded local-chain evidence — connect the devnet for current balances.”
+
+## Anti-patterns and prohibited implementations
+
+Components must not add isolated colors, arbitrary shadow tiers, hidden focus rings, tiny unreadable helper text, false financial balances or simulation labeled as live settlement. Teams must not copy Kimia branding or its user/price data. Bright accent fills must not carry near-white text. Viewport-wide overflow must not be hidden to conceal a broken grid.
+
+Migration should map former blue/navy literals to the neutral semantic system, preserve transaction behavior, then verify contrast, keyboard and responsive behavior. Exception roles must be named centrally rather than introduced locally.
+
+## QA checklist
+
+- [x] Computed Poppins stack and semantic surface/accent colors match the final tokens.
+- [x] Both inset and raised depth render without obscuring labels or focus.
+- [x] Default, hover, focus-visible, active, disabled, loading and error rules are defined for all component categories.
+- [x] Shared text and essential-boundary token pairs pass contrast thresholds.
+- [x] Dialog keyboard containment, Escape and focus return pass.
+- [x] Chart keyboard controls, state matrix and outcome-chip alternatives pass.
+- [x] 390px document layout and locally scrolling long-content regions pass.
+- [x] Borrower/lender/resolver lifecycle and recorded-read-only behavior pass.
+- [x] Production build and saved execution evidence pass.
+
+The release evidence distinguishes automated checks from visual review. A complete independent accessibility audit remains a production-readiness task.

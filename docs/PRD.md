@@ -1,0 +1,176 @@
+# Product Requirements Document (PRD)
+
+**Product:** Floor Protocol  
+**Release target:** v0 hackathon demonstrator; v1 testnet pilot  
+**Date:** 2026-11-05  
+**Decision owners:** product lead + protocol lead (to be assigned)  
+**Status:** Proposed, unimplemented
+
+## 1. Executive summary and thesis
+
+Prediction markets tokenize event-contingent cashflows. A trader may hold several outcome tokens whose aggregate *terminal* cashflow has a deterministically verifiable floor, even when individual legs can be worthless. Existing structured prediction-market prototypes emphasize baskets, correlation, probabilities, tranches and payout waterfalls; the product gap explored here is a **verifiable collateral and matched-credit lifecycle for compatible, fully funded claims**. Users should be able to compose positions, inspect a transparent proof, deposit them as collateral, borrow conservative USDC and have the settlement cashflow repay the lender automatically.
+
+**One-sentence positioning:** A risk terminal and lending rail for event-contingent assets, starting with proof-certified threshold portfolios.
+
+**Not:** a general-purpose collateral oracle, a Polymarket clone, a guaranteed-yield protocol, a credit-risk-free instrument, or a promise of permissionless Polymarket market integration.
+
+### Differentiation
+
+- Cumulant demonstrates structured markets on Arc with onchain vaults and parimutuel binary markets. It does **not** supply our specific atomic two-token, shared-observation, fixed-payout collateral proof and debt waterfall as its public product thesis.
+- Senthos packages baskets, tranches, PPNs and lending as a Solana market-risk experience. Its repository describes lending and tranches as sandbox/in-memory in the hackathon implementation. Floor Protocol puts the *credit lifecycle* onchain in P0 and makes verifiable payout constraints—not estimated probability—the eligibility condition.
+- Academic work already studies logical outcome arbitrage; the novelty claim is **product synthesis and enforcement**, not discovery of the underlying tautology.
+
+## 2. Customer segments and jobs-to-be-done
+
+| Persona | Job | Key anxiety | P0 UX outcome |
+|---|---|---|---|
+| Structured-product trader | Release liquidity without selling protected legs | I don't know if a lender will accept these claims | Compose → Certify → Borrow with explainable floor |
+| Market maker / hedge desk | Source discounted term exposure to outcome claims | Bad outcomes, stale market metadata, ambiguous settlement | See proof + maturity + collateral + max debt before signing |
+| Protocol risk operator | Underwrite assets with deterministic contractual support | Oracle inconsistency, double pledge, stalled resolution | Collateral rules, locked balances and traceable events |
+| Researcher / quant | Discover exact logical relationships | Correlation mistaken for logic | Interactive payoff states and formal proof evidence |
+| SaaS/risk team (v1+) | Monitor book and integrate proofs via API | Operational visibility, evidence, compliance | Read-only audit/portfolio API and alerts |
+
+**Initial customer:** sophisticated crypto-native traders and market makers on testnet. Do not design retail leverage onboarding as the primary early target.
+
+## 3. Problem and desired outcomes
+
+### Current workflow
+
+A user holds multiple prediction-market outcome claims. To raise stablecoin liquidity, they typically sell positions, rely on market-maker bids, or cannot use them as loan collateral. Statistical risk scores alone cannot prove any floor. Different venues may resolve superficially similar questions using different oracles and wording, undermining collateral eligibility.
+
+### Target workflow
+
+- A user discovers a compatible pair by **formal metadata**, not a guess.
+- UI displays all admissible settlement states and explicitly distinguishes terminal floor from market value.
+- Onchain verifier accepts exact known semantics; vault locks the very tokens that secure the debt.
+- Lender sees deterministic cashflows and loan terms and funds the borrower directly from their wallet.
+- One resolver finalizes the underlying observation; anyone can redeem claims and distribute funds according to the precommitted waterfall.
+
+### Primary success metrics
+
+- 100% of **accepted** P0 pairs satisfy floor theorem for every price state and cancellation under executable tests.
+- 0 unbacked ERC-1155 complete sets; 0 successful double pledges; 0 loan fundings with due amount above floor less policy buffer.
+- >95% successful happy-path browser E2E runs in deterministic local CI (target, not observed).
+- Full flow in <3 minutes on a pre-funded local/testnet setup (target).
+- Every displayed financial number maps to a chain event, deterministic calculation, or conspicuously marked indicative quote.
+- Demonstrated receipt for exactly one funded loan, one settlement and one distribution under two distinct wallets.
+
+## 4. Scope and prioritization
+
+### P0 — must ship
+
+**F-001 Markets:** curator can register an observation with immutable `assetId`, `observationTime`, canonical precision, collateral token, settlement policy and expiry/grace configuration; register two markets using the **same** observation, `GEQ` threshold predicate, and distinct strikes. 
+
+**F-002 Fully funded complete sets:** any testnet user may escrow `units × 1e6` test USDC for each binary market; contract issues `units` YES and `units` NO ERC-1155 claims. One full YES/NO set can be merged before settlement for its initial 1 USDC; after settlement outcomes can be redeemed at 1, 0 or (on common cancellation) 0.5 USDC per unit. Token IDs are immutable and deterministic.
+
+**F-003 Market discovery:** list local supported markets with observation metadata, balances and status; optionally show read-only third-party reference market cards visibly labeled `NOT COLLATERAL ELIGIBLE`.
+
+**F-004 Composer:** add/remove/change units for two eligible legs; live payoff graph and total minimum payment; invalid configurations show exact incompatibility reason. Do not allow borrowing from an unverified preview.
+
+**F-005 Proof:** onchain verifier checks token contract, registered markets, observation ID, policy/asset/chain, lower and upper strikes, YES(lower) and NO(upper) sides, unit count and cancellation behavior. Expose reason codes. Verification result is recomputed onchain within vault lock, not accepted as a user-provided certificate.
+
+**F-006 Vault custody:** atomic batch transfer of exact ERC-1155 IDs and amounts; persist owner, beneficiary, inventory and verified floor; prevent withdrawal when an active loan exists; block double pledge; provide cancellation and fee-free unlock before funding.
+
+**F-007 Credit offer:** lender chooses an eligible open position, fixed principal and fixed repayment amount/fee, with deadline and offer status. Contract validates borrower consent or borrower initiates requested terms and lender funds them; contract transfers test USDC directly from lender to borrower, records debt and lender. Enforce `debt + safetyReserve ≤ certifiedFloor`. One lender per loan in P0.
+
+**F-008 Settlement:** observation registry resolves exactly once after observation time to `price` or `CANCELLED` under a controlled resolver. Both markets derive outcome from that one immutable observation. Permissionless keeper transaction redeems locked shares, repays lender first, then pays borrower any surplus; emits events and marks loan final before external transfers.
+
+**F-009 Portfolio:** wallet positions, vault inventory, loan state, amounts paid, protocol event timeline with explorer links; reconcile user wallet and indexed chain state.
+
+**F-010 Demo and trust labels:** one-click preconfigured demo scenarios **above, inside, below and cancelled**; scenario parameter only accessible to clearly labeled authorized demo resolver; no user-controlled arbitrary oracle on a supposed production network.
+
+**F-011 Auth/wallet:** wallet connection, network switch, allowance flow with clear transaction status; no backend-held user keys; testnet faucet clearly marked.
+
+**F-012 Admin/ops:** read-only operational health + access-controlled test resolver on an isolated devnet; reason-coded failures; no public production resolver endpoint that signs arbitrary values.
+
+### P1 — testnet beta
+
+- `F-101` Fixed-duration quotes signed using EIP-712, expiry, nonce, lender balance/allowance checks, quote comparison.
+- `F-102` Chainlink CRE observation workflow with simulation artifact and validated external feed input (trigger, API read, validation, onchain write).
+- `F-103` Payment indexer, alerts, vault utilization and lender analytics; reorg-safe block cursor.
+- `F-104` Structured note/tranche module **only for unused, unencumbered collateral**: senior maximum face amount ≤ proven floor; junior receives residual, explicit first-loss allocation; external cashflows must actually settle onchain.
+- `F-105` Generic 2–8 threshold-leg interval sweep with certificate verification and defined gas ceiling; no external semantics beyond allowlisted numeric shared observation.
+- `F-106` Market read adapters for Polymarket Gamma metadata and quotes; add provenance, timestamp, rate limits and geo/legal checks.
+- `F-107` Early repayment path with explicit locked-token release, settlement protection and fee policy.
+
+### P2 — product/R&D, not guaranteed deliverables
+
+- `F-201` CTF adapter on Polygon where market conditions and oracle metadata demonstrably match and custody is truly executable; conduct audit first.
+- `F-202` Multi-underlying logical-constraint solver; exact SAT/SMT integer or lattice proof with independently checked witness; prohibit accepting raw LLM outputs as proofs.
+- `F-203` Senior/mezzanine/junior issuance, RFQ secondary exits, institution APIs, KYC/compliance where required.
+- `F-204` Controlled underwriting data from Senthos-inspired probabilistic models, labeled as estimates with backtests and model-risk reporting. **Never promotes a probability estimate to certified floor.**
+- `F-205` Borrower/lender fee system, circuit breakers, governance and multisig, monitoring and professional audit.
+
+## 5. Epic-level stories / acceptance criteria
+
+| ID | Story | Testable acceptance |
+|---|---|---|
+| AC-01 | As a researcher, I inspect two market conditions | Exact same observation ID; compatible collateral and price comparator rendered; incompatible pair shows refusal |
+| AC-02 | As a trader, I mint fully backed outcome units | Escrow rises by 1 USDC per complete set; YES/NO balances minted; no privileged mint without collateral |
+| AC-03 | As a trader, I compose two legs | Graph enumerates p<lower, p=lower, lower<p<upper, p=upper, p>upper, CANCELLED |
+| AC-04 | As a trader, I request certification | For YES(lower) + NO(upper) `lower<upper`, floor = `min(units) × 1e6`; wrong timestamp/registry/asset/side rejected |
+| AC-05 | As a borrower, I lock claims | Exact ERC-1155 balances move to vault and are associated with one vault position; no second loan can pledge them |
+| AC-06 | As a lender, I fund loan | Lender USDC decreases, borrower increases, contract loan becomes FUNDED; due amount bounded by floor−buffer |
+| AC-07 | As keeper, I settle | Outcome registry finalized; outcome tokens burned/redeemed; lender receives due; borrower receives residual; no double settlement |
+| AC-08 | As borrower, I cancel an unfunded position | Original claims returned only to owner; cannot cancel a funded loan |
+| AC-09 | As engineer, I test cancellation | Shared CANCELLED resolves both markets to 50/50 payouts; floor remains valid for whole-unit claims |
+| AC-10 | As judge, I inspect the app | explorer links plus matching emitted loan, settle, redemption and transfer events; UI doesn't fabricate states |
+
+## 6. Detailed user flows
+
+### Flow A — new trader, no position
+
+`Connect wallet → network check → faucet/USDC → market directory → choose two thresholds → split USDC into complete sets (2 markets) → portfolio builder → inspect floor → ERC-1155 approval → lock vault → request loan → lender funds → loan receipt → maturity/resolve → settle → cashflow audit`.
+
+When splitting complete sets into two markets, the user receives four total outcome token types. **Only the YES(lower) and NO(upper) tokens are pledged**; their other YES/NO counterpart holdings remain in wallet. Show this explicitly to avoid misleading economics.
+
+### Flow B — lender
+
+`Connect separate wallet → lender credit desk → view position inventory and certified floor → choose principal/fee ≤ policy limit → approve test USDC → fund → loan ledger → resolution alerts → claim optional if protocol has non-push model`.
+
+### Flow C — risk operator
+
+`Open Proof Inspector → view immutable observation/payout policies → view permissible states → confirm cancellation path → verify onchain contract addresses → review buffer and reserve headroom → inspect settlement trace`.
+
+### Flow D — failure
+
+- RPC failure: retain pending receipt link, safely poll, avoid duplicate transaction submission.
+- Market data stale: block new pricing/borrowing quotes; allow settled position redemption.
+- Observation unresolved at maturity: show `Awaiting finalization`; no false "paid" status. Recovery/cancel policy must be explicit.
+- External API down: local markets and verification must remain usable.
+- Wrong pair: no proof badge and no loan call.
+- Missing allowance: explain approval and show next step.
+- Loan quote stale/expired: fail deterministically and keep claims safe.
+
+## 7. Business model (v1 hypothesis, not established)
+
+- Buyer of product: professional prediction desks, outcome market infrastructure, onchain lenders.
+- Revenue: origination fee or fixed protocol take from lender fee; research API subscription to analytics/verification; enterprise execution and SLA tiers.
+- Value: capital efficiency for backed event claims + auditability. Measure real interest by interviews and signed pilots rather than market-size inventions.
+- Sales motion: partnerships with outcome-market venues and lending desks; proofs API as B2B entry point.
+- Regulatory caveat: prediction market access, lending/credit and structured products may be regulated differently across jurisdictions. Implement jurisdiction policy before live-user distribution; this specification is not legal advice.
+
+## 8. Nonfunctional requirements
+
+- **NFR-01 Correctness:** uint256 and fixed-point integer math; no JS floating-point in transaction logic; all contract amounts in 6-decimal test USDC base units.
+- **NFR-02 Security:** no custodial backend; ERC-1155 receiver handlers validated; nonReentrant/CEI; strict role control; invariant tests and documented assumptions.
+- **NFR-03 Traceability:** every displayed transaction state backed by RPC receipt or indexed log; indexer replayable and reorg-aware.
+- **NFR-04 Availability:** API health endpoints and graceful fallback when external venue unavailable; explicitly label stale data.
+- **NFR-05 Latency:** target proof preview <150ms for two legs locally; page navigations <1s warm; not guaranteed values.
+- **NFR-06 Accessibility:** WCAG AA contrast where feasible; keyboard controls for graph/drag interactions, reduced-motion mode, readable transaction warnings.
+- **NFR-07 Observability:** structured logs with request ID/chain ID/tx hash; never log private keys or tokens.
+- **NFR-08 Integrity:** ABI manifest pins chain ID, contract address and deployment block; CI cross-checks env vs deployed code hash.
+- **NFR-09 Safety:** demo uses mock collateral only, `TESTNET` banner; no production claims.
+- **NFR-10 Compatibility:** desktop dashboard first, mobile usable for portfolio, verification and transaction review; drag-and-drop has click/keyboard alternative.
+
+## 9. Explicit out-of-scope for the initial submission
+
+Live Polymarket custody, cross-chain bridging, full decentralized price discovery, automatic onchain orderbook, full Aave/Morpho integration, multi-asset borrowing, production governance, principal-guaranteed notes, generalized AI-parsed event claims, perpetual credit, margin calls, unbounded batching and licensed mainnet activity. These are separate engineering/regulatory efforts, not checkbox features.
+
+## 10. Open product decisions (before implementation freeze)
+
+- Chain strategy: **Anvil + one EVM testnet** for P0; use Arc only if Arc Studio participation and deployment path are genuinely feasible. Do not split liquidity across Sepolia/Arc/Polygon in P0.
+- Oracle model: trusted test resolver + simulated CRE for demo versus fully live external adapter; choose the latter only when deterministic reliability is demonstrated.
+- Repayment buffer: example `bufferBps=2000` (20% of floor), loan due ≤80% of floor; configurable immutable at position funding in P0. Example $0.78 debt on $1 floor qualifies.
+- Loan fee: fixed agreed USDC amount, **not an unbounded floating APR**.
+- Position transferability: locked position is non-transferable in P0 (explicit owner-beneficiary model); tradeable certificates belong to P1 with lien-aware transfer rules.

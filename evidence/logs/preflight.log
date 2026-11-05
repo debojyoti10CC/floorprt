@@ -1,0 +1,17 @@
+
+> floor-protocol@0.1.0 preflight C:\Users\Debojyoti De Majumde\Documents\Codex\2026-11-05\c-users-debojyoti-de-majumde-downloads\outputs\floor-protocol
+> tsx scripts/preflight.ts
+
+{
+  "status": "PASS",
+  "chainId": 31337,
+  "contractsVerified": 7,
+  "decimals": 6,
+  "mockCollateral": true,
+  "oracleMode": "TRUSTED_TEST_RESOLVER",
+  "block": "721",
+  "markets": 25,
+  "borrowerBalance": "956570000",
+  "positions": 8,
+  "loans": 7
+}
