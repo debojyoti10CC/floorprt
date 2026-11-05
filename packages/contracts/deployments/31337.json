@@ -1,0 +1,41 @@
+{
+  "schema": "floor-deployment/v1",
+  "chainId": 31337,
+  "chainName": "Anvil local devnet",
+  "rpcUrl": "http://127.0.0.1:8545",
+  "explorerUrl": "",
+  "deploymentBlock": "599",
+  "deployedAt": "2026-11-05T19:13:11.302Z",
+  "contracts": {
+    "CollateralToken": "0x8fc8cfb7f7362e44e472c690a6e025b80e406458",
+    "SharedObservationRegistry": "0xc7143d5ba86553c06f5730c8dc9f8187a621a8d4",
+    "OutcomeMarketFactory": "0x359570b3a0437805d0a71457d61ad26a28cac9a2",
+    "OutcomeTokens": "0xe3686721b062Da0B181140362A1ca5f2d3E43fBA",
+    "FloorVerifier": "0xc9952fc93fa9be383ccb39008c786b9f94eac95d",
+    "FloorVault": "0xdde063ebe8e85d666ad99f731b4dbf8c98f29708",
+    "CreditDesk": "0xd5724171c2b7f0aa717a324626050bd05767e2c6"
+  },
+  "codeHashes": {
+    "CollateralToken": "0xf2261789473cde7636c55dcc791b89626951360542cab3c93ca90a6b1feef8b2",
+    "SharedObservationRegistry": "0x1e3bd6b31347b542b2203a868a2c395c0754d6a16d101b1030300a989ffe50ca",
+    "OutcomeMarketFactory": "0xb0d64a52aca23ddd82626e567b1937d8bef24135fa6ac80d14c6997ffdc5d140",
+    "OutcomeTokens": "0x9e30a3d55ea72fcac5d0229a2c03b7a458aa259b9f92fefa610104d5d59c4823",
+    "FloorVerifier": "0x98c65832821e44d06f740737d028c5043416637777586c15d4d9e2db49ee093f",
+    "FloorVault": "0x0e2e49d24b6db809ae9b23847d6fdc5825c95b46862d7c6a06e68d1dc79210f9",
+    "CreditDesk": "0x664e5af870f4785377740a1130c60781dc3fdc26286603c179163ebf34c48658"
+  },
+  "roles": {
+    "curator": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+    "resolver": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+    "borrower": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+    "lender": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC"
+  },
+  "mockCollateral": true,
+  "oracleMode": "TRUSTED_TEST_RESOLVER",
+  "seededBlock": "624",
+  "defaultPair": {
+    "lower": "24",
+    "upper": "25"
+  },
+  "buildFingerprint": "43012fbc9ab571677cf757d9c197848107003d3905770e17c4b833fcdd5d6982"
+}

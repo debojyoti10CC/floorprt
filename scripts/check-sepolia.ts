@@ -1,0 +1,12 @@
+import {createPublicClient,http,erc20Abi,keccak256} from 'viem';
+import {writeFile,mkdir} from 'node:fs/promises';
+import {HistoricalFeedAbi,findFeedWitness,jsonSafe} from '../packages/shared/src/index';
+const usdc='0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238',feed='0x694AA1769357215DE4FAC081bf1f309aDC325306';
+const client=createPublicClient({transport:http(process.env.FLOOR_RPC_URL??'https://ethereum-sepolia-rpc.publicnode.com',{timeout:15000,retryCount:1})});
+if(await client.getChainId()!==11155111)throw new Error('Sepolia only');
+const [block,tokenCode,feedCode,decimals,latest]=await Promise.all([client.getBlock(),client.getCode({address:usdc}),client.getCode({address:feed}),client.readContract({address:usdc,abi:erc20Abi,functionName:'decimals'}),client.readContract({address:feed,abi:HistoricalFeedAbi,functionName:'latestRoundData'})]);
+if(!tokenCode||!feedCode||decimals!==6)throw new Error('External dependency validation failed');
+const witness=await findFeedWitness(client,feed,latest[3]-1n);
+await mkdir('evidence',{recursive:true});
+const evidence=jsonSafe({status:'PASS',authority:'PUBLIC_SEPOLIA_READ_ONLY',checkedAt:new Date().toISOString(),chainId:11155111,block:block.number,usdc,tokenCodeHash:keccak256(tokenCode),decimals,feed,feedCodeHash:keccak256(feedCode),latestRound:latest,witness,transactionsSent:0});
+await writeFile('evidence/sepolia-external-read.json',JSON.stringify(evidence,null,2));console.log(JSON.stringify(evidence,null,2));
