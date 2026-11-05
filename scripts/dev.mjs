@@ -21,7 +21,10 @@ try{
   if(existsSync('apps/web/public/deployment.json')){try{const d=JSON.parse(readFileSync('apps/web/public/deployment.json','utf8'));deployed=d.chainId===31337&&d.contracts.CollateralToken&&d.buildFingerprint===await contractFingerprint()&&(await rpc('eth_getCode',[d.contracts.CreditDesk,'latest']))!=='0x';}catch{}}
   if(!deployed)await run(tsx,['scripts/deploy.ts']);
   await run(tsx,['scripts/ensure-open.ts']);
-  let apiUp=false;try{apiUp=(await fetch('http://127.0.0.1:8787/api/v1/health')).ok}catch{}
+  const deployment=JSON.parse(readFileSync('apps/web/public/deployment.json','utf8'));
+  let apiHealth;try{const response=await fetch('http://127.0.0.1:8787/api/v1/health',{signal:AbortSignal.timeout(2000)});apiHealth={ok:response.ok,body:await response.json()};}catch{}
+  const apiUp=apiHealth?.ok&&apiHealth.body.apiVersion==='floor-api/v2'&&apiHealth.body.status==='ok'&&apiHealth.body.chainId===deployment.chainId&&apiHealth.body.deployment?.deploymentBlock===deployment.deploymentBlock&&apiHealth.body.deployment?.registry?.toLowerCase()===deployment.contracts.SharedObservationRegistry.toLowerCase()&&apiHealth.body.deployment?.creditDesk?.toLowerCase()===deployment.contracts.CreditDesk.toLowerCase();
+  if(apiHealth&&!apiUp)throw new Error('Port 8787 serves an incompatible or unhealthy API. Stop that API process and rerun pnpm dev.');
   if(!apiUp)start(tsx,['apps/api/src/server.ts']);
   await ready('http://127.0.0.1:8787/api/v1/health');
   let webUp=false;try{webUp=(await fetch('http://127.0.0.1:3000')).ok}catch{}
