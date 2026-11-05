@@ -15,13 +15,14 @@ export function CreditDeskView(){
   const [positionId,setPositionId]=useState(''),[principal,setPrincipal]=useState('0.75'),[due,setDue]=useState('0.78');
   const owned=p.data?.positions.filter(x=>{const o=p.data?.observations.find(o=>o.id===x.observationId);return x.owner.toLowerCase()===p.address?.toLowerCase()&&x.state===1&&o?.state===0&&BigInt(o.observationTime)>BigInt(p.data?.timestamp??'0')})??[];
   const now=BigInt(p.data?.timestamp??'0');
-  const requests=p.data?.positions.filter(x=>x.state===1&&x.request.active&&BigInt(x.request.expiry)>now)??[];
+  const requests=p.data?.positions.filter(x=>{const o=p.data?.observations.find(o=>o.id===x.observationId);return x.state===1&&x.request.active&&BigInt(x.request.expiry)>now&&o?.state===0&&BigInt(o.observationTime)>now})??[];
   const selected=(tab==='borrow'?owned:requests).find(x=>x.id===positionId)??(tab==='borrow'?owned[0]:requests[0]);
   const activeLoans=p.data?.loans.filter(x=>x.state===1)??[];
   const sum=(key:'principal'|'due'|'certifiedFloor')=>activeLoans.reduce((v,l)=>v+BigInt(l[key]),0n);
   const cap=selected?maximumDue(BigInt(selected.certifiedFloor),BigInt(p.data?.bufferBps??2000)):0n;
-  useEffect(()=>{if(!selected)return;const f=BigInt(selected.certifiedFloor);setPrincipal(tab==='lend'?inputAmount(selected.request.principal):inputAmount(f*75n/100n));setDue(tab==='lend'?inputAmount(selected.request.maximumDue):inputAmount(f*78n/100n));},[selected?.id,tab]);
-  const terms=useMemo(()=>{try{const pr=parseAmount(principal),d=parseAmount(due);if(pr<=0n||d<pr)return {valid:false,reason:'Total due must include the positive principal.',pr,d};if(d>cap)return {valid:false,reason:'Total due exceeds the floor minus its safety reserve.',pr,d};return {valid:true,reason:null,pr,d}}catch(e){return {valid:false,reason:(e as Error).message,pr:0n,d:0n}}},[principal,due,cap]);
+  const requestPrincipal=tab==='lend'?selected?.request.principal:undefined,requestMaximumDue=tab==='lend'?selected?.request.maximumDue:undefined,requestExpiry=tab==='lend'?selected?.request.expiry:undefined;
+  useEffect(()=>{if(!selected)return;const f=BigInt(selected.certifiedFloor);setPrincipal(tab==='lend'?inputAmount(selected.request.principal):inputAmount(f*75n/100n));setDue(tab==='lend'?inputAmount(selected.request.maximumDue):inputAmount(f*78n/100n));},[selected?.id,selected?.certifiedFloor,tab,requestPrincipal,requestMaximumDue,requestExpiry]);
+  const terms=useMemo(()=>{try{const pr=parseAmount(principal),d=parseAmount(due);if(pr<=0n||d<pr)return {valid:false,reason:'Total due must include the positive principal.',pr,d};if(d>cap)return {valid:false,reason:'Total due exceeds the floor minus its safety reserve.',pr,d};if(requestPrincipal!==undefined&&pr!==BigInt(requestPrincipal))return {valid:false,reason:'The borrower changed the requested principal. Review the updated terms.',pr,d};if(requestMaximumDue!==undefined&&d>BigInt(requestMaximumDue))return {valid:false,reason:'Total due exceeds the borrower-approved maximum.',pr,d};return {valid:true,reason:null,pr,d}}catch(e){return {valid:false,reason:(e as Error).message,pr:0n,d:0n}}},[principal,due,cap,requestPrincipal,requestMaximumDue]);
   const changeTab=(value:'borrow'|'lend')=>{setTab(value);setPositionId('');a.setError(null)};
   const request=async()=>{
     if(!selected||!terms.valid)throw new Error('Choose collateral and valid terms');

@@ -20,7 +20,7 @@ Floor's protocol, application code, CSS, SVG mark and proof engine were independ
 - Lucide icons — ISC. https://github.com/lucide-icons/lucide
 - Hono — MIT; Zod — MIT. https://github.com/honojs/hono and https://github.com/colinhacks/zod
 - TypeScript — Apache-2.0; tsx — MIT; Vitest — MIT; Playwright — Apache-2.0.
-- Poppins is self-hosted from the Google Fonts repository with its original SIL Open Font License in apps/web/public/fonts. JetBrains Mono is requested from Google Fonts, with system-font fallbacks.
+- Poppins is self-hosted from the Google Fonts repository with its original SIL Open Font License in apps/web/public/fonts. JetBrains Mono is also self-hosted from the official Google Fonts repository, with its original SIL license and system-font fallbacks.
 
 Package versions and transitive dependency provenance are pinned in pnpm-lock.yaml. Dependency licenses remain with the installed packages. The root MIT license applies to original Floor code and does not override third-party licenses.
 

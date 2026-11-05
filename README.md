@@ -1,4 +1,4 @@
-# Floor Protocol
+# AQRA
 
 An independently implemented outcome-collateral terminal: **compose → verify → lock → fund → settle**.
 

@@ -81,7 +81,7 @@ test.describe.serial('wallet-signed outcome collateral lifecycle',()=>{
         await expect.poll(async()=>(await client.readContract({address:d.contracts.CreditDesk,abi:CreditDeskAbi,functionName:'getLoan',args:[loanId]})).state).toBe(3);
         expect(b-await balance('borrower')).toBe(780000n);expect(await balance('lender')-l).toBe(780000n);
         expect((await client.readContract({address:d.contracts.FloorVault,abi:FloorVaultAbi,functionName:'getPosition',args:[positionId]})).state).toBe(3);
-        await bp.reload();await expect(bp.getByText('Repaid',{exact:true})).toBeVisible();
+        await bp.reload();await expect(bp.getByText('Repaid',{exact:true}).first()).toBeVisible();
         const snap=await readSnapshot(d,d.roles.borrower),event=snap.activity.find(e=>e.event==='LoanRepaid'&&String(e.args.loanId)===loanId.toString());expect(event).toBeDefined();
         results.push({scenario,loanId:String(loanId),paid:'780000',transactionHash:event!.transactionHash,blockNumber:event!.blockNumber});
         await operator.close();await borrower.close();await lender.close();return;
