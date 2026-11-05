@@ -1,48 +1,40 @@
-# Release evidence — 5 November 2026
+# AQRA release evidence — 6 November 2026
 
-This release implements the local P0 outcome-collateral lifecycle and the final user-supplied Kimia visual direction. It is a test-funds prototype, independently authored after researching Cumulant and Senthos.
+## Release result
 
-## Current push status
+`pnpm verify` passes on the checked-out source. The command runs source/ABI checks, TypeScript, unit and property tests, Foundry, differential vectors, chain preflight, the real browser suite, six onchain replay cases, a production build, and the dependency audit. The recorded result and per-command logs are in `evidence/verification.json` and `evidence/logs/`.
 
-Pushed at the user's request before the final browser rerun. The latest full gate caught wallet identity being lost on refresh after successful repayment. Identity restoration has been implemented; its browser rerun and the final export remain pending. Contract, unit, differential and canonical Sepolia fork checks passed. The authoritative gate result remains FAIL until the rerun succeeds.
+## Verification
 
-## Reproducible release gate
-
-Run `pnpm verify` from the project root. The authoritative aggregate result and UTC timestamp are in `evidence/verification.json`; each command's output is retained in `evidence/logs/`.
-
-| Gate | Evidence |
+| Gate | Result |
 |---|---|
-| Source, format and ABI consistency | 70 implementation sources checked; eight generated ABIs match compiler artifacts. |
-| TypeScript | Root and Next application type checks. |
-| Unit tests | 18 tests across proof math, persistent journal and oracle report guards and live-pair recovery. |
-| Solidity | 73 offline tests across nine suites, including adversarial custody/backing cases, 512-run fuzz tests and three stateful invariants with 128 runs × 48 calls each. |
-| Independent model | 10,000 Python/TypeScript vectors and 100 Solidity/TypeScript comparisons. |
-| Deployment preflight | Chain 31337, seven runtime-code hashes and six-decimal collateral. |
-| Browser | Twelve Chromium tests: offline read-only behavior, 3D/scenario controls, claim selection, four separate-wallet settlement cases, full repayment, expired-pair recovery, incompatible observations, mobile layout and Kimia/keyboard checks. |
-| Replay | Six genuine local-chain settlements at below/lower-boundary/inside/upper-boundary/above/cancellation states. |
-| Production export | Next production build and static packaging to `dist/`. |
-| Dependency audit | Zero advisories at release; totals retained in `evidence/dependency-audit.json`. |
+| Source and ABI consistency | PASS; source conflict/secret checks and eight generated contract ABIs |
+| TypeScript | PASS; API, shared packages, proof engine and web app |
+| Unit tests | PASS; 19 tests across five files, including API deployment reload and journal isolation |
+| Solidity | PASS; 75 offline tests, 512-run fuzz cases and three stateful invariants at 128 runs × 48 calls |
+| Independent payoff model | PASS; 10,000 Python/TypeScript vectors and 100 Solidity/TypeScript comparisons |
+| Local chain preflight | PASS; Anvil 31337, seven contract code hashes and six-decimal collateral |
+| Browser workflows | PASS; 12 Chromium cases covering offline read-only, payoff controls, drag/keyboard, five borrower/lender scenarios, expired-pair recovery, mobile and focus/contrast |
+| Settlement replay | PASS; six real local-EVM outcomes and two fresh collateral positions |
+| Production build | PASS; Next static build and `dist/` packaging |
+| Dependency audit | PASS; zero known advisories in the captured audit |
+| Sepolia read-only check | PASS at block 12072398; canonical Circle USDC and Chainlink ETH/USD proxy, zero transactions |
+| Sepolia fork mechanism | PASS at pinned block 12071482; full collateral and settlement waterfall, local-only test balances, zero public transactions |
 
-Foundry invariant handler reverts are expected rejected operations exercised by the handler; they are not test failures. The release gate propagates subprocess failures rather than treating a failed command as success.
+Foundry skips the fork test during the offline Solidity suite; the separate `pnpm test:fork` gate runs and passes it. The local faucet, test resolver and clock controls exist only on loopback Anvil. The UI's recorded snapshot is provenance-labeled and cannot authorize writes.
 
-## External dependencies
+## Monetary behavior
 
-`pnpm test:fork` passes the complete mechanism against canonical Sepolia USDC and historical Chainlink feed bytecode at block 12071482. This separate test uses local fork balance provisioning and sends zero public transactions. Output is in `evidence/logs/sepolia-fork.log` and `evidence/sepolia-fork.json`. `pnpm sepolia:check` successfully read the real public contracts and a contiguous historical witness; `evidence/sepolia-external-read.json` records those reads. No public deployment is implied.
+The browser suite uses distinct borrower, lender and resolver identities. It verifies exact wallet balances after funding, full repayment and settlement for below, inside, above and common-cancellation outcomes. Replay receipts, block numbers and exact base-unit payouts are saved in `evidence/browser-results.json` and `evidence/demo-receipts.json`.
 
-## Monetary evidence
-
-`evidence/browser-results.json` records four borrower/lender/resolver settlement journeys plus full repayment, transaction hashes, block numbers and exact base-unit payouts. `evidence/demo-receipts.json` records all six replay cases. Principal moves from a distinct lender to the borrower; settlement burns the actual ERC-1155 collateral and transfers actual mock USDC. At a one-USDC floor, the demonstrated fixed due is 0.78 USDC; the residual is 1.22 inside the interval and 0.22 outside or on shared cancellation.
-
-The API is read-only. Recorded snapshots cannot authorize transactions. Onchain reads are pinned to a single block; wallet writes verify chain and runtime identities and wait for receipts. The private static deployment exposes the mathematical tools and recorded evidence. Local `pnpm dev` supplies the live EVM and wallet-signed monetary journey.
+At a one-USDC certified floor, the demo principal is 0.75 USDC and the fixed lender due is 0.78 USDC. The lender receives 0.78; the borrower receives the remaining 1.22 for an inside payoff or 0.22 for the other demonstrated cases. These are local test-USDC transfers, not real-value claims.
 
 ## Visual and interaction evidence
 
-`evidence/screenshots/overview.png` and `studio.png` show the final charcoal/periwinkle interface with self-hosted Poppins and the supplied depth treatment. `mobile-studio.png` records the 390px layout. Settlement screenshots accompany the browser journeys.
+`evidence/screenshots/overview.png`, `studio.png`, `mobile-studio.png` and the settlement captures show the restored AQRA terminal. It uses the approved black/charcoal surfaces, Poppins, raised/inset depth and rounded controls. Both Poppins and JetBrains Mono are self-hosted with their original SIL Open Font License notices. Browser checks verify text and non-text contrast thresholds, visible keyboard focus, wallet-dialog focus/escape behavior, reduced motion and chart keyboard controls. These focused checks are not an independent accessibility certification.
 
-Browser assertions check the Poppins load, black canvas, token text contrast of at least 4.5:1, essential boundary/focus contrast of at least 3:1, chart arrow controls, wallet-dialog containment/Escape/focus return and reduced motion. Exact payoff tables and keyboard/click alternatives complement drag controls. These are focused implementation checks, not an independent full WCAG certification.
+## Boundaries
 
-## Explicit limits
+No public Sepolia deployment or public transaction was performed because no funded deployer signer was configured. The public read and fork tests are separate evidence; neither is a deployment receipt. The Chainlink adapter binds each observation to the proxy phase captured at deployment. After a feed phase upgrade, unresolved observations from the old instance fail closed and can reach their committed longstop cancellation; new observations require a new deployment.
 
-No public testnet receipt, live CRE simulation/DON deployment, signed RFQ market or tranche issuance is claimed. Oracle preparation code is tested but is not a live oracle integration. Generalized 2–8-leg research math does not authorize generalized vault collateral. Mock USDC has no market value; mainnet use is unsupported. The implementation has not received an independent audit.
-
-The original PRD remains in `docs/`. Final design rules, implementation decisions, third-party notices and reference research document what was implemented and why.
+The project has not received an independent security audit. Mainnet use, live Chainlink CRE/DON writes, signed RFQs, tranche issuance, external CTF custody and generalized multi-leg collateral are not implemented or claimed. See `FEATURES_AND_LIMITATIONS.md` and `EXTERNAL_DEPLOYMENT.md` for details.

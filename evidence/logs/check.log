@@ -6,7 +6,7 @@
 > floor-protocol@0.1.0 lint C:\Users\Debojyoti De Majumde\Documents\Codex\2026-11-05\c-users-debojyoti-de-majumde-downloads\outputs\floor-protocol
 > node scripts/source-checks.mjs && node scripts/foundry.mjs forge fmt --root packages/contracts --check
 
-PASS: 70 source files checked for conflict markers and hardcoded signing secrets; 8 generated ABIs match compiler artifacts.
+PASS: 73 source files checked for conflict markers and hardcoded signing secrets; 8 generated ABIs match compiler artifacts.
 
 > floor-protocol@0.1.0 typecheck C:\Users\Debojyoti De Majumde\Documents\Codex\2026-11-05\c-users-debojyoti-de-majumde-downloads\outputs\floor-protocol
 > tsc --noEmit && pnpm --filter @floor/web typecheck
@@ -23,10 +23,10 @@ PASS: 70 source files checked for conflict markers and hardcoded signing secrets
  RUN  v5.1.0 C:/Users/Debojyoti De Majumde/Documents/Codex/2026-11-05/c-users-debojyoti-de-majumde-downloads/outputs/floor-protocol
 
 
- Test Files  4 passed (4)
-      Tests  18 passed (18)
-   Start at  16:21:23
-   Duration  853ms (import 67%, tests 17%, transform 13%, worker 3%)
+ Test Files  5 passed (5)
+      Tests  19 passed (19)
+   Start at  04:17:10
+   Duration  930ms (import 61%, transform 27%, tests 11%, worker 2%)
 
 
 > floor-protocol@0.1.0 contracts:test C:\Users\Debojyoti De Majumde\Documents\Codex\2026-11-05\c-users-debojyoti-de-majumde-downloads\outputs\floor-protocol
@@ -34,57 +34,15 @@ PASS: 70 source files checked for conflict markers and hardcoded signing secrets
 
 No files changed, compilation skipped
 
-Ran 1 test for test/SepoliaFork.t.sol:SepoliaForkTests
-[SKIP] test_CanonicalUsdcAndFeedDriveFullWaterfall() (gas: 0)
-Suite result: ok. 0 passed; 0 failed; 1 skipped; finished in 14.92ms (3.52ms CPU time)
-
-Ran 4 tests for test/Adversarial.t.sol:AdversarialTests
-[PASS] test_CallerCannotInjectFloorOrStealForeignIssuerTokens() (gas: 3069505)
-[PASS] test_FeeOnTransferCannotCreateUnbackedClaims() (gas: 3138427)
-[PASS] test_MintReceiverCannotReenterAccounting() (gas: 818434)
-[PASS] test_ReleaseReceiverCannotReleaseTwice() (gas: 1260037)
-Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 19.55ms (7.17ms CPU time)
-
 Ran 3 tests for test/Repayment.t.sol:RepaymentTests
 [PASS] test_FailedRepaymentLeavesLienAndLoanIntact() (gas: 1017911)
 [PASS] test_FullRepaymentPaysLenderAndReturnsExactClaims() (gas: 1056624)
 [PASS] test_OnlyBorrowerRepaysAndPauseCannotStrandExit() (gas: 1036571)
-Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 21.03ms (9.06ms CPU time)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 14.09ms (2.19ms CPU time)
 
-Ran 1 test for test/fuzz/ActualPayoutFuzz.t.sol:ActualPayoutFuzz
-[PASS] testFuzz_RandomStrikesAndActualRedemption(uint128,uint128,uint64,uint64,uint128,bool) (runs: 512, μ: 594747, ~: 595078)
-Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 106.07ms (91.13ms CPU time)
-
-Ran 13 tests for test/Protocol.t.sol:ProofAndCustodyTests
-[PASS] testFuzz_MinimumBoundAllPrices(uint64,uint64,uint128) (runs: 512, μ: 58098, ~: 58049)
-[PASS] test_CallbackCannotBeSpoofedAndDeskBindingIsImmutable() (gas: 20843)
-[PASS] test_DisabledMarketRejectsNewLocks() (gas: 61404)
-[PASS] test_DoublePledgeFailsAndRollsBackPositionId() (gas: 901865)
-[PASS] test_LockActualInventoryAndLeaveCounterparts() (gas: 687464)
-[PASS] test_MismatchedObservationRejectsEvenWithSameAssetAndSource() (gas: 332494)
-[PASS] test_OnlyOwnerCanReleaseAndOnlyDeskCanLienOrRedeem() (gas: 686898)
-[PASS] test_ProofExpiresAtObservationTime() (gas: 61312)
-[PASS] test_ProofIsChainComputedAndUnequalQuantitiesSupported() (gas: 58776)
-[PASS] test_ReleaseUnfundedReturnsExactClaims() (gas: 700409)
-[PASS] test_ReversedAndEqualStrikesReject() (gas: 43517)
-[PASS] test_UnknownEmptyAndWrongSidesReject() (gas: 14972)
-[PASS] test_UnsolicitedSingleAndBatchDepositsReject() (gas: 460029)
-Suite result: ok. 13 passed; 0 failed; 0 skipped; finished in 110.61ms (103.92ms CPU time)
-
-Ran 12 tests for test/Protocol.t.sol:TokenTests
-[PASS] testFuzz_CompleteSetConservation(uint64,bool,bool) (runs: 512, μ: 396331, ~: 396249)
-[PASS] test_CancelOddWholeUnitsExactNoDust() (gas: 420309)
-[PASS] test_ClosedMarketsCannotMintOrMerge() (gas: 448077)
-[PASS] test_DisablingNewCollateralPreservesRedemption() (gas: 424592)
-[PASS] test_DoubleRedeemReverts() (gas: 432287)
-[PASS] test_MergeBurnsBothAndReturnsExactCollateral() (gas: 451827)
-[PASS] test_MintBackedCompleteSetAndUniqueIds() (gas: 432990)
-[PASS] test_MintWithoutAllowanceRevertsAtomically() (gas: 65938)
-[PASS] test_NoEarlyRedemption() (gas: 435583)
-[PASS] test_OperatorCannotRedeemSomeoneElsesBalance() (gas: 502467)
-[PASS] test_RedeemWinningAndLosingClaims() (gas: 433124)
-[PASS] test_ZeroUnitsRejected() (gas: 15781)
-Suite result: ok. 12 passed; 0 failed; 0 skipped; finished in 110.93ms (105.80ms CPU time)
+Ran 1 test for test/SepoliaFork.t.sol:SepoliaForkTests
+[SKIP] test_CanonicalUsdcAndFeedDriveFullWaterfall() (gas: 0)
+Suite result: ok. 0 passed; 0 failed; 1 skipped; finished in 14.53ms (3.64ms CPU time)
 
 Ran 10 tests for test/Protocol.t.sol:RegistryTests
 [PASS] test_CancellationPermissionlessAtLongstop() (gas: 41809)
@@ -97,22 +55,62 @@ Ran 10 tests for test/Protocol.t.sol:RegistryTests
 [PASS] test_PriceZeroIsValid() (gas: 38125)
 [PASS] test_RejectInvalidPolicyAndPrecision() (gas: 21541)
 [PASS] test_RejectOutOfRangePrice() (gas: 22290)
-Suite result: ok. 10 passed; 0 failed; 0 skipped; finished in 1.09s (9.86ms CPU time)
+Suite result: ok. 10 passed; 0 failed; 0 skipped; finished in 14.90ms (1.05ms CPU time)
 
-Ran 9 tests for test/FeedResolver.t.sol:FeedResolverTests
-[PASS] test_AnyKeeperUsesBoundFeedAndImmutableHistoricalPrice() (gas: 108003)
+Ran 4 tests for test/Adversarial.t.sol:AdversarialTests
+[PASS] test_CallerCannotInjectFloorOrStealForeignIssuerTokens() (gas: 3069505)
+[PASS] test_FeeOnTransferCannotCreateUnbackedClaims() (gas: 3138427)
+[PASS] test_MintReceiverCannotReenterAccounting() (gas: 818434)
+[PASS] test_ReleaseReceiverCannotReleaseTwice() (gas: 1260037)
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 15.05ms (4.22ms CPU time)
+
+Ran 11 tests for test/FeedResolver.t.sol:FeedResolverTests
+[PASS] test_AnyKeeperUsesBoundFeedAndImmutableHistoricalPrice() (gas: 113306)
 [PASS] test_CallerCannotSubmitPriceDirectly() (gas: 14938)
-[PASS] test_CannotChooseLaterOrEarlierRoundForOutcome() (gas: 313517)
-[PASS] test_CommonLongstopWorksWhenFeedStalls() (gas: 71459)
-[PASS] test_ExactObservationRoundIsIncluded() (gas: 101221)
-[PASS] test_IncompleteRoundAndMissingSuccessorFailClosed() (gas: 100235)
-[PASS] test_RejectsStaleFutureAndNegativeData() (gas: 150782)
-[PASS] test_RejectsUnboundSource() (gas: 164232)
-[PASS] test_RejectsWrongAssetAndPrecision() (gas: 164212)
-Suite result: ok. 9 passed; 0 failed; 0 skipped; finished in 1.09s (17.89ms CPU time)
+[PASS] test_CannotChooseLaterOrEarlierRoundForOutcome() (gas: 320824)
+[PASS] test_CommonLongstopWorksWhenFeedStalls() (gas: 75119)
+[PASS] test_ExactObservationRoundIsIncluded() (gas: 104870)
+[PASS] test_IncompleteRoundAndMissingSuccessorFailClosed() (gas: 107006)
+[PASS] test_RejectsRoundWhoseSuccessorCrossesPhaseBoundary() (gas: 30595)
+[PASS] test_RejectsRoundsFromArchivedFeedPhase() (gas: 41803)
+[PASS] test_RejectsStaleFutureAndNegativeData() (gas: 161629)
+[PASS] test_RejectsUnboundSource() (gas: 164223)
+[PASS] test_RejectsWrongAssetAndPrecision() (gas: 164181)
+Suite result: ok. 11 passed; 0 failed; 0 skipped; finished in 15.48ms (14.83ms CPU time)
+
+Ran 13 tests for test/Protocol.t.sol:ProofAndCustodyTests
+[PASS] testFuzz_MinimumBoundAllPrices(uint64,uint64,uint128) (runs: 512, μ: 58114, ~: 58049)
+[PASS] test_CallbackCannotBeSpoofedAndDeskBindingIsImmutable() (gas: 20843)
+[PASS] test_DisabledMarketRejectsNewLocks() (gas: 61404)
+[PASS] test_DoublePledgeFailsAndRollsBackPositionId() (gas: 901865)
+[PASS] test_LockActualInventoryAndLeaveCounterparts() (gas: 687464)
+[PASS] test_MismatchedObservationRejectsEvenWithSameAssetAndSource() (gas: 332494)
+[PASS] test_OnlyOwnerCanReleaseAndOnlyDeskCanLienOrRedeem() (gas: 686898)
+[PASS] test_ProofExpiresAtObservationTime() (gas: 61312)
+[PASS] test_ProofIsChainComputedAndUnequalQuantitiesSupported() (gas: 58776)
+[PASS] test_ReleaseUnfundedReturnsExactClaims() (gas: 700409)
+[PASS] test_ReversedAndEqualStrikesReject() (gas: 43517)
+[PASS] test_UnknownEmptyAndWrongSidesReject() (gas: 14972)
+[PASS] test_UnsolicitedSingleAndBatchDepositsReject() (gas: 460029)
+Suite result: ok. 13 passed; 0 failed; 0 skipped; finished in 89.48ms (83.38ms CPU time)
+
+Ran 12 tests for test/Protocol.t.sol:TokenTests
+[PASS] testFuzz_CompleteSetConservation(uint64,bool,bool) (runs: 512, μ: 395941, ~: 388681)
+[PASS] test_CancelOddWholeUnitsExactNoDust() (gas: 420309)
+[PASS] test_ClosedMarketsCannotMintOrMerge() (gas: 448077)
+[PASS] test_DisablingNewCollateralPreservesRedemption() (gas: 424592)
+[PASS] test_DoubleRedeemReverts() (gas: 432287)
+[PASS] test_MergeBurnsBothAndReturnsExactCollateral() (gas: 451827)
+[PASS] test_MintBackedCompleteSetAndUniqueIds() (gas: 432990)
+[PASS] test_MintWithoutAllowanceRevertsAtomically() (gas: 65938)
+[PASS] test_NoEarlyRedemption() (gas: 435583)
+[PASS] test_OperatorCannotRedeemSomeoneElsesBalance() (gas: 502467)
+[PASS] test_RedeemWinningAndLosingClaims() (gas: 433124)
+[PASS] test_ZeroUnitsRejected() (gas: 15781)
+Suite result: ok. 12 passed; 0 failed; 0 skipped; finished in 92.11ms (84.00ms CPU time)
 
 Ran 18 tests for test/Protocol.t.sol:CreditTests
-[PASS] testFuzz_BufferRoundsUp(uint128) (runs: 512, μ: 7080, ~: 6907)
+[PASS] testFuzz_BufferRoundsUp(uint128) (runs: 512, μ: 7069, ~: 6907)
 [PASS] test_AbovePaysOne() (gas: 1022612)
 [PASS] test_BelowPaysOne() (gas: 1022611)
 [PASS] test_ConsentRequiredAndPrincipalCannotBeChanged() (gas: 802546)
@@ -130,84 +128,88 @@ Ran 18 tests for test/Protocol.t.sol:CreditTests
 [PASS] test_SameWalletCannotFabricateLender() (gas: 775502)
 [PASS] test_SharedCancelPaysOne() (gas: 1009709)
 [PASS] test_UpperBoundaryPaysOne() (gas: 1022633)
-Suite result: ok. 18 passed; 0 failed; 0 skipped; finished in 1.09s (135.87ms CPU time)
+Suite result: ok. 18 passed; 0 failed; 0 skipped; finished in 103.24ms (109.95ms CPU time)
+
+Ran 1 test for test/fuzz/ActualPayoutFuzz.t.sol:ActualPayoutFuzz
+[PASS] testFuzz_RandomStrikesAndActualRedemption(uint128,uint128,uint64,uint64,uint128,bool) (runs: 512, μ: 594645, ~: 595076)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 103.27ms (91.80ms CPU time)
 
 Ran 3 tests for test/invariant/ProtocolInvariant.t.sol:ProtocolInvariant
-[PASS] invariant_AllDebtFitsCertifiedFloorAndNoStrandedCash() (runs: 128, calls: 6144, reverts: 1629)
+[PASS] invariant_AllDebtFitsCertifiedFloorAndNoStrandedCash() (runs: 128, calls: 6144, reverts: 1573)
 
 ╭-----------------+----------+-------+---------+----------╮
 | Contract        | Selector | Calls | Reverts | Discards |
 +=========================================================+
 | ProtocolHandler | fund     | 659   | 124     | 0        |
 |-----------------+----------+-------+---------+----------|
-| ProtocolHandler | lock     | 652   | 66      | 0        |
+| ProtocolHandler | lock     | 641   | 54      | 0        |
 |-----------------+----------+-------+---------+----------|
-| ProtocolHandler | merge    | 709   | 108     | 0        |
+| ProtocolHandler | merge    | 689   | 72      | 0        |
 |-----------------+----------+-------+---------+----------|
-| ProtocolHandler | mint     | 672   | 556     | 0        |
+| ProtocolHandler | mint     | 660   | 564     | 0        |
 |-----------------+----------+-------+---------+----------|
-| ProtocolHandler | redeem   | 693   | 48      | 0        |
+| ProtocolHandler | redeem   | 706   | 45      | 0        |
 |-----------------+----------+-------+---------+----------|
-| ProtocolHandler | release  | 726   | 97      | 0        |
+| ProtocolHandler | release  | 732   | 96      | 0        |
 |-----------------+----------+-------+---------+----------|
-| ProtocolHandler | repay    | 659   | 41      | 0        |
+| ProtocolHandler | repay    | 689   | 21      | 0        |
 |-----------------+----------+-------+---------+----------|
-| ProtocolHandler | resolve  | 667   | 539     | 0        |
+| ProtocolHandler | resolve  | 712   | 584     | 0        |
 |-----------------+----------+-------+---------+----------|
-| ProtocolHandler | settle   | 707   | 50      | 0        |
+| ProtocolHandler | settle   | 656   | 13      | 0        |
 ╰-----------------+----------+-------+---------+----------╯
 
-[PASS] invariant_ExactVaultInventoryAndSingleLien() (runs: 128, calls: 6144, reverts: 1627)
+[PASS] invariant_ExactVaultInventoryAndSingleLien() (runs: 128, calls: 6144, reverts: 1579)
+
+╭-----------------+----------+-------+---------+----------╮
+| Contract        | Selector | Calls | Reverts | Discards |
++=========================================================+
+| ProtocolHandler | fund     | 659   | 123     | 0        |
+|-----------------+----------+-------+---------+----------|
+| ProtocolHandler | lock     | 641   | 50      | 0        |
+|-----------------+----------+-------+---------+----------|
+| ProtocolHandler | merge    | 689   | 73      | 0        |
+|-----------------+----------+-------+---------+----------|
+| ProtocolHandler | mint     | 660   | 564     | 0        |
+|-----------------+----------+-------+---------+----------|
+| ProtocolHandler | redeem   | 706   | 45      | 0        |
+|-----------------+----------+-------+---------+----------|
+| ProtocolHandler | release  | 732   | 98      | 0        |
+|-----------------+----------+-------+---------+----------|
+| ProtocolHandler | repay    | 689   | 26      | 0        |
+|-----------------+----------+-------+---------+----------|
+| ProtocolHandler | resolve  | 712   | 584     | 0        |
+|-----------------+----------+-------+---------+----------|
+| ProtocolHandler | settle   | 656   | 16      | 0        |
+╰-----------------+----------+-------+---------+----------╯
+
+[PASS] invariant_FullyBackedForEveryOutstandingClaim() (runs: 128, calls: 6144, reverts: 1579)
 
 ╭-----------------+----------+-------+---------+----------╮
 | Contract        | Selector | Calls | Reverts | Discards |
 +=========================================================+
 | ProtocolHandler | fund     | 659   | 124     | 0        |
 |-----------------+----------+-------+---------+----------|
-| ProtocolHandler | lock     | 652   | 66      | 0        |
+| ProtocolHandler | lock     | 641   | 52      | 0        |
 |-----------------+----------+-------+---------+----------|
-| ProtocolHandler | merge    | 709   | 106     | 0        |
+| ProtocolHandler | merge    | 689   | 68      | 0        |
 |-----------------+----------+-------+---------+----------|
-| ProtocolHandler | mint     | 672   | 556     | 0        |
+| ProtocolHandler | mint     | 660   | 564     | 0        |
 |-----------------+----------+-------+---------+----------|
-| ProtocolHandler | redeem   | 693   | 48      | 0        |
+| ProtocolHandler | redeem   | 706   | 45      | 0        |
 |-----------------+----------+-------+---------+----------|
-| ProtocolHandler | release  | 726   | 97      | 0        |
+| ProtocolHandler | release  | 732   | 98      | 0        |
 |-----------------+----------+-------+---------+----------|
-| ProtocolHandler | repay    | 659   | 41      | 0        |
+| ProtocolHandler | repay    | 689   | 28      | 0        |
 |-----------------+----------+-------+---------+----------|
-| ProtocolHandler | resolve  | 667   | 539     | 0        |
+| ProtocolHandler | resolve  | 712   | 584     | 0        |
 |-----------------+----------+-------+---------+----------|
-| ProtocolHandler | settle   | 707   | 50      | 0        |
+| ProtocolHandler | settle   | 656   | 16      | 0        |
 ╰-----------------+----------+-------+---------+----------╯
 
-[PASS] invariant_FullyBackedForEveryOutstandingClaim() (runs: 128, calls: 6144, reverts: 1616)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 957.61ms (2.17s CPU time)
 
-╭-----------------+----------+-------+---------+----------╮
-| Contract        | Selector | Calls | Reverts | Discards |
-+=========================================================+
-| ProtocolHandler | fund     | 659   | 121     | 0        |
-|-----------------+----------+-------+---------+----------|
-| ProtocolHandler | lock     | 652   | 66      | 0        |
-|-----------------+----------+-------+---------+----------|
-| ProtocolHandler | merge    | 709   | 111     | 0        |
-|-----------------+----------+-------+---------+----------|
-| ProtocolHandler | mint     | 672   | 556     | 0        |
-|-----------------+----------+-------+---------+----------|
-| ProtocolHandler | redeem   | 693   | 48      | 0        |
-|-----------------+----------+-------+---------+----------|
-| ProtocolHandler | release  | 726   | 95      | 0        |
-|-----------------+----------+-------+---------+----------|
-| ProtocolHandler | repay    | 659   | 38      | 0        |
-|-----------------+----------+-------+---------+----------|
-| ProtocolHandler | resolve  | 667   | 539     | 0        |
-|-----------------+----------+-------+---------+----------|
-| ProtocolHandler | settle   | 707   | 42      | 0        |
-╰-----------------+----------+-------+---------+----------╯
-
-Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 1.09s (2.51s CPU time)
-
-Ran 10 test suites in 1.10s (4.73s CPU time): 73 tests passed, 0 failed, 1 skipped (74 total tests)
+Ran 10 test suites in 968.87ms (1.42s CPU time): 75 tests passed, 0 failed, 1 skipped (76 total tests)
 
 > floor-protocol@0.1.0 test:differential C:\Users\Debojyoti De Majumde\Documents\Codex\2026-11-05\c-users-debojyoti-de-majumde-downloads\outputs\floor-protocol
 > tsx scripts/differential.ts

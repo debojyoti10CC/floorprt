@@ -1,6 +1,6 @@
-# Floor Protocol delivery status
+# AQRA delivery status
 
-The local P0 mechanism is implemented. Final browser validation is in progress; see the current push status in RELEASE_EVIDENCE.md. Evidence and release boundaries are recorded in RELEASE_EVIDENCE.md and FEATURES_AND_LIMITATIONS.md.
+The local P0 mechanism and final interface are implemented. The complete local release gate passes; evidence and release boundaries are recorded in RELEASE_EVIDENCE.md and FEATURES_AND_LIMITATIONS.md.
 
 - [x] Registry, curated factory and fully funded ERC-1155 claims.
 - [x] Pair verifier, exact custody, borrower-consented credit, full early repayment and terminal settlement.

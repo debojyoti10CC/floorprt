@@ -8,38 +8,6 @@
 
 No files changed, compilation skipped
 warning[block-timestamp]: usage of `block.timestamp` in a comparison may be manipulated by validators
-   ╭▸ packages\contracts\src\SharedObservationRegistry.sol:39:86
-   │
-39 │             assetId == bytes32(0) || sourceId == bytes32(0) || priceDecimals > 18 || observationTime <= block.timestamp
-   │                                                                                      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   │
-   ╰ help: https://book.getfoundry.sh/reference/forge/forge-lint#block-timestamp
-
-warning[block-timestamp]: usage of `block.timestamp` in a comparison may be manipulated by validators
-   ╭▸ packages\contracts\src\SharedObservationRegistry.sol:67:13
-   │
-67 │         if (block.timestamp < obs.observationTime) revert TooEarly();
-   │             ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   │
-   ╰ help: https://book.getfoundry.sh/reference/forge/forge-lint#block-timestamp
-
-warning[block-timestamp]: usage of `block.timestamp` in a comparison may be manipulated by validators
-   ╭▸ packages\contracts\src\SharedObservationRegistry.sol:79:13
-   │
-79 │         if (block.timestamp < obs.cancelAfter) revert TooEarly();
-   │             ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   │
-   ╰ help: https://book.getfoundry.sh/reference/forge/forge-lint#block-timestamp
-
-warning[block-timestamp]: usage of `block.timestamp` in a comparison may be manipulated by validators
-   ╭▸ packages\contracts\src\CreditDesk.sol:75:94
-   │
-75 │             principal == 0 || maxDue < principal || maxDue > maximumDue(p.certifiedFloor) || expiry <= block.timestamp
-   │                                                                                              ━━━━━━━━━━━━━━━━━━━━━━━━━
-   │
-   ╰ help: https://book.getfoundry.sh/reference/forge/forge-lint#block-timestamp
-
-warning[block-timestamp]: usage of `block.timestamp` in a comparison may be manipulated by validators
    ╭▸ packages\contracts\src\OutcomeMarketFactory.sol:39:66
    │
 39 │                 || obs.state != T.ObservationState.UNRESOLVED || block.timestamp >= obs.observationTime
@@ -48,25 +16,25 @@ warning[block-timestamp]: usage of `block.timestamp` in a comparison may be mani
    ╰ help: https://book.getfoundry.sh/reference/forge/forge-lint#block-timestamp
 
 warning[block-timestamp]: usage of `block.timestamp` in a comparison may be manipulated by validators
-   ╭▸ packages\contracts\src\FloorVerifier.sol:50:59
+   ╭▸ packages\contracts\src\ChainlinkObservationResolver.sol:74:20
    │
-50 │         if (obs.state != T.ObservationState.UNRESOLVED || block.timestamp >= obs.observationTime) {
-   │                                                           ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+74 │                 || next.updated > block.timestamp || obs.observationTime - previous.updated > maxAge
+   │                    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    │
    ╰ help: https://book.getfoundry.sh/reference/forge/forge-lint#block-timestamp
 
 warning[block-timestamp]: usage of `block.timestamp` in a comparison may be manipulated by validators
-    ╭▸ packages\contracts\src\CreditDesk.sol:107:13
-    │
-107 │         if (block.timestamp >= request.expiry) revert Expired();
-    │             ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    │
-    ╰ help: https://book.getfoundry.sh/reference/forge/forge-lint#block-timestamp
+   ╭▸ packages\contracts\src\SharedObservationRegistry.sol:39:86
+   │
+39 │             assetId == bytes32(0) || sourceId == bytes32(0) || priceDecimals > 18 || observationTime <= block.timestamp
+   │                                                                                      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   │
+   ╰ help: https://book.getfoundry.sh/reference/forge/forge-lint#block-timestamp
 
 warning[block-timestamp]: usage of `block.timestamp` in a comparison may be manipulated by validators
-   ╭▸ packages\contracts\src\OutcomeTokens.sol:58:59
+   ╭▸ packages\contracts\src\FloorVerifier.sol:50:59
    │
-58 │         if (obs.state != T.ObservationState.UNRESOLVED || block.timestamp >= obs.observationTime) {
+50 │         if (obs.state != T.ObservationState.UNRESOLVED || block.timestamp >= obs.observationTime) {
    │                                                           ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    │
    ╰ help: https://book.getfoundry.sh/reference/forge/forge-lint#block-timestamp
@@ -86,12 +54,122 @@ warning[unsafe-typecast]: typecasts that can truncate values should be checked
     ╰ help: https://book.getfoundry.sh/reference/forge/forge-lint#unsafe-typecast
 
 warning[block-timestamp]: usage of `block.timestamp` in a comparison may be manipulated by validators
+   ╭▸ packages\contracts\src\OutcomeTokens.sol:58:59
+   │
+58 │         if (obs.state != T.ObservationState.UNRESOLVED || block.timestamp >= obs.observationTime) {
+   │                                                           ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   │
+   ╰ help: https://book.getfoundry.sh/reference/forge/forge-lint#block-timestamp
+
+warning[block-timestamp]: usage of `block.timestamp` in a comparison may be manipulated by validators
+   ╭▸ packages\contracts\src\SharedObservationRegistry.sol:67:13
+   │
+67 │         if (block.timestamp < obs.observationTime) revert TooEarly();
+   │             ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   │
+   ╰ help: https://book.getfoundry.sh/reference/forge/forge-lint#block-timestamp
+
+warning[block-timestamp]: usage of `block.timestamp` in a comparison may be manipulated by validators
+   ╭▸ packages\contracts\src\CreditDesk.sol:76:94
+   │
+76 │             principal == 0 || maxDue < principal || maxDue > maximumDue(p.certifiedFloor) || expiry <= block.timestamp
+   │                                                                                              ━━━━━━━━━━━━━━━━━━━━━━━━━
+   │
+   ╰ help: https://book.getfoundry.sh/reference/forge/forge-lint#block-timestamp
+
+warning[unsafe-typecast]: typecasts that can truncate values should be checked
+   ╭▸ packages\contracts\src\ChainlinkObservationResolver.sol:84:44
+   │
+84 │         if (roundId == type(uint80).max || uint64(roundId) == type(uint64).max) revert InvalidRound();
+   │                                            ━━━━━━━━━━━━━━━
+   │
+   ├ note: consider disabling this lint if you're certain the cast is safe
+   │       
+   │       // casting to 'uint64' is safe because [explain why]
+   │       // forge-lint: disable-next-line(unsafe-typecast)
+   │       
+   │       
+   ╰ help: https://book.getfoundry.sh/reference/forge/forge-lint#unsafe-typecast
+
+warning[unsafe-typecast]: typecasts that can truncate values should be checked
+   ╭▸ packages\contracts\src\ChainlinkObservationResolver.sol:87:13
+   │
+87 │         if (uint16(roundId >> 64) != feedPhase || feed.phaseId() != feedPhase) revert InvalidRound();
+   │             ━━━━━━━━━━━━━━━━━━━━━
+   │
+   ├ note: consider disabling this lint if you're certain the cast is safe
+   │       
+   │       // casting to 'uint16' is safe because [explain why]
+   │       // forge-lint: disable-next-line(unsafe-typecast)
+   │       
+   │       
+   ╰ help: https://book.getfoundry.sh/reference/forge/forge-lint#unsafe-typecast
+
+warning[unsafe-typecast]: typecasts that can truncate values should be checked
+   ╭▸ packages\contracts\src\ChainlinkObservationResolver.sol:89:13
+   │
+89 │         if (uint16(nextRoundId >> 64) != feedPhase) revert InvalidRound();
+   │             ━━━━━━━━━━━━━━━━━━━━━━━━━
+   │
+   ├ note: consider disabling this lint if you're certain the cast is safe
+   │       
+   │       // casting to 'uint16' is safe because [explain why]
+   │       // forge-lint: disable-next-line(unsafe-typecast)
+   │       
+   │       
+   ╰ help: https://book.getfoundry.sh/reference/forge/forge-lint#unsafe-typecast
+
+warning[block-timestamp]: usage of `block.timestamp` in a comparison may be manipulated by validators
+   ╭▸ packages\contracts\src\SharedObservationRegistry.sol:79:13
+   │
+79 │         if (block.timestamp < obs.cancelAfter) revert TooEarly();
+   │             ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   │
+   ╰ help: https://book.getfoundry.sh/reference/forge/forge-lint#block-timestamp
+
+warning[block-timestamp]: usage of `block.timestamp` in a comparison may be manipulated by validators
     ╭▸ packages\contracts\src\OutcomeTokens.sol:105:20
     │
 105 │                 || block.timestamp >= obs.observationTime
     │                    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     │
     ╰ help: https://book.getfoundry.sh/reference/forge/forge-lint#block-timestamp
+
+warning[unsafe-typecast]: typecasts that can truncate values should be checked
+   ╭▸ packages\contracts\test\SepoliaFork.t.sol:35:27
+   │
+35 │         uint64 maturity = uint64(nextTime - 1);
+   │                           ━━━━━━━━━━━━━━━━━━━━
+   │
+   ├ note: consider disabling this lint if you're certain the cast is safe
+   │       
+   │       // casting to 'uint64' is safe because [explain why]
+   │       // forge-lint: disable-next-line(unsafe-typecast)
+   │       
+   │       
+   ╰ help: https://book.getfoundry.sh/reference/forge/forge-lint#unsafe-typecast
+
+warning[block-timestamp]: usage of `block.timestamp` in a comparison may be manipulated by validators
+    ╭▸ packages\contracts\src\CreditDesk.sol:108:13
+    │
+108 │         if (block.timestamp >= request.expiry) revert Expired();
+    │             ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://book.getfoundry.sh/reference/forge/forge-lint#block-timestamp
+
+warning[unsafe-typecast]: typecasts that can truncate values should be checked
+   ╭▸ packages\contracts\test\SepoliaFork.t.sol:46:51
+   │
+46 │         uint256 lower = factory.createMarket(obs, uint256(answer) - 100e8);
+   │                                                   ━━━━━━━━━━━━━━━
+   │
+   ├ note: consider disabling this lint if you're certain the cast is safe
+   │       
+   │       // casting to 'uint256' is safe because [explain why]
+   │       // forge-lint: disable-next-line(unsafe-typecast)
+   │       
+   │       
+   ╰ help: https://book.getfoundry.sh/reference/forge/forge-lint#unsafe-typecast
 
 warning[unsafe-typecast]: typecasts that can truncate values should be checked
     ╭▸ packages\contracts\test\invariant\ProtocolInvariant.t.sol:105:49
@@ -107,10 +185,24 @@ warning[unsafe-typecast]: typecasts that can truncate values should be checked
     │       
     ╰ help: https://book.getfoundry.sh/reference/forge/forge-lint#unsafe-typecast
 
+warning[unsafe-typecast]: typecasts that can truncate values should be checked
+   ╭▸ packages\contracts\test\SepoliaFork.t.sol:47:51
+   │
+47 │         uint256 upper = factory.createMarket(obs, uint256(answer) + 100e8);
+   │                                                   ━━━━━━━━━━━━━━━
+   │
+   ├ note: consider disabling this lint if you're certain the cast is safe
+   │       
+   │       // casting to 'uint256' is safe because [explain why]
+   │       // forge-lint: disable-next-line(unsafe-typecast)
+   │       
+   │       
+   ╰ help: https://book.getfoundry.sh/reference/forge/forge-lint#unsafe-typecast
+
 warning[block-timestamp]: usage of `block.timestamp` in a comparison may be manipulated by validators
-    ╭▸ packages\contracts\src\CreditDesk.sol:158:59
+    ╭▸ packages\contracts\src\CreditDesk.sol:172:59
     │
-158 │         if (obs.state != T.ObservationState.UNRESOLVED || block.timestamp >= obs.observationTime) {
+172 │         if (obs.state != T.ObservationState.UNRESOLVED || block.timestamp >= obs.observationTime) {
     │                                                           ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     │
     ╰ help: https://book.getfoundry.sh/reference/forge/forge-lint#block-timestamp
@@ -119,24 +211,24 @@ warning[block-timestamp]: usage of `block.timestamp` in a comparison may be mani
 > floor-protocol@0.1.0 abi C:\Users\Debojyoti De Majumde\Documents\Codex\2026-11-05\c-users-debojyoti-de-majumde-downloads\outputs\floor-protocol
 > tsx scripts/generate-abis.ts
 
-Generated 7 typed ABIs from compiler artifacts.
+Generated 8 typed ABIs from compiler artifacts.
 
 > @floor/web@0.1.0 build C:\Users\Debojyoti De Majumde\Documents\Codex\2026-11-05\c-users-debojyoti-de-majumde-downloads\outputs\floor-protocol\apps\web
 > next build
 
 ▲ Next.js 16.4.5 (Turbopack)
-✓ Running next.config.ts took 132ms
+✓ Running next.config.ts took 107ms
 
   Creating an optimized production build ...
-✓ Compiled successfully in 1304ms
+✓ Compiled successfully in 4.0s
   Running TypeScript ...
-  Finished TypeScript in 4.7s ...
+  Finished TypeScript in 6.8s ...
   Collecting page data using 5 workers ...
   Generating static pages using 5 workers (0/12) ...
   Generating static pages using 5 workers (3/12) 
   Generating static pages using 5 workers (6/12) 
   Generating static pages using 5 workers (9/12) 
-✓ Generating static pages using 5 workers (12/12) in 1047ms
+✓ Generating static pages using 5 workers (12/12) in 906ms
   Finalizing page optimization ...
 
 Route (app)

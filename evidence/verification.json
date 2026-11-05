@@ -1,20 +1,38 @@
 {
-  "status": "FAIL",
+  "status": "PASS",
+  "checkedAt": "2026-11-05T22:20:11.826Z",
   "results": [
     {
       "command": "pnpm check",
       "exitCode": 0,
-      "durationMs": 26373
+      "durationMs": 23140
     },
     {
       "command": "pnpm preflight",
       "exitCode": 0,
-      "durationMs": 1724
+      "durationMs": 1525
     },
     {
       "command": "pnpm e2e",
-      "exitCode": 1,
-      "durationMs": 164828
+      "exitCode": 0,
+      "durationMs": 133586
+    },
+    {
+      "command": "pnpm demo",
+      "exitCode": 0,
+      "durationMs": 17639
+    },
+    {
+      "command": "pnpm build",
+      "exitCode": 0,
+      "durationMs": 19378
     }
-  ]
+  ],
+  "audit": {
+    "info": 0,
+    "low": 0,
+    "moderate": 0,
+    "high": 0,
+    "critical": 0
+  }
 }
