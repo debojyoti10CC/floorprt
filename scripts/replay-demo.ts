@@ -15,7 +15,9 @@ const send=async(role:'borrower'|'lender'|'resolver',name:ContractName,fn:string
   receipts.push({role,action:fn,transactionHash:hash,blockNumber:r.blockNumber});return r;
 };
 const cash=async(role:'borrower'|'lender')=>await client.readContract({address:d.contracts.CollateralToken,abi:abis.CollateralToken,functionName:'balanceOf',args:[d.roles[role]]}) as bigint;
-async function pair(delay=120n){
+// Give the observed block timestamp plenty of headroom when Anvil has been
+// idle; its next mined block may advance to wall-clock time before this call.
+async function pair(delay=86400n){
   const now=(await client.getBlock()).timestamp,t=now+delay;
   const obs=arg(await send('resolver','SharedObservationRegistry','registerObservation',[keccak256(toHex('ETH/USD')),t,8,keccak256(toHex('TRUSTED_TEST_RESOLVER')),keccak256(toHex('FLOOR_SHARED_GEQ_50_50_V1')),t+3600n]),'SharedObservationRegistry','ObservationRegistered','observationId');
   const lower=arg(await send('resolver','OutcomeMarketFactory','createMarket',[obs,5000n*100000000n]),'OutcomeMarketFactory','MarketCreated','marketId');
