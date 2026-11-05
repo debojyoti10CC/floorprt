@@ -1,0 +1,66 @@
+---
+title: 'Local, static and Sepolia deployment'
+description: 'Deploy only supported test environments and keep public receipts separate from forks.'
+---
+
+## Local contracts
+
+Use `pnpm dev` for the integrated setup. For explicit steps, keep `pnpm chain` running, then:
+
+```bash
+pnpm contracts:build
+pnpm abi
+pnpm deploy:local
+pnpm preflight
+```
+
+The shared deployment script probes actual RPC chain ID, supports only 31337/11155111 and restricts unlocked local deployment to loopback. Command names do not force a chain: **both deployment scripts call the same file**, so verify the RPC before running either.
+
+Local setup deploys MockUSDC, registry, factory/issuer, verifier, vault and desk; binds the desk; seeds three observations and markets; faucets borrower/lender; and mints backed inventory. Manifests and receipts are generated from actual deployment transactions.
+
+## Static application hosting
+
+```bash
+pnpm build
+```
+
+This compiles contracts, regenerates ABIs, builds the Next.js static export and copies it to `dist/`. Host `dist/` using a static host. No private key belongs there. Without a matching reachable RPC, the terminal is recorded read-only evidence, not a public protocol deployment.
+
+Mintlify docs are separate from the app's static export; see [documentation publishing](/maintenance/documentation).
+
+## Sepolia prerequisites
+
+- Funded dedicated test deployer with gas.
+- Separate borrower/lender injected wallets with canonical **test** USDC.
+- Reliable Sepolia RPC and explicit process-environment signer.
+- Review feed phase/window, metadata and canonical dependency addresses.
+
+| Dependency | Sepolia address |
+| --- | --- |
+| Circle USDC | `0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238` |
+| Chainlink ETH/USD proxy | `0x694AA1769357215DE4FAC081bf1f309aDC325306` |
+
+Check current [Circle registry](https://developers.circle.com/stablecoins/usdc-contract-addresses) and [Chainlink historical data rules](https://docs.chain.link/data-feeds/price-feeds/historical-data) independently before deploying.
+
+```bash
+# Set FLOOR_RPC_URL to a Sepolia endpoint in this process.
+# Supply DEPLOYER_PRIVATE_KEY securely outside source files.
+pnpm contracts:build
+pnpm abi
+pnpm deploy:sepolia
+pnpm preflight
+pnpm build
+```
+
+Sepolia deploys the historical adapter and its registry; it never deploys MockUSDC. The script seeds markets, but does not faucet USDC or fund user loans. Role placeholders for borrower/lender may initially equal the curator; actual distinct injected wallets must execute their own flow. Load the generated manifest in Operations and reconnect.
+
+## Verify separate gates
+
+```bash
+pnpm sepolia:check   # public reads only
+pnpm test:fork       # local pinned fork, test balances
+```
+
+Neither is a public protocol deployment receipt. The checked-in release contains no such receipt. Before claiming a public gate, retain contract creation hashes, public mint/lock/request/fund/resolve/settle receipts, exact wallet deltas, chain/block identity and source verification records.
+
+Mainnet and unsupported chains are refused. An independent audit, legal review, multisig operations, feed migration and token-freeze policy remain required before real-value use.

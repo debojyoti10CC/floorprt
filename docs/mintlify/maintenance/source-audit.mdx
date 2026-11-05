@@ -1,0 +1,40 @@
+---
+title: 'Documentation scope and source reconciliation'
+description: 'Decisions and discrepancies identified while mapping the original blueprint to current code.'
+---
+
+## Documentation decision
+
+This site documents the checked-in implementation without changing monetary contracts or silently rewriting the original blueprint. `MECHANISM_AND_PROOFS.md` remains the payout authority; implementation decisions resolve documented scope/timing/rounding ambiguities. Generated ABI references, not proposed signatures, are the callable interface reference.
+
+This is a documentation/source review, not a new security audit or full rerun of historical release gates.
+
+## Reconciled differences
+
+| Historical wording/proposal | Current source and documentation decision |
+| --- | --- |
+| PRD/architecture/security say unimplemented | Preserved as blueprint history; current status is documented separately |
+| Principal-only or floor-buffer rounded down formula | Use fee-inclusive due and upward-rounded reserve, as mechanism prose, ADR and contract require |
+| Security list says odd amounts blocked | ADR-003 resolves: odd **whole** units valid; fractional units invalid |
+| Repayment deferred / REPAID_EARLY label | Implemented full fixed-due repayment, enum `REPAID = 3`, including after maturity while funded |
+| Resolver/admin longstop | Implemented permissionless common cancellation only after cancelAfter |
+| Mint/borrow while unresolved | Also strictly before observationTime under ADR-009 |
+| OpenZeppelin/wagmi/Postgres proposed stack | Actual code uses OpenZeppelin/viem, Hono, direct snapshots and persistent JSON journal; no SQL projection stack |
+| Large proposed error/endpoint taxonomy | Implemented eight verifier reasons and 13 routes documented from source |
+| Generic redeemFor operator assumption | Actual function burns caller inventory only; operator cannot redeem another holder's tokens |
+| Mock collateral for all testnets | ADR-016 adds external canonical Sepolia test USDC and feed adapter; no mock deployed there |
+| CRE named as future integration | Unsigned validator exists; no successful CRE CLI simulation or live DON evidence |
+| Eight-contract shorthand | Eight concrete contracts plus `FloorTypes` library; seven core deployment addresses locally, optional eighth historical adapter on Sepolia |
+
+## Known residual limitations, not silently repaired
+
+- Some UI copy hardcodes local/mock asset and test resolver language; Sepolia-aware labels need a separately tested UI change. Example: proof and settlement metadata currently name trusted test resolver, and credit badges assume 20% despite reading dynamic caps.
+- Operations displays a one-hour cancellation grace even though its feed-mode new-pair code uses one day. Read actual `cancelAfter` onchain.
+- API collections are bounded, not cursor-paginated. Their total is the snapshot-window count, not a protocol-global count.
+- Proof preview pins the verifier query, then fetches a separate snapshot for scenario metadata; it is not an atomic cross-response snapshot. Scenarios may exist even when `valid` is false.
+- Preview payload size guard trusts declared Content-Length; malformed JSON/RPC errors reach generic 500. Do not claim hardened public request limits/rate limits.
+- Example `NEXT_PUBLIC_` connection values are unused by the current provider; Operations/manifest config is authoritative.
+- Existing public read/fork evidence cannot be upgraded to a public deployment claim.
+- API and local orchestration ports are not fully parameterized end-to-end.
+
+These observations do not authorize relaxing contract guards. Any financial-rule change needs an explicit ADR/spec update and negative, boundary, conservation and lifecycle tests before implementation.

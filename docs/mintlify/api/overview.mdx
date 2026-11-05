@@ -1,0 +1,42 @@
+---
+title: 'Read API conventions'
+description: 'Source-derived HTTP routes, integer schemas, bounded snapshots and non-authoritative previews.'
+---
+
+Base URL: `http://127.0.0.1:8787/api/v1`. Source: `apps/api/src/app.ts`. Start with `pnpm dev` or `pnpm dev:api` after deploying a matching manifest.
+
+The API is **read-only relative to funds**, including `POST /proof/preview`. It has no signing keys, authenticated spending endpoint, trade executor or authoritative offchain monetary ledger. All monetary actions are wallet-signed contract calls.
+
+[Download the OpenAPI 3.0 specification](/api/openapi.json)
+
+## Types and authority
+
+Amounts, IDs, timestamps and block numbers serialize as decimal strings when they originate as BigInt. Chain IDs, enum states, counts, log indexes, precision and buffer basis points are JSON numbers. Tuple field names/order match the generated ABI/shared types, not the original proposed DTOs.
+
+`DIRECT_CHAIN` identifies current contract reads. `DERIVED_READ_CACHE` identifies the journal. `authorization: false` means a proof preview cannot authorize a lock. An HTTP 200 with `valid: false` is an expected ineligible proof result, not a valid certificate.
+
+## Bounded collections
+
+Snapshots include newest 200 observations, markets, positions and loans, plus about 5,000 blocks of protocol events. Optional `limit` defaults to 50 and clamps to 1–100; collection routes return the tail of that window. `total` is the bounded collection's count. No cursor, offset, full-history pagination, user address filter on activity or configurable snapshot wallet parameter is implemented.
+
+Detail routes search the same windows; older entities may return 404. `/vaults/{id}` uses an Ethereum address to select owner-filtered positions, otherwise a position ID. Generic errors return an `error` message; health and research have specific status/authority shapes.
+
+## Preview request
+
+```json
+{
+  "chainId": 31337,
+  "lowerMarketId": "2",
+  "upperMarketId": "3",
+  "lowerYesUnits": "1",
+  "upperNoUnits": "1"
+}
+```
+
+The configured chain ID must match exactly. Quantities must be positive uint64 decimal strings. IDs are at most 78 digits syntactically; runtime ABI/RPC errors may still reject excessive uint256 values. Preview checks declared Content-Length above 8192, not a hardened streaming limit. Malformed JSON reaches the generic 500 handler; do not promise all parse failures return 400.
+
+The verifier query is pinned to one block, while scenario metadata comes from a subsequent bounded snapshot. Scenarios may be returned for an ineligible pair; only `valid` reflects the verifier result, and the vault must recompute it at lock.
+
+## Hosting and access
+
+The server binds loopback. CORS allows HTTP(S) localhost/127.0.0.1 origins. No API authentication, public rate-limit middleware, hardened abuse boundary or production SLA is supplied. Research requests have a fixed upstream URL, timeout/cache and provenance; they never enter the approved vault path.

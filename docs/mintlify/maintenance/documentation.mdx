@@ -1,0 +1,41 @@
+---
+title: 'Maintain and publish the documentation'
+description: 'Generate source-derived references, validate Mintlify and deploy this repository subdirectory.'
+---
+
+## Site source
+
+The Mintlify content root is **`docs/mintlify`**, not the repository root. `docs.json` configures navigation, original AQRA SVG assets and dark-first colors. The app's embedded `/docs/` screen is separate.
+
+Original specifications remain untouched in `docs/*.md` and `docs/ADR/`. Generated mirrors carry a historical-source warning. Current guides explicitly distinguish implemented behavior, local execution, recorded evidence, public reads, forks and future features.
+
+## Generate and check
+
+From the repository root:
+
+```bash
+pnpm docs:generate
+pnpm docs:check
+pnpm docs:links
+pnpm docs:dev
+```
+
+The commands pin Mintlify CLI **4.2.1205**. Preview runs on port **3001**, leaving the terminal's 3000 free.
+
+- `scripts/docs-generate.mjs`: original-spec mirrors, complete compiler-ABI contract references and SVG assets.
+- `scripts/docs-api-generate.mjs`: all implemented HTTP route pages and OpenAPI, with route-inventory drift checks.
+- `--check`: compare generated output without rewriting it.
+- `mint validate`: content/config/navigation/OpenAPI checks plus a strict build.
+- `mint broken-links`: internal links/anchors/redirects/snippets.
+
+Regenerate ABIs from compiler artifacts before updating contract references after a contract change. Generated pages are not proof that a deployed address has matching code.
+
+## Review checklist
+
+Verify payout boundaries, whole-unit cancellation, total due including fees, ceiling reserve, exact custody, state/role/timing restrictions and no unsupported production claims. Link to evidence without relabeling historical results as a newly run test suite. Financial-rule changes need an ADR/spec decision and regression tests.
+
+## Git-linked publishing
+
+Configure a **separate AQRA site** in Mintlify with repository `debojyoti10CC/floorprt`, branch `main` and content directory `docs/mintlify`. The connected GitHub installation must have repository permission. Commit and push reviewed documentation, then check Mintlify's build/deployment result and public URL. Do not replace unrelated existing site contents or alter billing as part of documentation setup.
+
+OAuth MCP authentication alone does not imply GitHub repository installation, a successful build or a live deployment. Any missing dashboard permission/installation must be completed by an authorized account owner. Never publish private keys, OAuth tokens, local config or deployment write credentials.

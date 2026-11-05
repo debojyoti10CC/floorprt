@@ -1,0 +1,69 @@
+---
+title: "List approved markets"
+description: "GET /api/v1/markets — Approved issuer markets, including escrow and deterministic token IDs; collection also includes blockNumber and source. Eligibility flag alo"
+---
+
+`GET /api/v1/markets`
+
+Approved issuer markets, including escrow and deterministic token IDs; collection also includes blockNumber and source. Eligibility flag alone does not prove observation is still open.
+
+## Request
+
+```bash
+curl 'http://127.0.0.1:8787/api/v1/markets?limit=50'
+```
+
+Optional `limit` defaults to 50 and is clamped to 1–100. It selects the tail of the bounded window, without cursor or offset pagination.
+
+## Response contract
+
+The following is a **schema**, not a transaction result. Shared types resolve in the [OpenAPI specification](/api/openapi.json).
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "items": {
+      "type": "array",
+      "items": {
+        "$ref": "#/components/schemas/Market"
+      }
+    },
+    "total": {
+      "type": "integer"
+    },
+    "limit": {
+      "type": "integer"
+    },
+    "authority": {
+      "type": "string",
+      "enum": [
+        "DIRECT_CHAIN"
+      ]
+    },
+    "blockNumber": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)$"
+    },
+    "source": {
+      "type": "string",
+      "enum": [
+        "DIRECT_CHAIN"
+      ]
+    }
+  },
+  "required": [
+    "items",
+    "total",
+    "limit",
+    "authority"
+  ]
+}
+```
+
+## Status codes
+
+- **200**: Successful read; proof validity is a separate field.
+- **500**: Runtime/manifest/RPC error; malformed preview JSON also reaches generic error handling.
+
+[API conventions and limitations](/api/overview)

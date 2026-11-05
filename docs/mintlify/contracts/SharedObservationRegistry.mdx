@@ -1,0 +1,174 @@
+---
+title: "SharedObservationRegistry"
+description: "Compiler-ABI-derived callable functions, events and errors for SharedObservationRegistry."
+---
+
+Curator registers immutable observations. Only the bound resolver finalizes at/after maturity; anyone cancels at/after the common longstop. Both terminal states are irreversible.
+
+[Contract source](https://github.com/debojyoti10CC/floorprt/blob/main/packages/contracts/src/SharedObservationRegistry.sol) · [Generated ABI](https://github.com/debojyoti10CC/floorprt/blob/main/packages/shared/src/abis.generated.ts)
+
+<Note>This reference is generated from the checked-in compiler ABI. It includes inherited OpenZeppelin interfaces. It is not a deployment/address claim. Amounts and IDs are integers; tuples expand below to exact ABI field order.</Note>
+
+## Constructor
+
+### Deploy
+
+```solidity
+constructor(address curator, address testResolver)
+```
+
+## Functions
+
+### POLICY
+
+```solidity
+function POLICY() view returns (bytes32)
+```
+
+### acceptOwnership
+
+```solidity
+function acceptOwnership() nonpayable
+```
+
+### cancel
+
+```solidity
+function cancel(uint256 id) nonpayable
+```
+
+### finalize
+
+```solidity
+function finalize(uint256 id, uint256 canonicalPrice) nonpayable
+```
+
+### observation
+
+```solidity
+function observation(uint256 id) view returns ((bytes32,uint64,uint8,bytes32,bytes32,uint64,uint8,uint256,address) obs)
+```
+
+### observationCount
+
+```solidity
+function observationCount() view returns (uint256)
+```
+
+### owner
+
+```solidity
+function owner() view returns (address)
+```
+
+### pendingOwner
+
+```solidity
+function pendingOwner() view returns (address)
+```
+
+### registerObservation
+
+```solidity
+function registerObservation(bytes32 assetId, uint64 observationTime, uint8 priceDecimals, bytes32 sourceId, bytes32 resolutionPolicyHash, uint64 cancelAfter) nonpayable returns (uint256 id)
+```
+
+### renounceOwnership
+
+```solidity
+function renounceOwnership() nonpayable
+```
+
+### resolver
+
+```solidity
+function resolver() view returns (address)
+```
+
+### transferOwnership
+
+```solidity
+function transferOwnership(address newOwner) nonpayable
+```
+
+## Events
+
+### ObservationCancelled
+
+```solidity
+event ObservationCancelled(uint256 indexed observationId)
+```
+
+### ObservationFinalized
+
+```solidity
+event ObservationFinalized(uint256 indexed observationId, uint256 price)
+```
+
+### ObservationRegistered
+
+```solidity
+event ObservationRegistered(uint256 indexed observationId, bytes32 indexed assetId, uint64 observationTime)
+```
+
+### OwnershipTransferStarted
+
+```solidity
+event OwnershipTransferStarted(address indexed previousOwner, address indexed newOwner)
+```
+
+### OwnershipTransferred
+
+```solidity
+event OwnershipTransferred(address indexed previousOwner, address indexed newOwner)
+```
+
+## Errors
+
+### AlreadyTerminal
+
+```solidity
+error AlreadyTerminal()
+```
+
+### InvalidObservation
+
+```solidity
+error InvalidObservation()
+```
+
+### InvalidPrice
+
+```solidity
+error InvalidPrice()
+```
+
+### OwnableInvalidOwner
+
+```solidity
+error OwnableInvalidOwner(address owner)
+```
+
+### OwnableUnauthorizedAccount
+
+```solidity
+error OwnableUnauthorizedAccount(address account)
+```
+
+### TooEarly
+
+```solidity
+error TooEarly()
+```
+
+### UnauthorizedResolver
+
+```solidity
+error UnauthorizedResolver()
+```
+
+### UnknownObservation
+
+```solidity
+error UnknownObservation()
+```

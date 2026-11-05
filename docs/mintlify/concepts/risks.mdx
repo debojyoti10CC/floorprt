@@ -1,0 +1,31 @@
+---
+title: 'Risks and trust assumptions'
+description: 'What the mathematical bound cannot guarantee about real execution or finance.'
+---
+
+<Warning>
+This is an unaudited local/testnet prototype. Mainnet is not enabled. Do not deposit real-value assets or describe the system as audited, risk-free, insured or legally cleared.
+</Warning>
+
+| Assumption / risk | Why it matters |
+| --- | --- |
+| Full issuer backing | A payout formula cannot create missing collateral |
+| Correct exact custody | The certified tokens must actually secure the loan and cannot be pledged twice |
+| Contract correctness | Bugs, reentrancy, misconfiguration or unexpected token behavior can defeat enforcement |
+| Oracle fairness | A shared numeric price preserves the restricted theorem, but a bad price changes upside allocation |
+| Oracle liveness | Terminal support is not immediate liquidity; longstop recovery still requires chain access and gas |
+| Stablecoin behavior | Peg, transferability, freezes/blacklists and proxy upgrades remain external risks |
+| Chain/RPC integrity | Wrong chain, stale manifests, reorgs and unavailable infrastructure affect safe execution |
+| Lender availability | A verified floor does not guarantee a counterparty will advance capital |
+| Acquisition economics | Buying or minting claims may cost more than the pledged floor |
+| Legal/regulatory status | Prediction claims, lending and structured products may be restricted by jurisdiction |
+
+## Deliberate boundaries
+
+Only claims from the bound approved issuer enter the vault. Gamma/Polymarket data is research-only. There is no bridge, external CTF custody, probabilistic collateral uplift, generalized loan solver or transferable lien certificate.
+
+Pausing new locks or funding is separate from exits: settlement, full repayment and unfunded release remain available subject to their own state and token-transfer conditions. There is no admin ability to seize pledged inventory.
+
+## Incident behavior
+
+A short redemption, code identity mismatch, failed transfer or inconsistent custody is an error to investigate, not something to hide behind a cache fallback. Recorded snapshots cannot authorize writes. Follow [incident response](/operations/incidents) and retain exact transaction/block evidence.

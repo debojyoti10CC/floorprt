@@ -1,0 +1,1486 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "AQRA read API",
+    "version": "0.1.0",
+    "description": "Source-derived local prototype API. No signing routes or monetary authorization. Integer financial values are decimal strings; entity lists are bounded snapshots, not cursor pagination."
+  },
+  "servers": [
+    {
+      "url": "http://127.0.0.1:8787/api/v1",
+      "description": "Local Hono API"
+    }
+  ],
+  "paths": {
+    "/config": {
+      "get": {
+        "operationId": "config",
+        "summary": "Deployment configuration",
+        "description": "Current manifest generation, including addresses and code hashes. It is configuration, not proof that runtime code is present.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful read; proof validity is a separate field.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Deployment"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Runtime/manifest/RPC error; malformed preview JSON also reaches generic error handling.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "operationId": "health",
+        "summary": "API and chain health",
+        "description": "Checks RPC chain identity and exposes deployment identity, oracle mode, journal overview and signingKeys NONE. Returns 503 on chain mismatch or RPC unavailability. Healthy responses include apiVersion floor-api/v2; RPC-failure responses have a smaller shape.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful read; proof validity is a separate field.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Runtime/manifest/RPC error; malformed preview JSON also reaches generic error handling.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Wrong chain or unavailable RPC."
+          }
+        }
+      }
+    },
+    "/snapshot": {
+      "get": {
+        "operationId": "snapshot",
+        "summary": "Direct chain snapshot",
+        "description": "Pins related reads to one block; latest 200 per entity collection and about 5,000 blocks of activity. No wallet argument is accepted by this route, so walletAddress/walletBalance are null and market wallet balances are zero.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful read; proof validity is a separate field.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Snapshot"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Runtime/manifest/RPC error; malformed preview JSON also reaches generic error handling.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/observations": {
+      "get": {
+        "operationId": "observations",
+        "summary": "List observations",
+        "description": "Newest observations inside the bounded snapshot. total is the window count, not a global chain count.",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 50
+            },
+            "description": "Tail of bounded snapshot; clamped to 1–100. No cursor/offset support."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful read; proof validity is a separate field.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Observation"
+                      }
+                    },
+                    "total": {
+                      "type": "integer"
+                    },
+                    "limit": {
+                      "type": "integer"
+                    },
+                    "authority": {
+                      "type": "string",
+                      "enum": [
+                        "DIRECT_CHAIN"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "items",
+                    "total",
+                    "limit",
+                    "authority"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Runtime/manifest/RPC error; malformed preview JSON also reaches generic error handling.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/markets": {
+      "get": {
+        "operationId": "markets",
+        "summary": "List approved markets",
+        "description": "Approved issuer markets, including escrow and deterministic token IDs; collection also includes blockNumber and source. Eligibility flag alone does not prove observation is still open.",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 50
+            },
+            "description": "Tail of bounded snapshot; clamped to 1–100. No cursor/offset support."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful read; proof validity is a separate field.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Market"
+                      }
+                    },
+                    "total": {
+                      "type": "integer"
+                    },
+                    "limit": {
+                      "type": "integer"
+                    },
+                    "authority": {
+                      "type": "string",
+                      "enum": [
+                        "DIRECT_CHAIN"
+                      ]
+                    },
+                    "blockNumber": {
+                      "type": "string",
+                      "pattern": "^(0|[1-9][0-9]*)$"
+                    },
+                    "source": {
+                      "type": "string",
+                      "enum": [
+                        "DIRECT_CHAIN"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "items",
+                    "total",
+                    "limit",
+                    "authority"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Runtime/manifest/RPC error; malformed preview JSON also reaches generic error handling.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/markets/{id}": {
+      "get": {
+        "operationId": "market",
+        "summary": "Read one market",
+        "description": "Searches the newest-200 market snapshot. Returns 404 outside that window or for missing IDs. Observation may be omitted when outside its own bounded collection.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Decimal entity ID."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful read; proof validity is a separate field.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "market": {
+                      "$ref": "#/components/schemas/Market"
+                    },
+                    "observation": {
+                      "$ref": "#/components/schemas/Observation"
+                    },
+                    "block": {
+                      "type": "string",
+                      "pattern": "^(0|[1-9][0-9]*)$"
+                    }
+                  },
+                  "required": [
+                    "market",
+                    "block"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Entity not found inside the bounded snapshot."
+          },
+          "500": {
+            "description": "Runtime/manifest/RPC error; malformed preview JSON also reaches generic error handling.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/vaults/{id}": {
+      "get": {
+        "operationId": "vault",
+        "summary": "Read a position or owner portfolio",
+        "description": "If id is an Ethereum address, returns a bounded owner-filtered collection. Otherwise reads one position ID from the snapshot, returning 404 if absent. This route does not accept a separate owner query.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Position ID or owner Ethereum address."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 50
+            },
+            "description": "Tail of bounded snapshot; clamped to 1–100. No cursor/offset support."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful read; proof validity is a separate field.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/Position"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "items": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/Position"
+                          }
+                        },
+                        "total": {
+                          "type": "integer"
+                        },
+                        "limit": {
+                          "type": "integer"
+                        },
+                        "authority": {
+                          "type": "string",
+                          "enum": [
+                            "DIRECT_CHAIN"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "items",
+                        "total",
+                        "limit",
+                        "authority"
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Entity not found inside the bounded snapshot."
+          },
+          "500": {
+            "description": "Runtime/manifest/RPC error; malformed preview JSON also reaches generic error handling.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/loans": {
+      "get": {
+        "operationId": "loans",
+        "summary": "List loans",
+        "description": "Newest loans from direct chain reads; states are numeric enums.",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 50
+            },
+            "description": "Tail of bounded snapshot; clamped to 1–100. No cursor/offset support."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful read; proof validity is a separate field.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Loan"
+                      }
+                    },
+                    "total": {
+                      "type": "integer"
+                    },
+                    "limit": {
+                      "type": "integer"
+                    },
+                    "authority": {
+                      "type": "string",
+                      "enum": [
+                        "DIRECT_CHAIN"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "items",
+                    "total",
+                    "limit",
+                    "authority"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Runtime/manifest/RPC error; malformed preview JSON also reaches generic error handling.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/loans/{id}": {
+      "get": {
+        "operationId": "loan",
+        "summary": "Read one loan",
+        "description": "Searches the bounded direct snapshot. Missing or older IDs return 404 even if older contract state still exists.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Decimal entity ID."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful read; proof validity is a separate field.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Loan"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Entity not found inside the bounded snapshot."
+          },
+          "500": {
+            "description": "Runtime/manifest/RPC error; malformed preview JSON also reaches generic error handling.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/activity": {
+      "get": {
+        "operationId": "activity",
+        "summary": "List protocol activity",
+        "description": "Decoded known-contract protocol events in the bounded block window. Standard Transfer/Approval and OwnershipTransferred events are omitted; no address filter is implemented.",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 50
+            },
+            "description": "Tail of bounded snapshot; clamped to 1–100. No cursor/offset support."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful read; proof validity is a separate field.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Activity"
+                      }
+                    },
+                    "total": {
+                      "type": "integer"
+                    },
+                    "limit": {
+                      "type": "integer"
+                    },
+                    "authority": {
+                      "type": "string",
+                      "enum": [
+                        "DIRECT_CHAIN"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "items",
+                    "total",
+                    "limit",
+                    "authority"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Runtime/manifest/RPC error; malformed preview JSON also reaches generic error handling.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/metrics": {
+      "get": {
+        "operationId": "metrics",
+        "summary": "Read bounded metrics",
+        "description": "activePrincipal sums FUNDED loans; lockedFloor sums OPEN and ENCUMBERED positions; settlements counts SETTLED loans. These are window aggregates, not unbounded protocol-wide analytics.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful read; proof validity is a separate field.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Metrics"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Runtime/manifest/RPC error; malformed preview JSON also reaches generic error handling.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/research/markets": {
+      "get": {
+        "operationId": "research",
+        "summary": "Read research metadata",
+        "description": "Fetches up to 12 active Gamma market rows, caches for 60 seconds and deduplicates concurrent fetches. External request timeout is 8 seconds. All rows are research-only and not collateral eligible. Source failures return 502; no stale-on-error success response is implemented.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful read; proof validity is a separate field.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Research"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Runtime/manifest/RPC error; malformed preview JSON also reaches generic error handling.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Gamma/source validation failure; collateralEligible remains false."
+          }
+        }
+      }
+    },
+    "/proof/preview": {
+      "post": {
+        "operationId": "preview",
+        "summary": "Preview a pair proof",
+        "description": "Validates decimal-string IDs and positive uint64 quantities, with chainId equal to the configured deployment. Calls the onchain verifier at a pinned block, then builds scenarios from a separate snapshot. Always authorization false. A valid=false proof normally returns HTTP 200; scenarios may still exist and are not certification.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful read; proof validity is a separate field.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Preview"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid parsed request shape, chain ID or quantity."
+          },
+          "413": {
+            "description": "Declared Content-Length exceeds 8192 bytes. This is not a hardened streaming size cap."
+          },
+          "500": {
+            "description": "Runtime/manifest/RPC error; malformed preview JSON also reaches generic error handling.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PreviewInput"
+              },
+              "example": {
+                "chainId": 31337,
+                "lowerMarketId": "2",
+                "upperMarketId": "3",
+                "lowerYesUnits": "1",
+                "upperNoUnits": "1"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "error"
+        ]
+      },
+      "Request": {
+        "type": "object",
+        "properties": {
+          "principal": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$"
+          },
+          "maximumDue": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$"
+          },
+          "expiry": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$"
+          },
+          "active": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "principal",
+          "maximumDue",
+          "expiry",
+          "active"
+        ]
+      },
+      "Observation": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$"
+          },
+          "assetId": {
+            "type": "string",
+            "pattern": "^0x[0-9a-fA-F]{64}$"
+          },
+          "observationTime": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$"
+          },
+          "priceDecimals": {
+            "type": "integer"
+          },
+          "sourceId": {
+            "type": "string",
+            "pattern": "^0x[0-9a-fA-F]{64}$"
+          },
+          "resolutionPolicyHash": {
+            "type": "string",
+            "pattern": "^0x[0-9a-fA-F]{64}$"
+          },
+          "cancelAfter": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$"
+          },
+          "state": {
+            "type": "integer",
+            "enum": [
+              0,
+              1,
+              2
+            ]
+          },
+          "price": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$"
+          },
+          "resolver": {
+            "type": "string",
+            "pattern": "^0x[0-9a-fA-F]{40}$"
+          }
+        },
+        "required": [
+          "id",
+          "assetId",
+          "observationTime",
+          "priceDecimals",
+          "sourceId",
+          "resolutionPolicyHash",
+          "cancelAfter",
+          "state",
+          "price",
+          "resolver"
+        ]
+      },
+      "Market": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$"
+          },
+          "observationId": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$"
+          },
+          "strike": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$"
+          },
+          "enabledForNewCollateral": {
+            "type": "boolean"
+          },
+          "yesTokenId": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$"
+          },
+          "noTokenId": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$"
+          },
+          "escrow": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$"
+          },
+          "yesBalance": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$"
+          },
+          "noBalance": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$"
+          }
+        },
+        "required": [
+          "id",
+          "observationId",
+          "strike",
+          "enabledForNewCollateral",
+          "yesTokenId",
+          "noTokenId",
+          "escrow",
+          "yesBalance",
+          "noBalance"
+        ]
+      },
+      "Position": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$"
+          },
+          "owner": {
+            "type": "string",
+            "pattern": "^0x[0-9a-fA-F]{40}$"
+          },
+          "beneficiary": {
+            "type": "string",
+            "pattern": "^0x[0-9a-fA-F]{40}$"
+          },
+          "marketLower": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$"
+          },
+          "marketUpper": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$"
+          },
+          "unitsLower": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$"
+          },
+          "unitsUpper": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$"
+          },
+          "observationId": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$"
+          },
+          "certifiedFloor": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$"
+          },
+          "state": {
+            "type": "integer",
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ]
+          },
+          "lienLoanId": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$"
+          },
+          "request": {
+            "$ref": "#/components/schemas/Request"
+          }
+        },
+        "required": [
+          "id",
+          "owner",
+          "beneficiary",
+          "marketLower",
+          "marketUpper",
+          "unitsLower",
+          "unitsUpper",
+          "observationId",
+          "certifiedFloor",
+          "state",
+          "lienLoanId",
+          "request"
+        ]
+      },
+      "Loan": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$"
+          },
+          "positionId": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$"
+          },
+          "lender": {
+            "type": "string",
+            "pattern": "^0x[0-9a-fA-F]{40}$"
+          },
+          "borrower": {
+            "type": "string",
+            "pattern": "^0x[0-9a-fA-F]{40}$"
+          },
+          "principal": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$"
+          },
+          "due": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$"
+          },
+          "certifiedFloor": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$"
+          },
+          "fundedAt": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$"
+          },
+          "targetMaturity": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$"
+          },
+          "state": {
+            "type": "integer",
+            "enum": [
+              0,
+              1,
+              2,
+              3
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "positionId",
+          "lender",
+          "borrower",
+          "principal",
+          "due",
+          "certifiedFloor",
+          "fundedAt",
+          "targetMaturity",
+          "state"
+        ]
+      },
+      "Activity": {
+        "type": "object",
+        "properties": {
+          "event": {
+            "type": "string"
+          },
+          "args": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "transactionHash": {
+            "type": "string",
+            "pattern": "^0x[0-9a-fA-F]{64}$"
+          },
+          "blockNumber": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$"
+          },
+          "blockHash": {
+            "type": "string",
+            "pattern": "^0x[0-9a-fA-F]{64}$"
+          },
+          "logIndex": {
+            "type": "integer"
+          },
+          "address": {
+            "type": "string",
+            "pattern": "^0x[0-9a-fA-F]{40}$"
+          }
+        },
+        "required": [
+          "event",
+          "args",
+          "transactionHash",
+          "blockNumber",
+          "blockHash",
+          "logIndex",
+          "address"
+        ]
+      },
+      "Deployment": {
+        "type": "object",
+        "properties": {
+          "schema": {
+            "type": "string",
+            "enum": [
+              "floor-deployment/v1"
+            ]
+          },
+          "chainId": {
+            "type": "integer",
+            "enum": [
+              31337,
+              11155111
+            ]
+          },
+          "chainName": {
+            "type": "string"
+          },
+          "rpcUrl": {
+            "type": "string"
+          },
+          "explorerUrl": {
+            "type": "string"
+          },
+          "deploymentBlock": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$"
+          },
+          "deployedAt": {
+            "type": "string"
+          },
+          "contracts": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "pattern": "^0x[0-9a-fA-F]{40}$"
+            }
+          },
+          "codeHashes": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "pattern": "^0x[0-9a-fA-F]{64}$"
+            }
+          },
+          "roles": {
+            "type": "object",
+            "properties": {
+              "curator": {
+                "type": "string",
+                "pattern": "^0x[0-9a-fA-F]{40}$"
+              },
+              "resolver": {
+                "type": "string",
+                "pattern": "^0x[0-9a-fA-F]{40}$"
+              },
+              "borrower": {
+                "type": "string",
+                "pattern": "^0x[0-9a-fA-F]{40}$"
+              },
+              "lender": {
+                "type": "string",
+                "pattern": "^0x[0-9a-fA-F]{40}$"
+              }
+            },
+            "required": [
+              "curator",
+              "resolver",
+              "borrower",
+              "lender"
+            ]
+          },
+          "mockCollateral": {
+            "type": "boolean"
+          },
+          "oracleMode": {
+            "type": "string",
+            "enum": [
+              "TRUSTED_TEST_RESOLVER",
+              "CHAINLINK_HISTORICAL"
+            ]
+          },
+          "oracle": {
+            "type": "object"
+          },
+          "buildFingerprint": {
+            "type": "string"
+          },
+          "seededBlock": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$"
+          },
+          "defaultPair": {
+            "type": "object",
+            "properties": {
+              "lower": {
+                "type": "string",
+                "pattern": "^(0|[1-9][0-9]*)$"
+              },
+              "upper": {
+                "type": "string",
+                "pattern": "^(0|[1-9][0-9]*)$"
+              }
+            },
+            "required": [
+              "lower",
+              "upper"
+            ]
+          }
+        },
+        "required": [
+          "schema",
+          "chainId",
+          "chainName",
+          "rpcUrl",
+          "explorerUrl",
+          "deploymentBlock",
+          "deployedAt",
+          "contracts",
+          "codeHashes",
+          "roles",
+          "mockCollateral",
+          "oracleMode"
+        ]
+      },
+      "Snapshot": {
+        "type": "object",
+        "properties": {
+          "chainId": {
+            "type": "integer"
+          },
+          "blockNumber": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$"
+          },
+          "blockHash": {
+            "type": "string",
+            "pattern": "^0x[0-9a-fA-F]{64}$"
+          },
+          "timestamp": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$"
+          },
+          "observations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Observation"
+            }
+          },
+          "markets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Market"
+            }
+          },
+          "positions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Position"
+            }
+          },
+          "loans": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Loan"
+            }
+          },
+          "activity": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Activity"
+            }
+          },
+          "walletAddress": {
+            "type": "string",
+            "nullable": true
+          },
+          "walletBalance": {
+            "type": "string",
+            "nullable": true
+          },
+          "bufferBps": {
+            "type": "integer"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "DIRECT_CHAIN",
+              "RECORDED_CHAIN"
+            ]
+          },
+          "fetchedAt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "chainId",
+          "blockNumber",
+          "blockHash",
+          "timestamp",
+          "observations",
+          "markets",
+          "positions",
+          "loans",
+          "activity",
+          "walletAddress",
+          "walletBalance",
+          "bufferBps",
+          "source",
+          "fetchedAt"
+        ]
+      },
+      "PreviewInput": {
+        "type": "object",
+        "properties": {
+          "chainId": {
+            "type": "integer",
+            "enum": [
+              31337,
+              11155111
+            ]
+          },
+          "lowerMarketId": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$",
+            "maxLength": 78
+          },
+          "upperMarketId": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$",
+            "maxLength": 78
+          },
+          "lowerYesUnits": {
+            "type": "string",
+            "pattern": "^[1-9][0-9]*$",
+            "description": "Positive uint64, at most 18446744073709551615."
+          },
+          "upperNoUnits": {
+            "type": "string",
+            "pattern": "^[1-9][0-9]*$",
+            "description": "Positive uint64, at most 18446744073709551615."
+          }
+        },
+        "required": [
+          "chainId",
+          "lowerMarketId",
+          "upperMarketId",
+          "lowerYesUnits",
+          "upperNoUnits"
+        ]
+      },
+      "Preview": {
+        "type": "object",
+        "properties": {
+          "valid": {
+            "type": "boolean"
+          },
+          "floorUsdcBase": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$"
+          },
+          "observationId": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$"
+          },
+          "proofVersion": {
+            "type": "string",
+            "pattern": "^0x[0-9a-fA-F]{64}$"
+          },
+          "reasonCode": {
+            "type": "integer"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "scenarios": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "state": {
+                  "type": "string"
+                },
+                "label": {
+                  "type": "string"
+                },
+                "price": {
+                  "oneOf": [
+                    {
+                      "type": "string",
+                      "pattern": "^(0|[1-9][0-9]*)$"
+                    },
+                    {
+                      "type": "string",
+                      "enum": [
+                        "CANCELLED"
+                      ]
+                    }
+                  ]
+                },
+                "payout": {
+                  "type": "string",
+                  "pattern": "^(0|[1-9][0-9]*)$"
+                }
+              },
+              "required": [
+                "state",
+                "label",
+                "price",
+                "payout"
+              ]
+            }
+          },
+          "verifiedAtBlock": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$"
+          },
+          "verifierAddress": {
+            "type": "string",
+            "pattern": "^0x[0-9a-fA-F]{40}$"
+          },
+          "assumptions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "authorization": {
+            "type": "boolean",
+            "enum": [
+              false
+            ]
+          }
+        },
+        "required": [
+          "valid",
+          "floorUsdcBase",
+          "observationId",
+          "proofVersion",
+          "reasonCode",
+          "reason",
+          "scenarios",
+          "verifiedAtBlock",
+          "verifierAddress",
+          "assumptions",
+          "authorization"
+        ]
+      },
+      "Metrics": {
+        "type": "object",
+        "properties": {
+          "block": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$"
+          },
+          "activePrincipal": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$"
+          },
+          "lockedFloor": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$"
+          },
+          "settlements": {
+            "type": "integer"
+          },
+          "authority": {
+            "type": "string",
+            "enum": [
+              "DIRECT_CHAIN"
+            ]
+          }
+        },
+        "required": [
+          "block",
+          "activePrincipal",
+          "lockedFloor",
+          "settlements",
+          "authority"
+        ]
+      },
+      "Research": {
+        "type": "object",
+        "properties": {
+          "markets": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "externalId": {
+                  "type": "string"
+                },
+                "question": {
+                  "type": "string"
+                },
+                "outcomes": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "conditionId": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "endDate": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "resolutionSource": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "sourceUri": {
+                  "type": "string"
+                },
+                "venue": {
+                  "type": "string",
+                  "enum": [
+                    "POLYMARKET"
+                  ]
+                },
+                "eligibility": {
+                  "type": "string",
+                  "enum": [
+                    "RESEARCH_ONLY"
+                  ]
+                },
+                "collateralEligible": {
+                  "type": "boolean",
+                  "enum": [
+                    false
+                  ]
+                }
+              },
+              "required": [
+                "externalId",
+                "question",
+                "outcomes",
+                "conditionId",
+                "endDate",
+                "resolutionSource",
+                "sourceUri",
+                "venue",
+                "eligibility",
+                "collateralEligible"
+              ]
+            }
+          },
+          "fetchedAt": {
+            "type": "string"
+          },
+          "stale": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "markets",
+          "fetchedAt",
+          "stale"
+        ]
+      }
+    }
+  }
+}

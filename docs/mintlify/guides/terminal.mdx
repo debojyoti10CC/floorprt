@@ -1,0 +1,36 @@
+---
+title: 'Terminal screens and interaction modes'
+description: 'Navigate the application without confusing payoff models, recorded evidence and chain state.'
+---
+
+| Route | Screen | Purpose |
+| --- | --- | --- |
+| `/`, `/terminal/` | Overview | Bounded chain metrics, exact scenario surface, confirmed activity/capital flows |
+| `/markets/` | Market explorer | Approved issuer directory and separately labeled research feed |
+| `/compose/` | Portfolio studio | Select/drag claims, edit whole units, inspect payout and lock |
+| `/proof/` | Proof inspector | Finite state table, live verifier result and canonical metadata |
+| `/credit/` | Credit desk | Borrower requests and distinct-lender funding |
+| `/portfolio/` | My portfolio | Wallet claims, vault positions, borrower/lender ledger and repayment |
+| `/settlements/` | Settlement audit | Loan selection, realized waterfall and transaction evidence |
+| `/ops/` | Operations | Curator setup, resolver/feed controls, RPC/manifest settings |
+| `/docs/` | Embedded protocol explanation | Compact application documentation, separate from this Mintlify site |
+
+## Exact models versus financial state
+
+The overview 3D surface/state matrix evaluates price and 1–6× portfolio scale. It is not a probability distribution, price feed, wallet balance or transaction. Changing a scenario only recomputes a deterministic payoff. Capital-flow diagrams instead aggregate confirmed protocol events in the bounded read window.
+
+## Offline behavior
+
+When the configured RPC is unavailable, matching recorded local evidence may load with `RECORDED_CHAIN` provenance. Historical data and mathematical tools remain inspectable; **wallet writes are disabled**. Hosted static HTML does not make a local devnet public.
+
+## Accessibility and design
+
+The final terminal uses Poppins, JetBrains Mono numeric roles, black/charcoal surfaces, pale periwinkle accents and semantic Kimia-inspired tokens in `apps/web/src/app/kimia.css`. No reference branding or trading figures are copied.
+
+- Claim chips support native click/keyboard selection as well as drag/drop.
+- The payoff surface supports Left/Right arrows and Home when focused.
+- Exact state tables supplement graphics.
+- Wallet dialog supports focus containment, Escape and focus return.
+- Reduced-motion and 390px responsive checks exist in Playwright.
+
+These focused checks are not an independent WCAG certification. See [design specification](/specifications/DESIGN_SYSTEM).

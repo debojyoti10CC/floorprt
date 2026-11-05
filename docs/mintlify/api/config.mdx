@@ -1,0 +1,31 @@
+---
+title: "Deployment configuration"
+description: "GET /api/v1/config — Current manifest generation, including addresses and code hashes. It is configuration, not proof that runtime code is present."
+---
+
+`GET /api/v1/config`
+
+Current manifest generation, including addresses and code hashes. It is configuration, not proof that runtime code is present.
+
+## Request
+
+```bash
+curl 'http://127.0.0.1:8787/api/v1/config'
+```
+
+## Response contract
+
+The following is a **schema**, not a transaction result. Shared types resolve in the [OpenAPI specification](/api/openapi.json).
+
+```json
+{
+  "$ref": "#/components/schemas/Deployment"
+}
+```
+
+## Status codes
+
+- **200**: Successful read; proof validity is a separate field.
+- **500**: Runtime/manifest/RPC error; malformed preview JSON also reaches generic error handling.
+
+[API conventions and limitations](/api/overview)

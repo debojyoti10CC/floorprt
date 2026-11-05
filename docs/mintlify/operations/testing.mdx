@@ -1,0 +1,49 @@
+---
+title: 'Testing and release commands'
+description: 'Run the correct checks and distinguish historical evidence from new execution.'
+---
+
+Install pinned dependencies first. Compile/regenerate ABIs before source checks on a fresh checkout. Run the local stack for differential RPC comparisons and preflight.
+
+```bash
+pnpm contracts:build
+pnpm abi
+pnpm dev                 # keep running in another terminal
+```
+
+| Command | Scope / side effects |
+| --- | --- |
+| `pnpm lint` | Conflict/secret scan, generated ABI consistency, forge formatting |
+| `pnpm typecheck` | Root packages/services/scripts and web TypeScript |
+| `pnpm test` | Vitest unit/property suite |
+| `pnpm contracts:test` | Offline Solidity tests, fuzz and invariants; public fork test skipped unless opted in |
+| `pnpm test:differential` | 10,000 Python/TS vectors, 100 historical seeded-block Solidity/TS comparisons; writes evidence |
+| `pnpm check` | lint + types + unit + Solidity + differential |
+| `pnpm preflight` | RPC chain identity, runtime hashes, six-decimal collateral, snapshot |
+| `pnpm e2e` | Chromium multi-wallet lifecycle, repayment, scenario/drag, offline, focus/contrast/mobile; writes receipts/screenshots |
+| `pnpm demo` | Six local settlements, clock advancement, receipts and fresh demo inventory |
+| `pnpm build` | Contracts/ABIs, production static app and packaging |
+| `pnpm verify` | check → preflight → e2e → demo → build → dependency audit; saves per-command logs |
+| `pnpm test:fork` | Separate pinned Sepolia external bytecode gate |
+| `pnpm sepolia:check` | Separate public read-only dependency inspection |
+| `pnpm docs:check` | Generated-doc consistency and Mintlify content/build validation |
+
+Install Chromium once: `pnpm exec playwright install chromium`. On Linux CI, use `--with-deps`. If `python` is unavailable, set `PYTHON=python3`.
+
+## Critical properties
+
+- Backing and cash conservation through mint, merge, partial/losing/canceled redemption.
+- Exact shared observation, ordered strikes, correct sides and maturity cutoff.
+- Positive whole units, odd whole cancellation, conservative reserve rounding.
+- Exact expected callback context, foreign issuer rejection and reentrancy resistance.
+- Borrower consent, distinct lender, exact principal and fee-inclusive cap.
+- Allowance/transfer failure atomicity, one lien, no duplicate settlement/redemption.
+- Full repayment returns exact inventory and excludes later settlement.
+- Stateful invariants: outstanding liabilities backed, vault inventory matches positions, debt fits floor and no stranded protocol cash.
+- Historical resolver rejects stale/negative/incomplete rounds, gaps and archived phase witnesses.
+
+Foundry uses 512 fuzz runs and 128 invariant runs × 48 calls in its checked-in config. Tests are important evidence, not an audit or complete proof of production safety.
+
+## CI versus full verification
+
+`.github/workflows/ci.yml` installs Node 24/pnpm, builds ABIs, runs types/unit/Solidity/fork/format, browser and static build, and uploads evidence. It is not identical to `pnpm verify`: the latter also drives demo and audit with its own logs. External fork/read checks depend on RPC/network availability.

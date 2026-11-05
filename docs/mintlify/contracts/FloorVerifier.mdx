@@ -1,0 +1,60 @@
+---
+title: "FloorVerifier"
+description: "Compiler-ABI-derived callable functions, events and errors for FloorVerifier."
+---
+
+Restricted YES(lower GEQ) plus NO(upper GEQ) proof. verifyPair fixes sides by grammar; verifySelection additionally checks explicit sides. The factory/issuer/registry identity is fixed by immutable construction.
+
+[Contract source](https://github.com/debojyoti10CC/floorprt/blob/main/packages/contracts/src/FloorVerifier.sol) · [Generated ABI](https://github.com/debojyoti10CC/floorprt/blob/main/packages/shared/src/abis.generated.ts)
+
+<Note>This reference is generated from the checked-in compiler ABI. It includes inherited OpenZeppelin interfaces. It is not a deployment/address claim. Amounts and IDs are integers; tuples expand below to exact ABI field order.</Note>
+
+## Constructor
+
+### Deploy
+
+```solidity
+constructor(address factory_)
+```
+
+## Functions
+
+### PROOF_VERSION
+
+```solidity
+function PROOF_VERSION() view returns (bytes32)
+```
+
+### factory
+
+```solidity
+function factory() view returns (address)
+```
+
+### registry
+
+```solidity
+function registry() view returns (address)
+```
+
+### tokens
+
+```solidity
+function tokens() view returns (address)
+```
+
+### verifyPair
+
+```solidity
+function verifyPair(uint256 lower, uint256 upper, uint64 qLower, uint64 qUpper) view returns ((bool,uint256,uint256,bytes32,uint16) result)
+```
+
+### verifySelection
+
+```solidity
+function verifySelection(uint256 lower, uint256 upper, uint64 qLower, uint64 qUpper, uint8 sideLower, uint8 sideUpper) view returns ((bool,uint256,uint256,bytes32,uint16) result)
+```
+
+## Events
+
+## Errors

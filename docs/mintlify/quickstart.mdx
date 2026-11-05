@@ -1,0 +1,61 @@
+---
+title: 'Local quickstart'
+description: 'Run AQRA with a real local EVM and wallet-authorized test-fund transactions.'
+---
+
+## Prerequisites
+
+Use Node **24.16.0** (`.node-version`), pnpm **10.20.0**, and Python **3.10+** for differential checks. `package.json` permits Node 22+, but the project pins Node 24 for reproducibility. Foundry 1.7.1 binaries are pinned npm dependencies; no global installation is required.
+
+```bash
+pnpm install --frozen-lockfile
+pnpm dev
+```
+
+| Service | Local address |
+| --- | --- |
+| Terminal | `http://127.0.0.1:3000/` |
+| Hono read API | `http://127.0.0.1:8787/api/v1/health` |
+| Anvil RPC, chain 31337 | `http://127.0.0.1:8545` |
+
+`pnpm dev` compiles contracts, regenerates eight typed ABIs, deploys and seeds when needed, provisions an open pair if all observations have matured, and starts the API and web app. It reuses compatible services. A conflicting chain on 8545 or unhealthy/incompatible API on 8787 causes a visible failure, not a silent replacement.
+
+<Warning>
+Keep Anvil on loopback. Its unlocked accounts and freely mintable test collateral are intentionally insecure development rails, never public custody infrastructure.
+</Warning>
+
+## Connect and transact
+
+1. Select **Connect wallet → Borrower**. The browser uses an unlocked Anvil account, restricted to loopback chain 31337.
+2. In **Portfolio studio**, select an open pair, inspect the proof and mint complete sets if needed.
+3. Approve the outcome-token operator and **Lock pair in vault**.
+4. In **Credit desk → Borrow**, request `0.75` principal and `0.78` maximum total due for a one-USDC floor.
+5. Connect the **Lender** account, select **Lend**, approve and fund.
+6. Connect **Curator / test resolver**, open **Operations**, and choose a scenario. **Advance local clock & finalize** changes Anvil time explicitly.
+7. In **Settlement audit**, settle and inspect the confirmed cashflow event.
+
+Use [the borrower guide](/guides/borrow) for details or [full repayment](/guides/settle-and-repay) to recover claims without waiting for resolution.
+
+## Verify the local setup
+
+Keep the stack running in another terminal:
+
+```bash
+pnpm preflight
+pnpm check
+pnpm exec playwright install chromium
+pnpm e2e
+pnpm demo
+```
+
+The differential script invokes `python` by default. If your executable is `python3`, run `PYTHON=python3 pnpm check` on a POSIX shell. `pnpm demo` adds real local transactions and advances time; it is not a read-only command.
+
+## Preview this documentation
+
+From the repository root:
+
+```bash
+pnpm docs:dev
+```
+
+The Mintlify preview uses port **3001** to avoid the application. See [documentation maintenance](/maintenance/documentation) for generation, validation and publishing.

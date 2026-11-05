@@ -1,0 +1,32 @@
+---
+title: "Read research metadata"
+description: "GET /api/v1/research/markets — Fetches up to 12 active Gamma market rows, caches for 60 seconds and deduplicates concurrent fetches. External request timeout is 8 seconds."
+---
+
+`GET /api/v1/research/markets`
+
+Fetches up to 12 active Gamma market rows, caches for 60 seconds and deduplicates concurrent fetches. External request timeout is 8 seconds. All rows are research-only and not collateral eligible. Source failures return 502; no stale-on-error success response is implemented.
+
+## Request
+
+```bash
+curl 'http://127.0.0.1:8787/api/v1/research/markets'
+```
+
+## Response contract
+
+The following is a **schema**, not a transaction result. Shared types resolve in the [OpenAPI specification](/api/openapi.json).
+
+```json
+{
+  "$ref": "#/components/schemas/Research"
+}
+```
+
+## Status codes
+
+- **200**: Successful read; proof validity is a separate field.
+- **500**: Runtime/manifest/RPC error; malformed preview JSON also reaches generic error handling.
+- **502**: Gamma/source validation failure; collateralEligible remains false.
+
+[API conventions and limitations](/api/overview)

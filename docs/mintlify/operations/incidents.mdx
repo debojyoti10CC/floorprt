@@ -1,0 +1,30 @@
+---
+title: 'Incident response and recovery'
+description: 'A prototype runbook for preserving evidence, preventing new exposure and handling safe exits.'
+---
+
+This runbook is guidance, not a staffed production incident service or security guarantee. No security contact/SLA is configured by this documentation.
+
+## Triage
+
+1. Record chain ID, RPC, contract addresses/code hashes, deployment manifest, exact error, transaction hash, block/hash/log index and affected position/loan IDs. Never capture private keys or access tokens.
+2. Reproduce reads directly against the intended chain; distinguish RPC failure, stale indexer, reorg, bad manifest and actual monetary inconsistency.
+3. If authorized, pause **new locks** with `FloorVault.setLocksPaused(true)` and **new requests/funding** with `CreditDesk.setFundingPaused(true)`. These require owner signatures; there is no backend admin signer.
+4. Preserve journal orphan evidence and failed receipts. Do not erase historical records or fabricate partial settlement as success.
+
+## Safe exits
+
+- OPEN position: owner may release exact claims, even after observation maturity.
+- FUNDED loan: borrower may repay full fixed due while token transfers and recipient callbacks work.
+- Terminal observation: anyone may settle if backing/redemption checks pass.
+- Unresolved observation after longstop: anyone may call shared cancellation.
+
+A token freeze, insolvency or failed recipient transfer may block exits. There is no hidden admin rescue, debt haircut or permission to skim pledged inventory. A shortfall reverts and requires explicit engineering/risk resolution, not a catch-and-continue payout.
+
+## Feed phase transition
+
+The historical adapter pins deployment phase. After an upgrade it fails closed; use committed longstop for unresolved old observations and deploy a new source-bound instance for new observations. Never reinterpret archived rounds as current phase data.
+
+## Recovery and disclosure
+
+Identify the root cause, add negative and boundary regression tests, reconcile all amounts against chain state, and produce new verification evidence before resuming exposure. External production launch requires independent audit, governance, monitoring, legal review and an operational ownership policy beyond this prototype.

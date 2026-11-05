@@ -1,0 +1,36 @@
+---
+title: 'Persistent read-side journal'
+description: 'Canonical block replay, reorg detection, orphan retention and deployment isolation.'
+---
+
+Sources: `services/indexer/indexer.ts`, `services/indexer/worker.ts`.
+
+The journal stores raw logs and canonical checkpoints in JSON under ignored `services/indexer/state/`. It is not a monetary ledger or a PostgreSQL projection system. The API worker syncs every six seconds and exposes overview/lag information through health. HTTP entity collections still read contracts directly.
+
+## Identity and persistence
+
+A deployment key hashes chain ID, deployment block/time, sorted addresses and RPC URL. Changing identity gets a separate journal. Nonidentity manifest changes may reuse the existing journal. Files persist with a temporary write followed by rename.
+
+| Property | Implementation |
+| --- | --- |
+| Log identity | chain ID + block hash + transaction hash + log index |
+| Batch | At most 250 blocks per sync by default |
+| Checkpoints | Most recent 256 retained |
+| Local confirmations | 0 by default |
+| Other chain confirmations | 3 by default; configurable via `FLOOR_CONFIRMATIONS` |
+| Canonical authority | Chain; journal always `DERIVED_READ_CACHE` |
+
+## Reorg algorithm
+
+1. Clone the previous committed state.
+2. Compare saved cursor hash with the current chain.
+3. If different, search retained checkpoints backward for a canonical ancestor.
+4. Mark later logs orphaned rather than deleting evidence; rewind checkpoints/cursor.
+5. Replay canonical blocks with parent-hash and log-provenance checks.
+6. Commit only after the batch and persistence succeed.
+
+No retained ancestor means replay from the deployment start. A chain change during a batch or foreign log provenance fails without mutating committed state. Tests cover idempotency, orphan retention, bounded replay and provenance mismatch.
+
+## Operational limits
+
+The journal grows without a production retention policy, and sync is single-process with no distributed lock. Confirmation defaults are convenience settings, not universal finality guarantees. There are no normalized SQL projections, scalable analytics pagination, RPC failover or institutional SLA. Review these before expanding beyond the local prototype.

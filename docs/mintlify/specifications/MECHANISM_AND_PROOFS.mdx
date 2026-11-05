@@ -1,0 +1,141 @@
+---
+title: "Mechanism Mathematics and Proof Specification"
+description: "Preserved repository document: docs/MECHANISM_AND_PROOFS.md. Historical proposals may differ from current implementation."
+---
+
+<Warning>
+Preserved source document. Status, interface examples and proposals are historical where noted; consult the current guides and source-derived references before integration. This page is generated, not a new execution or audit claim.
+</Warning>
+
+[Original Markdown source](https://github.com/debojyoti10CC/floorprt/blob/main/docs/MECHANISM_AND_PROOFS.md) · [Current documentation scope](/maintenance/source-audit)
+
+
+**Goal:** give engineers an exact, falsifiable statement—not vague 'principal protection' language.
+
+## 1. Definitions / exact units
+
+Let a common observation resolve to integer `p` (price normalized with an immutable precision, e.g. 8 decimals). Two binary markets are prepared by the same factory, reference one identical `observationId` and collateral token, use comparator `GEQ`, and settle once on the same registry value.
+
+- Market `L`: `YES_L(p) = 1` when `p &gt;= L`, else 0.
+- Market `U`: `NO_U(p) = 1` when `p &lt; U`, else 0 (complement of `YES_U(p) = 1` when `p &gt;= U`).
+- `L &lt; U` strictly (no floating-point comparison); `qL`, `qU` are positive whole ERC-1155 unit counts.
+- Each winning unit redeems for **1,000,000 micro-USDC** ($1); each losing unit for 0.
+- The single observation may also be **CANCELLED**, with every tied YES or NO unit redeeming **500,000 micro-USDC** ($0.50). This common-cancellation rule is part of the same immutable settlement policy and is **not** a general claim about any external market.
+
+For a finalized numeric value, the portfolio contractual payout in micro-USDC:
+
+`Pay(p) = 1_000_000 * [qL * 1(p &gt;= L) + qU * 1(p &lt; U)]`.
+
+For shared cancellation: `Pay(cancel) = 500_000 * (qL + qU)`.
+
+**Theorem (restricted P0 rule):** for any valid numeric `p` and the common cancellation state, `Pay &gt;= 1_000_000 * min(qL,qU)`. Proof: `p &lt; L` implies `p &lt; U`, so NO_U pays `qU`; `L &lt;= p &lt; U` means both pay; `p &gt;= U` implies `p &gt;= L`, so YES_L pays `qL`. Cancellation pays half the sum, which is at least the smaller count. QED.
+
+**P0 floor (micro-USDC):** `F = min(qL,qU) * 1_000_000`.
+
+### Three-state payout table (qL=qU=1)
+
+| Observation | YES(≥5000) | NO(≥6000) | Combined |
+|---|---:|---:|---:|
+| 4,500 (&lt;L) | $0 | $1 | **$1** |
+| 5,000 (=L) | $1 | $1 | **$2** |
+| 5,500 (between) | $1 | $1 | **$2** |
+| 6,000 (=U) | $1 | $0 | **$1** |
+| 6,500 (&gt;U) | $1 | $0 | **$1** |
+| shared CANCELLED | $0.50 | $0.50 | **$1** |
+
+For unequal quantities, e.g. `(qL,qU)=(3,2)`, numeric payout is 2, 5, or 3 USDC and cancellation is 2.5 USDC; `floor=2 USDC`.
+
+## 2. Why Cumulant's onchain binary markets cannot be reused unchanged
+
+Cumulant `PredictionMarket.sol` uses **parimutuel** stake pools. Winners receive contributed stake plus a share of the losing pool. There is no fixed outcome token that necessarily pays exactly `$1` per winning ERC-1155 unit. Senthos's Solana basket vault held USDC and mirrored externally observed legs under an authority, rather than directly holding native Polymarket outcomes. Neither satisfies the P0 fixed-payoff proof without reengineering. For our proof, **minting must escrow full-set USDC; claims must have fixed payout semantics; and each market must redeem independently with auditable rules.**
+
+## 3. Proof validation input
+
+Define `PositionInput` (also see JSON schema index):
+
+```
+marketIdLower: uint64
+marketIdUpper: uint64
+sideLower: YES
+sideUpper: NO
+lowerUnits: uint64  // >0 whole claims
+upperUnits: uint64  // >0 whole claims
+```
+
+Verifier reads immutable onchain market metadata and confirms:
+
+1. Both markets exist, not finalized/cancelled at lock, recognized `OutcomeMarketFactory` and same ERC-1155 issuer.
+2. Same `observationId`, exact observation time, oracle policy version, settlement token, settlement decimals, chain ID (implicit) and asset ID.
+3. Both predicates are canonical `GEQ`, `lowerStrike &lt; upperStrike`.
+4. Sides exactly `YES(lower)` and `NO(upper)`; amounts &gt;0; no unsupported nested/negative-risk cross conditions.
+5. Both have **fixed winning payout=1e6** and **common cancel payout=5e5** micro-USDC per unit; complete-set escrow is fully backed. (Enforce contract implementation/address allowlist; not UI metadata.)
+6. Observations cannot independently resolve each child market; all children reference registry's one terminal state.
+7. Each vault lock is associated with exact token IDs, amounts and lender/borrower rights; funds cannot be reused.
+
+Verifier returns `&#123; eligible, floorBaseUnits, proofVersion, observationId, lowerStrike, upperStrike, reasonCode &#125;` and **does not return probability, current market price or guaranteed APR**.
+
+## 4. Debt rule
+
+For a credit position with certified floor `F`, principal `P`, fixed lender fee `C`, and reserve buffer `b` basis points:
+
+`D = P + C`
+
+`D &lt;= floor(F) - floor(F * b / 10_000)`  (with rounding conservative to lender; implementation should implement ceiling of buffer, e.g. `buffer = ceilDiv(F*b,10000)` to avoid accidental overadvances).
+
+Example: `F=1_000_000`, `b=2_000` (20%) yields allowed max due `800_000`; `P=750_000`, `C=30_000`, `D=780_000`. Lender advance ratio `0.75`, due ratio `0.78`.
+
+**Never use loan principal-only LTV.** Total promised lender payment, including fee and any other obligation, must be inside cap. In P0, `D` is fixed; it must not grow above floor with time.
+
+Settlement output `R` from burning/redeeming locked tokens:
+
+`lenderPaid = min(R, D)`
+`borrowerResidual = R - lenderPaid`.
+
+For an intact P0 system, `R &gt;= F &gt; D`, so lender receives `D`, borrower receives at least `F-D` and possibly more. If the actual claim contract is insolvent, canceled inconsistently, or unable to resolve, the theorem's operational assumptions fail. Expose and block on such incidents.
+
+## 5. Token backing accounting
+
+One complete set for a market is **one YES and one NO token**, each token a whole integer unit. The issuer escrows exactly 1 USDC per set. For any finalized value:
+
+- YES pays 1 USDC and NO pays 0; OR
+- YES pays 0 and NO pays 1 USDC; OR
+- common CANCELLED: YES and NO each pay 0.5 USDC.
+
+Total redemption potential per full set = 1 USDC for all terminal states. `totalRedemptionLiabilities &lt;= escrow` must always hold, with refunds/merge burns adjusting both liabilities and escrow. Each redeemed token is burned before/atomically with payout. Complete-set merging is allowed only before terminal settlement and requires both tokens from the same market.
+
+**Decimals simplification:** ERC-1155 quantities are whole units in P0. Do not issue fractional claims that can cause integer truncation under the 50/50 cancel state. USDC itself has 6 decimals for settlement; verified in tests. `MockUSDC` should mirror that decimal precision but be prominently labeled test money.
+
+## 6. Admissible state partitioning
+
+For generalized threshold portfolios with one common scalar `p`, the payoff changes only when crossing a strike. A solver can sort unique strikes `s0 &lt; ... &lt; sk`, evaluate each piecewise-constant interval and relevant endpoint, plus CANCELLED, then compute the minimum.
+
+For a set of `m` YES/NO threshold legs, a simple O(m log m) sort and O(m^2) evaluation is sufficient for P1 small m; optimize with sweep-line O(m log m). The onchain verifier cannot just trust an offchain `min`: either (a) independently recalculate exact payout across onchain-provided sorted strike list, (b) verify a proof certificate whose soundness is established, or (c) restrict to an onchain-provable supported grammar. For P0 use (c).
+
+### Proposed P1 certificate
+
+- `ruleVersion`, `observationId`, `marketIds`, `sides`, `unitCounts`, `strikeList`, `boundValue`, `proofDigest`.
+- Contract verifies market count ≤8, observation/policy consistency, sorted distinct strikes, payout at each sufficient interval representative, `boundValue &lt;= computedMinimum`; reject malformed certificate.
+- A Merkle commitment alone is **not proof** of logical soundness. Do not call a signed server claim 'trustless'.
+
+## 7. Counterexamples and negative tests
+
+1. **Same words, distinct observations**: a market settling at 12:00 and another at 12:01 can independently yield YES(lower)=0 and NO(upper)=0. REJECT.
+2. **Different reference assets**: BTC/USD lower vs ETH/USD upper. REJECT.
+3. **Different oracle cancellation semantics**: one void pays 0, another pays 0.5. REJECT.
+4. **Wrong strike order `L &gt; U`**: price in `[U,L)` makes both YES lower and NO upper lose; floor may be zero. REJECT.
+5. **Wrong side**: NO(lower) and YES(upper) can both lose in `(L,U)`. REJECT.
+6. **Unbacked parimutuel stakes**: a team-issued promise to pay at most pool balances doesn't satisfy $1-per-winning-share. REJECT.
+7. **Arbitrary Polymarket market with similar question**: metadata correlation doesn't imply contractual common resolution. DISCOVERY ONLY.
+8. **Opaque bridged assets**: a wrapped claim on another chain without verified custody/redemption adapter is not approved collateral. REJECT.
+9. **Borrower's full-set leftovers**: note that acquiring both markets by complete-set minting leaves counterpart claims in wallet; vault floor does not prove total strategy profit after acquisition cost.
+10. **Oracle never resolves**: contractual floor exists on paper but settlement liquidity is not available; require recovery and liveness planning.
+11. **Odd base-amount canceled claims**: fractional micro-unit rounding could break exact floor. P0 prevents by whole-unit ERC-1155 semantics.
+12. **Market contract upgrade changes payout rules**: frozen immutable/pinned code hash only. REJECT UPGRADABLE UNAPPROVED ISSUERS.
+
+## 8. Proof display requirements
+
+Each successful proof inspector must show: `observationId`, asset, chain, price source, timestamp, normalized predicate grammar, contract addresses/code hashes, both strikes, token counts, terminal payout chart, CANCELLED row, exact floor, proof version, contract verification transaction or query, and **assumptions panel**. It must explicitly state that the floor is a *terminal contractual payout bound contingent on custody/collateral/settlement*, not a price floor for selling the tokens today.
+
+## 9. Research linkage
+
+The classification of logical outcome relationships and combinatorial arbitrage is established in research such as Saguillo et al., *Unravelling the Probabilistic Forest* (2025), and Shi &amp; Zhai, *Combinatorial Arbitrage in Prediction Markets* (October 2026). Floor Protocol applies the restrictive mathematical insight to collateral verification and lending. The original literature is about pricing/arbitrage, not proof of our implementation's safety. See SOURCE_AUDIT.

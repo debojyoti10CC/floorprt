@@ -4,6 +4,18 @@ An independently implemented outcome-collateral terminal: **compose â†’ verify â
 
 The application uses a real local EVM, fully backed ERC-1155 outcome claims, full fixed-debt repayment, wallet-signed transactions and a lender-first USDC settlement waterfall. Its scenario studio evaluates exact contractual payoffs; financial state comes from contract reads and confirmed events.
 
+## Project documentation
+
+The complete Mintlify site lives in [`docs/mintlify`](docs/mintlify), covering the mechanism, user guides, source-derived contract/API references, operations, risks and original specifications.
+
+```sh
+pnpm docs:generate  # sync contract/API references and specification mirrors
+pnpm docs:check     # source consistency and strict Mintlify validation
+pnpm docs:dev       # documentation preview on port 3001
+```
+
+See [`docs/mintlify/maintenance/documentation.mdx`](docs/mintlify/maintenance/documentation.mdx) for publishing and maintenance. The original `docs/*.md` blueprint is preserved separately from current implementation guidance.
+
 ## Start the complete application
 
 Prerequisites: Node 24, pnpm 10.20.0, Python 3.10+ for differential tests. Foundry native binaries are pinned npm dependencies; a separate global Foundry installation is unnecessary.

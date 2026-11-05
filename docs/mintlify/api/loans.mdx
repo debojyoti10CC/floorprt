@@ -1,0 +1,59 @@
+---
+title: "List loans"
+description: "GET /api/v1/loans — Newest loans from direct chain reads; states are numeric enums."
+---
+
+`GET /api/v1/loans`
+
+Newest loans from direct chain reads; states are numeric enums.
+
+## Request
+
+```bash
+curl 'http://127.0.0.1:8787/api/v1/loans?limit=50'
+```
+
+Optional `limit` defaults to 50 and is clamped to 1–100. It selects the tail of the bounded window, without cursor or offset pagination.
+
+## Response contract
+
+The following is a **schema**, not a transaction result. Shared types resolve in the [OpenAPI specification](/api/openapi.json).
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "items": {
+      "type": "array",
+      "items": {
+        "$ref": "#/components/schemas/Loan"
+      }
+    },
+    "total": {
+      "type": "integer"
+    },
+    "limit": {
+      "type": "integer"
+    },
+    "authority": {
+      "type": "string",
+      "enum": [
+        "DIRECT_CHAIN"
+      ]
+    }
+  },
+  "required": [
+    "items",
+    "total",
+    "limit",
+    "authority"
+  ]
+}
+```
+
+## Status codes
+
+- **200**: Successful read; proof validity is a separate field.
+- **500**: Runtime/manifest/RPC error; malformed preview JSON also reaches generic error handling.
+
+[API conventions and limitations](/api/overview)

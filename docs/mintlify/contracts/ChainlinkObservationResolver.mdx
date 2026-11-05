@@ -1,0 +1,102 @@
+---
+title: "ChainlinkObservationResolver"
+description: "Compiler-ABI-derived callable functions, events and errors for ChainlinkObservationResolver."
+---
+
+Permissionless historical-round witness submission, not arbitrary price submission or CRE. The last complete feed publication at/before observation time needs its contiguous successor after it, within the committed window and unchanged deployment phase.
+
+[Contract source](https://github.com/debojyoti10CC/floorprt/blob/main/packages/contracts/src/ChainlinkObservationResolver.sol) · [Generated ABI](https://github.com/debojyoti10CC/floorprt/blob/main/packages/shared/src/abis.generated.ts)
+
+<Note>This reference is generated from the checked-in compiler ABI. It includes inherited OpenZeppelin interfaces. It is not a deployment/address claim. Amounts and IDs are integers; tuples expand below to exact ABI field order.</Note>
+
+## Constructor
+
+### Deploy
+
+```solidity
+constructor(address curator, address feed_, bytes32 assetId_, uint32 maxAge_)
+```
+
+## Functions
+
+### assetId
+
+```solidity
+function assetId() view returns (bytes32)
+```
+
+### feed
+
+```solidity
+function feed() view returns (address)
+```
+
+### feedPhase
+
+```solidity
+function feedPhase() view returns (uint16)
+```
+
+### finalizeFromFeed
+
+```solidity
+function finalizeFromFeed(uint256 id, uint80 roundId) nonpayable
+```
+
+### maxAge
+
+```solidity
+function maxAge() view returns (uint32)
+```
+
+### priceDecimals
+
+```solidity
+function priceDecimals() view returns (uint8)
+```
+
+### registry
+
+```solidity
+function registry() view returns (address)
+```
+
+### sourceId
+
+```solidity
+function sourceId() view returns (bytes32)
+```
+
+## Events
+
+### FeedObservationFinalized
+
+```solidity
+event FeedObservationFinalized(uint256 indexed observationId, uint80 indexed roundId, uint256 price, uint256 publishedAt)
+```
+
+## Errors
+
+### IncompatibleObservation
+
+```solidity
+error IncompatibleObservation()
+```
+
+### InvalidFeed
+
+```solidity
+error InvalidFeed()
+```
+
+### InvalidRound
+
+```solidity
+error InvalidRound()
+```
+
+### InvalidWindow
+
+```solidity
+error InvalidWindow()
+```

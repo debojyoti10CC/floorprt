@@ -1,0 +1,51 @@
+---
+title: 'Chain reads, manifests and wallet writes'
+description: 'Use generated ABIs, one-block snapshots and explicit signer boundaries.'
+---
+
+## Deployment identity
+
+`Deployment` in `packages/shared/src/chain.ts` uses schema `floor-deployment/v1` and includes chain ID, RPC/explorer URL, deployment block/time, addresses, runtime-code hashes, role addresses, collateral mode and oracle mode. Optional fields include historical adapter/feed identity, build fingerprint, seeded block and default pair.
+
+Deployment writes:
+
+- `packages/contracts/deployments/<chainId>.json`
+- `packages/contracts/deployments/<chainId>-receipts.json`
+- `apps/web/public/deployment.json`
+
+Never copy addresses from an unrelated manifest. Restarting an ephemeral Anvil without redeploying invalidates saved deployment identity.
+
+## Generated ABI contract
+
+```bash
+pnpm contracts:build
+pnpm abi
+```
+
+Eight contract ABIs are emitted into `packages/shared/src/abis.generated.ts`. `FloorTypes` is a library of shared structs/enums, not a ninth deployed component. Generic collateral reads use viem's ERC-20 ABI; the faucet uses the local MockUSDC ABI.
+
+## One-block snapshots
+
+```typescript
+import { readSnapshot } from '@floor/shared';
+const snapshot = await readSnapshot(deployment, walletAddress, rpcUrl);
+```
+
+`readSnapshot` checks chain ID, gets a block, and pins related contract reads to its number. It returns newest **200 per collection** and approximately **5,000 blocks of protocol activity**. Wallet balances are included only if a wallet is supplied. API snapshots omit wallet context. Activity excludes standard token transfer/approval and ownership-transfer noise.
+
+These bounded collections are not global totals or scalable pagination. Entity detail routes can miss older IDs outside the window even when contracts still hold them.
+
+## Wallet boundary
+
+`apps/web/src/lib/protocol.tsx` supports:
+
+- Local unlocked Anvil transport, **only** loopback chain 31337.
+- Injected EIP-1193 browser wallet with network switching.
+
+Before each write, the terminal checks chain ID and runtime hashes, simulates the call, asks the wallet to send, persists pending receipt identity and waits for confirmation. Pending-send guards and reload receipt recovery reduce duplicate submissions. Failed/unknown receipt status is not a successful transfer.
+
+No private key belongs in `NEXT_PUBLIC_` variables, local storage, an API signing route or docs. The deployment signer is an explicit operator process input; it is not a borrower spending service.
+
+## Offline mode
+
+Matching `recorded-run.json` is labeled historical evidence and cannot authorize writes. A reachable RPC alone is insufficient for spending: the code checks pinned contract identity. Code hashes of external proxy bytecode do not pin the implementation behind that proxy; upstream upgrades remain a risk.

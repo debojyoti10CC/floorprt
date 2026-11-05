@@ -1,0 +1,29 @@
+---
+title: 'Evidence and reproducibility'
+description: 'Interpret checked-in test results, receipts, screenshots and external-chain artifacts correctly.'
+---
+
+The repository contains a historical release record dated **6 November 2026**. Its assertions describe the recorded run; they are not newly executed checks just because the documentation displays them.
+
+| Artifact | Meaning |
+| --- | --- |
+| `evidence/verification.json` and `evidence/logs/` | Captured full local release commands, exit codes and output |
+| `evidence/differential.json` | Recorded Python/TS and Solidity/TS comparison counts |
+| `evidence/demo-receipts.json` | Six local settlement scenarios and wallet-authorized transaction receipts |
+| `evidence/browser-results.json` | Separate-wallet browser cashflow/repayment records |
+| `evidence/screenshots/` | Terminal, studio, mobile and settlement captures |
+| `evidence/dependency-audit.json` | Dependency advisory snapshot at the recorded execution time |
+| `evidence/sepolia-external-read.json` | Public dependency reads, zero transactions |
+| `evidence/sepolia-fork.json` | Local fork at block 12071482, test-only balances, zero public transactions |
+| `packages/contracts/deployments/31337*.json` | Local deployment manifest and transaction identities |
+| `apps/web/public/recorded-run.json` | Offline historical snapshot and scenario evidence |
+
+The release record reports 19 unit tests, 75 offline Solidity tests, three stateful invariants, 12 Chromium cases, 10,000 Python/TS vectors and 100 Solidity/TS comparisons. Consult the files and exact checkout for historical counts; new code can change them.
+
+## Reproduce, do not relabel
+
+Run [the test commands](/operations/testing) with a fresh compatible local deployment. `pnpm demo` adds transactions and deliberately advances the clock. Repeating it is not a chain reset. Record exact command output and checkout identity when creating a new release record.
+
+A local receipt proves a local EVM execution, not economic value or a public explorer transaction. A fork proves a selected external-code integration on a local test execution, not a public deployment. A screenshot alone proves neither cash transfers nor oracle provenance.
+
+[Preserved release document](/specifications/RELEASE_EVIDENCE) · [Source evidence directory](https://github.com/debojyoti10CC/floorprt/tree/main/evidence)

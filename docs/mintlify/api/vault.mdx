@@ -1,0 +1,69 @@
+---
+title: "Read a position or owner portfolio"
+description: "GET /api/v1/vaults/{id} — If id is an Ethereum address, returns a bounded owner-filtered collection. Otherwise reads one position ID from the snapshot, returning 404 "
+---
+
+`GET /api/v1/vaults/{id}`
+
+If id is an Ethereum address, returns a bounded owner-filtered collection. Otherwise reads one position ID from the snapshot, returning 404 if absent. This route does not accept a separate owner query.
+
+## Request
+
+```bash
+curl 'http://127.0.0.1:8787/api/v1/vaults/1?limit=50'
+```
+
+Optional `limit` defaults to 50 and is clamped to 1–100. It selects the tail of the bounded window, without cursor or offset pagination.
+
+Path `id` is required. An owner address switches the response from one Position to a collection.
+
+## Response contract
+
+The following is a **schema**, not a transaction result. Shared types resolve in the [OpenAPI specification](/api/openapi.json).
+
+```json
+{
+  "oneOf": [
+    {
+      "$ref": "#/components/schemas/Position"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/Position"
+          }
+        },
+        "total": {
+          "type": "integer"
+        },
+        "limit": {
+          "type": "integer"
+        },
+        "authority": {
+          "type": "string",
+          "enum": [
+            "DIRECT_CHAIN"
+          ]
+        }
+      },
+      "required": [
+        "items",
+        "total",
+        "limit",
+        "authority"
+      ]
+    }
+  ]
+}
+```
+
+## Status codes
+
+- **200**: Successful read; proof validity is a separate field.
+- **404**: Entity not found inside the bounded snapshot.
+- **500**: Runtime/manifest/RPC error; malformed preview JSON also reaches generic error handling.
+
+[API conventions and limitations](/api/overview)

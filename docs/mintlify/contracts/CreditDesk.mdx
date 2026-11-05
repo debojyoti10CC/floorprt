@@ -1,0 +1,270 @@
+---
+title: "CreditDesk"
+description: "Compiler-ABI-derived callable functions, events and errors for CreditDesk."
+---
+
+Exact borrower-approved principal, bounded fixed due and expiry. One distinct lender per position. Full fixed-due borrower repayment or permissionless terminal settlement is atomic; shortfalls revert. Immutable bufferBps is 2,000 in deployment scripts, not a universal constructor constant.
+
+[Contract source](https://github.com/debojyoti10CC/floorprt/blob/main/packages/contracts/src/CreditDesk.sol) · [Generated ABI](https://github.com/debojyoti10CC/floorprt/blob/main/packages/shared/src/abis.generated.ts)
+
+<Note>This reference is generated from the checked-in compiler ABI. It includes inherited OpenZeppelin interfaces. It is not a deployment/address claim. Amounts and IDs are integers; tuples expand below to exact ABI field order.</Note>
+
+## Constructor
+
+### Deploy
+
+```solidity
+constructor(address curator, address vault_, uint16 bufferBps_)
+```
+
+## Functions
+
+### acceptOwnership
+
+```solidity
+function acceptOwnership() nonpayable
+```
+
+### bufferBps
+
+```solidity
+function bufferBps() view returns (uint16)
+```
+
+### cancelRequest
+
+```solidity
+function cancelRequest(uint256 positionId) nonpayable
+```
+
+### collateral
+
+```solidity
+function collateral() view returns (address)
+```
+
+### fundLoan
+
+```solidity
+function fundLoan(uint256 positionId, uint256 principal, uint256 totalDue) nonpayable returns (uint256 id)
+```
+
+### fundingPaused
+
+```solidity
+function fundingPaused() view returns (bool)
+```
+
+### getLoan
+
+```solidity
+function getLoan(uint256 id) view returns ((uint256,address,address,uint256,uint256,uint256,uint64,uint64,uint8) loan)
+```
+
+### getRequest
+
+```solidity
+function getRequest(uint256 positionId) view returns ((uint256,uint256,uint64,bool))
+```
+
+### loanCount
+
+```solidity
+function loanCount() view returns (uint256)
+```
+
+### maximumDue
+
+```solidity
+function maximumDue(uint256 floorAmount) view returns (uint256)
+```
+
+### owner
+
+```solidity
+function owner() view returns (address)
+```
+
+### pendingOwner
+
+```solidity
+function pendingOwner() view returns (address)
+```
+
+### registry
+
+```solidity
+function registry() view returns (address)
+```
+
+### renounceOwnership
+
+```solidity
+function renounceOwnership() nonpayable
+```
+
+### repay
+
+```solidity
+function repay(uint256 id) nonpayable
+```
+
+### requestLoan
+
+```solidity
+function requestLoan(uint256 positionId, uint256 principal, uint256 maxDue, uint64 expiry) nonpayable
+```
+
+### setFundingPaused
+
+```solidity
+function setFundingPaused(bool paused) nonpayable
+```
+
+### settle
+
+```solidity
+function settle(uint256 id) nonpayable
+```
+
+### transferOwnership
+
+```solidity
+function transferOwnership(address newOwner) nonpayable
+```
+
+### vault
+
+```solidity
+function vault() view returns (address)
+```
+
+## Events
+
+### BorrowRequestCancelled
+
+```solidity
+event BorrowRequestCancelled(uint256 indexed positionId)
+```
+
+### BorrowRequested
+
+```solidity
+event BorrowRequested(uint256 indexed positionId, address indexed borrower, uint256 requestedPrincipal, uint256 maxDue)
+```
+
+### LoanFunded
+
+```solidity
+event LoanFunded(uint256 indexed loanId, uint256 indexed positionId, address indexed lender, address borrower, uint256 principal, uint256 due)
+```
+
+### LoanRepaid
+
+```solidity
+event LoanRepaid(uint256 indexed loanId, address indexed borrower, address indexed lender, uint256 paid)
+```
+
+### LoanSettled
+
+```solidity
+event LoanSettled(uint256 indexed loanId, uint256 redeemed, uint256 lenderPaid, uint256 borrowerPaid)
+```
+
+### NewFundingPaused
+
+```solidity
+event NewFundingPaused(bool paused)
+```
+
+### OwnershipTransferStarted
+
+```solidity
+event OwnershipTransferStarted(address indexed previousOwner, address indexed newOwner)
+```
+
+### OwnershipTransferred
+
+```solidity
+event OwnershipTransferred(address indexed previousOwner, address indexed newOwner)
+```
+
+## Errors
+
+### Expired
+
+```solidity
+error Expired()
+```
+
+### FundingPaused
+
+```solidity
+error FundingPaused()
+```
+
+### InvalidState
+
+```solidity
+error InvalidState()
+```
+
+### InvalidTerms
+
+```solidity
+error InvalidTerms()
+```
+
+### NotResolved
+
+```solidity
+error NotResolved()
+```
+
+### ObservationClosed
+
+```solidity
+error ObservationClosed()
+```
+
+### OwnableInvalidOwner
+
+```solidity
+error OwnableInvalidOwner(address owner)
+```
+
+### OwnableUnauthorizedAccount
+
+```solidity
+error OwnableUnauthorizedAccount(address account)
+```
+
+### RedemptionShortfall
+
+```solidity
+error RedemptionShortfall()
+```
+
+### ReentrancyGuardReentrantCall
+
+```solidity
+error ReentrancyGuardReentrantCall()
+```
+
+### SafeERC20FailedOperation
+
+```solidity
+error SafeERC20FailedOperation(address token)
+```
+
+### TransferMismatch
+
+```solidity
+error TransferMismatch()
+```
+
+### Unauthorized
+
+```solidity
+error Unauthorized()
+```

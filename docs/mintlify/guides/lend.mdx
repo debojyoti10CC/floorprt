@@ -1,0 +1,32 @@
+---
+title: 'Review and fund a request'
+description: 'Advance exact principal from a separate wallet within borrower consent and the floor cap.'
+---
+
+1. Connect a funded **Lender** wallet, distinct from position owner and beneficiary.
+2. Open **Credit desk → Lend** (`/credit/`). Select an active request whose observation remains open and expiry has not arrived.
+3. Inspect exact vault inventory, observation, certified floor, borrower, beneficiary, fixed principal and request deadline.
+4. Choose total due at least principal and no greater than both borrower maximum and the onchain floor-minus-reserve cap.
+5. Select **Approve & fund loan**. Approval authorizes the exact principal if current allowance is insufficient; funding transfers principal directly to the borrower.
+6. Wait for a successful receipt and `LoanFunded`. Verify borrower/lender balance deltas and the ENCUMBERED position.
+
+<Note>
+Principal is fixed by the borrower and cannot be edited or partially funded. If the request changes or expires while you review it, the contract checks the latest state and may revert.
+</Note>
+
+## Sample terms
+
+| Item | Test USDC |
+| --- | --- |
+| Certified terminal floor | 1.00 |
+| Reserve headroom | 0.20 |
+| Maximum policy due | 0.80 |
+| Principal advanced | 0.75 |
+| Agreed due | 0.78 |
+| Fixed fee | 0.03 |
+
+There is no floating APR, debt escalation, lending pool or secondary exit. Resolver delay can postpone settlement without increasing fixed due. See [risk assumptions](/concepts/risks).
+
+## Recover capital
+
+After common finalization/cancellation, any connected wallet can settle, sending due to the recorded lender. Alternatively the borrower may repay the complete due and recover claims. Neither requires the lender to operate a private keeper or call a backend spending endpoint.

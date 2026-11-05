@@ -1,0 +1,282 @@
+---
+title: "FloorVault"
+description: "Compiler-ABI-derived callable functions, events and errors for FloorVault."
+---
+
+Nontransferable exact-inventory positions with immutable owner and beneficiary. Lock recomputes the proof; expected batch context rejects unsolicited deposits. Only the once-bound reciprocal CreditDesk may lien, redeem or release repaid claims. New-lock pauses do not pause exits.
+
+[Contract source](https://github.com/debojyoti10CC/floorprt/blob/main/packages/contracts/src/FloorVault.sol) · [Generated ABI](https://github.com/debojyoti10CC/floorprt/blob/main/packages/shared/src/abis.generated.ts)
+
+<Note>This reference is generated from the checked-in compiler ABI. It includes inherited OpenZeppelin interfaces. It is not a deployment/address claim. Amounts and IDs are integers; tuples expand below to exact ABI field order.</Note>
+
+## Constructor
+
+### Deploy
+
+```solidity
+constructor(address curator, address verifier_)
+```
+
+## Functions
+
+### acceptOwnership
+
+```solidity
+function acceptOwnership() nonpayable
+```
+
+### bindCreditDesk
+
+```solidity
+function bindCreditDesk(address desk) nonpayable
+```
+
+### collateral
+
+```solidity
+function collateral() view returns (address)
+```
+
+### creditDesk
+
+```solidity
+function creditDesk() view returns (address)
+```
+
+### getPosition
+
+```solidity
+function getPosition(uint256 id) view returns ((address,address,uint256,uint256,uint64,uint64,uint256,uint256,uint8,uint256) p)
+```
+
+### lockPair
+
+```solidity
+function lockPair(uint256 lower, uint256 upper, uint64 qLower, uint64 qUpper, address beneficiary) nonpayable returns (uint256 id)
+```
+
+### locksPaused
+
+```solidity
+function locksPaused() view returns (bool)
+```
+
+### markEncumbered
+
+```solidity
+function markEncumbered(uint256 id, uint256 loanId) nonpayable
+```
+
+### onERC1155BatchReceived
+
+```solidity
+function onERC1155BatchReceived(address operator, address from, uint256[] ids, uint256[] values, bytes data) nonpayable returns (bytes4)
+```
+
+### onERC1155Received
+
+```solidity
+function onERC1155Received(address, address, uint256, uint256, bytes) pure returns (bytes4)
+```
+
+### owner
+
+```solidity
+function owner() view returns (address)
+```
+
+### pendingOwner
+
+```solidity
+function pendingOwner() view returns (address)
+```
+
+### positionCount
+
+```solidity
+function positionCount() view returns (uint256)
+```
+
+### redeemLocked
+
+```solidity
+function redeemLocked(uint256 id) nonpayable returns (uint256 amount)
+```
+
+### releaseRepaid
+
+```solidity
+function releaseRepaid(uint256 id, uint256 loanId) nonpayable
+```
+
+### releaseUnfunded
+
+```solidity
+function releaseUnfunded(uint256 id) nonpayable
+```
+
+### renounceOwnership
+
+```solidity
+function renounceOwnership() nonpayable
+```
+
+### setLocksPaused
+
+```solidity
+function setLocksPaused(bool paused) nonpayable
+```
+
+### supportsInterface
+
+```solidity
+function supportsInterface(bytes4 interfaceId) view returns (bool)
+```
+
+### tokens
+
+```solidity
+function tokens() view returns (address)
+```
+
+### transferOwnership
+
+```solidity
+function transferOwnership(address newOwner) nonpayable
+```
+
+### verifier
+
+```solidity
+function verifier() view returns (address)
+```
+
+## Events
+
+### CreditDeskBound
+
+```solidity
+event CreditDeskBound(address indexed desk)
+```
+
+### LocksPaused
+
+```solidity
+event LocksPaused(bool paused)
+```
+
+### OwnershipTransferStarted
+
+```solidity
+event OwnershipTransferStarted(address indexed previousOwner, address indexed newOwner)
+```
+
+### OwnershipTransferred
+
+```solidity
+event OwnershipTransferred(address indexed previousOwner, address indexed newOwner)
+```
+
+### PositionEncumbered
+
+```solidity
+event PositionEncumbered(uint256 indexed positionId, uint256 indexed loanId)
+```
+
+### PositionRedeemed
+
+```solidity
+event PositionRedeemed(uint256 indexed positionId, uint256 amount)
+```
+
+### VaultPositionCreated
+
+```solidity
+event VaultPositionCreated(uint256 indexed positionId, address indexed owner, uint256 floorUsdc)
+```
+
+### VaultPositionReleased
+
+```solidity
+event VaultPositionReleased(uint256 indexed positionId)
+```
+
+## Errors
+
+### InvalidBeneficiary
+
+```solidity
+error InvalidBeneficiary()
+```
+
+### InvalidDesk
+
+```solidity
+error InvalidDesk()
+```
+
+### InvalidPair
+
+```solidity
+error InvalidPair(uint16 reasonCode)
+```
+
+### InvalidPosition
+
+```solidity
+error InvalidPosition()
+```
+
+### NewLocksPaused
+
+```solidity
+error NewLocksPaused()
+```
+
+### NotPositionOwner
+
+```solidity
+error NotPositionOwner()
+```
+
+### OnlyCreditDesk
+
+```solidity
+error OnlyCreditDesk()
+```
+
+### OwnableInvalidOwner
+
+```solidity
+error OwnableInvalidOwner(address owner)
+```
+
+### OwnableUnauthorizedAccount
+
+```solidity
+error OwnableUnauthorizedAccount(address account)
+```
+
+### RedemptionShortfall
+
+```solidity
+error RedemptionShortfall()
+```
+
+### ReentrancyGuardReentrantCall
+
+```solidity
+error ReentrancyGuardReentrantCall()
+```
+
+### SafeERC20FailedOperation
+
+```solidity
+error SafeERC20FailedOperation(address token)
+```
+
+### UnexpectedDeposit
+
+```solidity
+error UnexpectedDeposit()
+```

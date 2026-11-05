@@ -1,0 +1,138 @@
+---
+title: "MockUSDC"
+description: "Compiler-ABI-derived callable functions, events and errors for MockUSDC."
+---
+
+LOCAL TEST MONEY ONLY. Freely mintable six-decimal tUSDC with no market value. faucet allows a positive amount up to 10,000 USDC per call, with no global issuance cap. The Sepolia deployment path uses external Circle USDC instead.
+
+[Contract source](https://github.com/debojyoti10CC/floorprt/blob/main/packages/contracts/src/MockUSDC.sol) · [Generated ABI](https://github.com/debojyoti10CC/floorprt/blob/main/packages/shared/src/abis.generated.ts)
+
+<Note>This reference is generated from the checked-in compiler ABI. It includes inherited OpenZeppelin interfaces. It is not a deployment/address claim. Amounts and IDs are integers; tuples expand below to exact ABI field order.</Note>
+
+## Constructor
+
+### Deploy
+
+```solidity
+constructor()
+```
+
+## Functions
+
+### allowance
+
+```solidity
+function allowance(address owner, address spender) view returns (uint256)
+```
+
+### approve
+
+```solidity
+function approve(address spender, uint256 value) nonpayable returns (bool)
+```
+
+### balanceOf
+
+```solidity
+function balanceOf(address account) view returns (uint256)
+```
+
+### decimals
+
+```solidity
+function decimals() pure returns (uint8)
+```
+
+### faucet
+
+```solidity
+function faucet(uint256 amount) nonpayable
+```
+
+### name
+
+```solidity
+function name() view returns (string)
+```
+
+### symbol
+
+```solidity
+function symbol() view returns (string)
+```
+
+### totalSupply
+
+```solidity
+function totalSupply() view returns (uint256)
+```
+
+### transfer
+
+```solidity
+function transfer(address to, uint256 value) nonpayable returns (bool)
+```
+
+### transferFrom
+
+```solidity
+function transferFrom(address from, address to, uint256 value) nonpayable returns (bool)
+```
+
+## Events
+
+### Approval
+
+```solidity
+event Approval(address indexed owner, address indexed spender, uint256 value)
+```
+
+### Transfer
+
+```solidity
+event Transfer(address indexed from, address indexed to, uint256 value)
+```
+
+## Errors
+
+### ERC20InsufficientAllowance
+
+```solidity
+error ERC20InsufficientAllowance(address spender, uint256 allowance, uint256 needed)
+```
+
+### ERC20InsufficientBalance
+
+```solidity
+error ERC20InsufficientBalance(address sender, uint256 balance, uint256 needed)
+```
+
+### ERC20InvalidApprover
+
+```solidity
+error ERC20InvalidApprover(address approver)
+```
+
+### ERC20InvalidReceiver
+
+```solidity
+error ERC20InvalidReceiver(address receiver)
+```
+
+### ERC20InvalidSender
+
+```solidity
+error ERC20InvalidSender(address sender)
+```
+
+### ERC20InvalidSpender
+
+```solidity
+error ERC20InvalidSpender(address spender)
+```
+
+### FaucetLimit
+
+```solidity
+error FaucetLimit()
+```

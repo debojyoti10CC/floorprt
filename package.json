@@ -8,6 +8,10 @@
     "node": ">=22.0.0"
   },
   "scripts": {
+    "docs:generate": "node scripts/docs-generate.mjs && node scripts/docs-api-generate.mjs",
+    "docs:check": "node scripts/docs-generate.mjs --check && node scripts/docs-api-generate.mjs --check && cd docs/mintlify && pnpm dlx mint@4.2.1205 validate",
+    "docs:links": "cd docs/mintlify && pnpm dlx mint@4.2.1205 broken-links --check-anchors --check-redirects --check-snippets",
+    "docs:dev": "cd docs/mintlify && pnpm dlx mint@4.2.1205 dev --port 3001 --no-open",
     "dev": "node scripts/dev.mjs",
     "dev:web": "pnpm --filter @floor/web dev",
     "dev:api": "tsx apps/api/src/server.ts",

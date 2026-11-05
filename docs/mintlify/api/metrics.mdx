@@ -1,0 +1,31 @@
+---
+title: "Read bounded metrics"
+description: "GET /api/v1/metrics — activePrincipal sums FUNDED loans; lockedFloor sums OPEN and ENCUMBERED positions; settlements counts SETTLED loans. These are window aggreg"
+---
+
+`GET /api/v1/metrics`
+
+activePrincipal sums FUNDED loans; lockedFloor sums OPEN and ENCUMBERED positions; settlements counts SETTLED loans. These are window aggregates, not unbounded protocol-wide analytics.
+
+## Request
+
+```bash
+curl 'http://127.0.0.1:8787/api/v1/metrics'
+```
+
+## Response contract
+
+The following is a **schema**, not a transaction result. Shared types resolve in the [OpenAPI specification](/api/openapi.json).
+
+```json
+{
+  "$ref": "#/components/schemas/Metrics"
+}
+```
+
+## Status codes
+
+- **200**: Successful read; proof validity is a separate field.
+- **500**: Runtime/manifest/RPC error; malformed preview JSON also reaches generic error handling.
+
+[API conventions and limitations](/api/overview)

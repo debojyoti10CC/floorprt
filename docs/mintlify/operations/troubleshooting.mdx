@@ -1,0 +1,27 @@
+---
+title: 'Troubleshooting'
+description: 'Recover from local service, proof, wallet and oracle failures without inventing financial success.'
+---
+
+| Symptom | Check and safe action |
+| --- | --- |
+| Port 8545 is another chain | Stop the conflicting service yourself; run isolated Anvil 31337. Startup refuses the wrong chain. |
+| Incompatible API on 8787 | Stop the stale API and rerun `pnpm dev`; deployment generation must match. |
+| Code identity mismatch | Compare chain and manifest, run preflight; redeploy/rebuild intentionally. Do not bypass hashes. |
+| Recorded devnet banner | Matching RPC is unavailable. The site is read-only; run local stack or configure a genuine supported manifest. |
+| Observation closed / reason 5 | Use an open pair, or connect curator and register a fresh observation. Never bypass maturity. |
+| Observation mismatch / reason 2 | Choose both market IDs from the exact same observation, not just the same asset label. |
+| Wrong strike order / reason 3 | Lower YES strike must be strictly below upper NO strike. |
+| Lock disabled | Connect correct wallet, await live proof, verify whole quantities/balances and open observation. |
+| Funding reverts | Check distinct lender/beneficiary, balance/allowance, request activity/expiry, exact principal and both due caps. |
+| Awaiting finalization | Wait for resolver or committed longstop; fixed debt does not grow. No success state can be fabricated. |
+| Feed witness unavailable | Wait for successor report; inspect phase/window. Missing/gapped/upgraded feed fails closed; use longstop if eligible. |
+| Pending transaction after reload | Recover original hash receipt before sending another. Inspect chain, nonce and transaction status. |
+| Differential seeded-block error | Use the matching fresh deployment and historical block/manifest; do not swap current data into a historical test. |
+| `python` not found | Set `PYTHON=python3` or install compatible Python. |
+| Older market/loan returns 404 | API is bounded to newest 200 entities; direct contract reads may still find it. |
+| Research feed unavailable | Start local API; inspect 502/source error. Approved collateral lifecycle is independent. |
+
+## Do not hide an incident
+
+Redemption shortfalls, unexplained balance deltas, foreign issuer inventory or unexpected runtime changes need investigation. Preserve receipts/logs and follow [incident response](/operations/incidents), rather than resetting state or calling an offline snapshot current.

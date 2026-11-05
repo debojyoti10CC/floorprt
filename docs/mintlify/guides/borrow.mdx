@@ -1,0 +1,35 @@
+---
+title: 'Compose collateral and borrow'
+description: 'Create backed inventory, inspect the exact proof, lock claims and publish loan terms.'
+---
+
+Prerequisite: [run the local stack](/quickstart). Use only test funds.
+
+<Steps>
+  <Step title="Choose an open observation">
+    Connect the borrower wallet and open **Portfolio studio** (`/compose/`). Select YES at a strictly lower strike and NO at a higher strike, both from the same observation. If matured, use **Use open pair** or ask the curator to create a fresh pair in Operations. Quantity edits are preserved by recovery.
+  </Step>
+  <Step title="Acquire whole claims">
+    Enter positive whole units for both legs. **Mint a funded complete set** approves collateral if necessary and escrows one test USDC per set. You receive both sides of each market; only selected YES(lower) and NO(upper) will be pledged. Counterparts remain in the wallet.
+  </Step>
+  <Step title="Inspect the proof">
+    Check the state table, lower-inclusive/upper-exclusive boundaries and cancellation. Open **Proof inspector** to review observation, rule, contracts and verified block. A calculation-only/offline preview cannot unlock the monetary action.
+  </Step>
+  <Step title="Lock inventory">
+    Approve the vault as ERC-1155 operator and select **Lock pair in vault**. The vault recomputes the proof and pulls the exact claims atomically. Wait for the confirmed receipt and position ID.
+  </Step>
+  <Step title="Publish consented terms">
+    Open **Credit desk → Borrow**, select your OPEN position and enter principal and maximum total due. For a one-USDC floor use `0.75` / `0.78`. The UI selects an expiry no later than observation time and normally within 30 minutes. Confirm **Publish loan request**.
+  </Step>
+  <Step title="Wait for a distinct lender">
+    A request is not a funded loan. Only a successful lender transaction advances principal. Inspect confirmed balances and loan state; the API does not sign or custody funds.
+  </Step>
+</Steps>
+
+## Cancel before funding
+
+You may cancel the borrow request while the position remains OPEN, or release unfunded claims from **My portfolio**. Releasing makes the position terminal; any residual request record cannot fund a non-OPEN position. After funding, withdraw only through [full repayment or settlement](/guides/settle-and-repay).
+
+## Check before signing
+
+Verify chain, issuer, collateral, exact quantities, beneficiary, due including fees and expiry. The terminal currently chooses the owner as beneficiary; the contract supports a distinct valid immutable beneficiary. A floor is not guaranteed profit or immediate liquidity.

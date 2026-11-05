@@ -1,0 +1,35 @@
+---
+title: "Preview a pair proof"
+description: "POST /api/v1/proof/preview — Validates decimal-string IDs and positive uint64 quantities, with chainId equal to the configured deployment. Calls the onchain verifier at "
+---
+
+`POST /api/v1/proof/preview`
+
+Validates decimal-string IDs and positive uint64 quantities, with chainId equal to the configured deployment. Calls the onchain verifier at a pinned block, then builds scenarios from a separate snapshot. Always authorization false. A valid=false proof normally returns HTTP 200; scenarios may still exist and are not certification.
+
+## Request
+
+```bash
+curl 'http://127.0.0.1:8787/api/v1/proof/preview' -X POST \
+  -H 'Content-Type: application/json' \
+  -d '{"chainId":31337,"lowerMarketId":"2","upperMarketId":"3","lowerYesUnits":"1","upperNoUnits":"1"}'
+```
+
+## Response contract
+
+The following is a **schema**, not a transaction result. Shared types resolve in the [OpenAPI specification](/api/openapi.json).
+
+```json
+{
+  "$ref": "#/components/schemas/Preview"
+}
+```
+
+## Status codes
+
+- **200**: Successful read; proof validity is a separate field.
+- **400**: Invalid parsed request shape, chain ID or quantity.
+- **413**: Declared Content-Length exceeds 8192 bytes. This is not a hardened streaming size cap.
+- **500**: Runtime/manifest/RPC error; malformed preview JSON also reaches generic error handling.
+
+[API conventions and limitations](/api/overview)

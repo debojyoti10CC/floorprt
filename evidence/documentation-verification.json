@@ -1,0 +1,29 @@
+{
+  "scope": "Mintlify documentation only; no monetary contracts or application behavior changed",
+  "contentDirectory": "docs/mintlify",
+  "mintlifyCli": "4.2.1205",
+  "generatedSpecificationMirrors": 17,
+  "generatedContractReferences": 8,
+  "documentedHttpRoutes": 13,
+  "checks": [
+    {"command": "pnpm docs:generate", "exitCode": 0, "result": "28 generated specification/contract/asset files; 14 API/OpenAPI files written"},
+    {"command": "pnpm docs:check", "exitCode": 0, "result": "Generated source consistency passed; strict Mintlify build and validation passed"},
+    {"command": "mint validate --format json", "exitCode": 0, "result": {"passed": true, "errors": 0, "warnings": 0, "buildPassed": true}},
+    {"command": "pnpm docs:links", "exitCode": 0, "result": "No broken links found, including anchors, redirects and snippets"},
+    {"command": "node --check scripts/docs-generate.mjs && node --check scripts/docs-api-generate.mjs", "exitCode": 0},
+    {"command": "git diff --check", "exitCode": 0}
+  ],
+  "protocolReleaseSuiteRerun": false,
+  "publication": {
+    "status": "BLOCKED_ACCOUNT_SETUP",
+    "mcpAuthenticated": true,
+    "existingAccessibleSite": "novaire",
+    "existingSiteModified": false,
+    "repositoryAvailableThroughMintlifyIntegration": false,
+    "dashboardBrowserAccess": "DENIED",
+    "requiredRepository": "debojyoti10CC/floorprt",
+    "requiredBranch": "main",
+    "requiredContentDirectory": "/docs/mintlify",
+    "publicDocumentationUrl": null
+  }
+}

@@ -1,0 +1,50 @@
+---
+title: 'The contractual payout floor'
+description: 'The exact restricted theorem, interval boundaries and common-cancellation proof.'
+---
+
+Take **YES at lower strike L** and **NO at upper strike U**, with strictly ordered positive strikes, positive whole quantities qL/qU, and the **identical immutable observation**. The approved issuer fixes winning payout at one USDC and common cancellation at half a USDC.
+
+```text
+Pay(p) = 1000000 × [qL × 1(p ≥ L) + qU × 1(p < U)]
+Pay(CANCELLED) = 500000 × (qL + qU)
+F = 1000000 × min(qL, qU)
+```
+
+## Why the bound holds
+
+| State | Paying claims | Portfolio payout |
+| --- | --- | --- |
+| p below L | Upper NO | qU USDC |
+| L ≤ p below U | Both | qL + qU USDC |
+| p ≥ U | Lower YES | qL USDC |
+| Shared cancellation | Both at 0.5 | (qL + qU) / 2 USDC |
+
+Each numeric state pays at least the smaller quantity. Half the sum is also at least the smaller quantity. Thus all supported terminal states pay at least F.
+
+## Canonical one-unit example
+
+| Observation | Lower YES ≥ 5,000 | Upper NO ≥ 6,000 | Combined |
+| --- | --- | --- | --- |
+| 4,500 | 0 | 1 | 1 |
+| **5,000 exactly** | 1 | 1 | **2** |
+| 5,500 | 1 | 1 | 2 |
+| **6,000 exactly** | 1 | 0 | **1** |
+| 6,500 | 1 | 0 | 1 |
+| Shared cancellation | 0.5 | 0.5 | 1 |
+
+All amounts above are test USDC. Lower equality is inclusive; upper NO is the complement of GEQ and therefore exclusive.
+
+For quantities `(3, 2)`, numeric payouts are 2, 5 and 3; cancellation pays 2.5; floor is 2 USDC. **Odd whole quantities are valid.** Fractional claim quantities are not.
+
+## When the theorem does not apply
+
+Different timestamps, observation IDs, assets, independent void rules, reversed strikes, wrong sides, unbacked/parimutuel claims and external venue titles are not equivalent inputs. Similar English wording or statistical correlation cannot certify a common resolution.
+
+`FloorVault.lockPair` calls `FloorVerifier.verifyPair` in the same transaction. An API response, browser preview, signed server statement or hash is not a substitute.
+
+<Warning>
+The theorem is conditional on backing, exact custody, contract correctness, eventual resolution and settlement-token transferability. It says nothing about secondary-market bids, acquisition profit or immediate redemption.
+</Warning>
+
+Normative mathematical specification: [Mechanism and proofs](/specifications/MECHANISM_AND_PROOFS).

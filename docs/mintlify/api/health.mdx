@@ -1,0 +1,33 @@
+---
+title: "API and chain health"
+description: "GET /api/v1/health — Checks RPC chain identity and exposes deployment identity, oracle mode, journal overview and signingKeys NONE. Returns 503 on chain mismatch"
+---
+
+`GET /api/v1/health`
+
+Checks RPC chain identity and exposes deployment identity, oracle mode, journal overview and signingKeys NONE. Returns 503 on chain mismatch or RPC unavailability. Healthy responses include apiVersion floor-api/v2; RPC-failure responses have a smaller shape.
+
+## Request
+
+```bash
+curl 'http://127.0.0.1:8787/api/v1/health'
+```
+
+## Response contract
+
+The following is a **schema**, not a transaction result. Shared types resolve in the [OpenAPI specification](/api/openapi.json).
+
+```json
+{
+  "type": "object",
+  "additionalProperties": true
+}
+```
+
+## Status codes
+
+- **200**: Successful read; proof validity is a separate field.
+- **500**: Runtime/manifest/RPC error; malformed preview JSON also reaches generic error handling.
+- **503**: Wrong chain or unavailable RPC.
+
+[API conventions and limitations](/api/overview)

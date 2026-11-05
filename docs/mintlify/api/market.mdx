@@ -1,0 +1,50 @@
+---
+title: "Read one market"
+description: "GET /api/v1/markets/{id} — Searches the newest-200 market snapshot. Returns 404 outside that window or for missing IDs. Observation may be omitted when outside its own"
+---
+
+`GET /api/v1/markets/{id}`
+
+Searches the newest-200 market snapshot. Returns 404 outside that window or for missing IDs. Observation may be omitted when outside its own bounded collection.
+
+## Request
+
+```bash
+curl 'http://127.0.0.1:8787/api/v1/markets/2'
+```
+
+Path `id` is required. Use a decimal entity ID.
+
+## Response contract
+
+The following is a **schema**, not a transaction result. Shared types resolve in the [OpenAPI specification](/api/openapi.json).
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "market": {
+      "$ref": "#/components/schemas/Market"
+    },
+    "observation": {
+      "$ref": "#/components/schemas/Observation"
+    },
+    "block": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)$"
+    }
+  },
+  "required": [
+    "market",
+    "block"
+  ]
+}
+```
+
+## Status codes
+
+- **200**: Successful read; proof validity is a separate field.
+- **404**: Entity not found inside the bounded snapshot.
+- **500**: Runtime/manifest/RPC error; malformed preview JSON also reaches generic error handling.
+
+[API conventions and limitations](/api/overview)

@@ -1,0 +1,32 @@
+---
+title: 'Runtime configuration'
+description: 'Actual process environment variables, browser configuration and local defaults.'
+---
+
+Environment variables must be supplied to the process; scripts do not automatically load `.env` files. `.env.example` is a template, not a secrets loader.
+
+| Variable | Consumer and default |
+| --- | --- |
+| `FLOOR_RPC_URL` | Deployment/API/preflight/differential/public-read/replay override; local deployment defaults to `http://127.0.0.1:8545` |
+| `DEPLOYER_PRIVATE_KEY` | Sepolia deployment process only; explicitly required for public deployment |
+| `FLOOR_EXPLORER_URL` | Deployment manifest explorer override; Sepolia defaults to Etherscan |
+| `FLOOR_API_PORT` | API server, default 8787; bound to `127.0.0.1` |
+| `FLOOR_CONFIRMATIONS` | Journal depth: default 0 on Anvil, 3 otherwise; use a nonnegative integer |
+| `FLOOR_SEPOLIA_RPC` | Fork test RPC override |
+| `FLOOR_FORK_TEST` | Foundry fork opt-in; `pnpm test:fork` sets it to true |
+| `PYTHON` | Differential Python executable; default `python` |
+| `CI` | Playwright avoids reusing existing web server when set |
+
+`NEXT_PUBLIC_FLOOR_RPC_URL` and `NEXT_PUBLIC_FLOOR_CHAIN_ID` appear in the example file but are **not read by the current connection provider**. Browser configuration uses `deployment.json`, then validated Operations settings stored under `floor-connection`.
+
+## Browser settings
+
+Operations accepts an HTTP(S) read RPC and optional `floor-deployment/v1` manifest. Saving disconnects the wallet so identity can be verified again. Supported chain IDs are 31337 and 11155111. Sepolia requires external collateral and the historical-feed mode.
+
+Local storage also holds wallet selection and pending transaction identity, never borrower private keys or an authoritative balance ledger. Avoid clearing pending transaction state until its receipt is investigated.
+
+## Local orchestrator is intentionally fixed
+
+`pnpm dev` probes/starts local RPC 8545, API health 8787 and web 3000. Changing `FLOOR_API_PORT` alone does not reconfigure the orchestrator or research UI's hardcoded localhost API URL. Custom port/hosting arrangements require explicit coordinated changes; they are not silently supported by the example env file.
+
+<Warning>Never use a `NEXT_PUBLIC_` key variable or commit a signer secret. Do not expose unlocked Anvil or the local development API as a public spending service.</Warning>

@@ -1,0 +1,65 @@
+---
+title: 'Contract integration overview'
+description: 'Exact supported interfaces, role boundaries, state transitions and verifier reasons.'
+---
+
+The references in this section are generated from `packages/shared/src/abis.generated.ts`, not the original blueprint signatures. Solidity is **0.8.30**, with OpenZeppelin **5.6.1**. Eight concrete contract ABIs are generated; `FloorTypes.sol` supplies structs, enums and constants.
+
+## Roles and controls
+
+| Component | Privileged actions | Permissionless / user actions |
+| --- | --- | --- |
+| Registry | Owner registers; immutable resolver finalizes | Anyone cancels after longstop |
+| Factory | Owner creates markets and changes new eligibility | Metadata reads |
+| Tokens | No privileged unbacked mint | Holder-funded mint, merge, holder-only burn/redemption |
+| Verifier | No admin role | Pair/selection reads |
+| Vault | Owner binds desk once and pauses new locks | Holder locks; owner releases unfunded; bound desk manages lien/exits |
+| Desk | Owner pauses new requests/funding | Owner requests/cancels/repays; distinct lender funds; anyone settles |
+| Feed adapter | Constructor-bound source | Anyone submits valid historical witness |
+| MockUSDC | No restricted mint authority | Anyone uses bounded-per-call local faucet |
+
+Ownable components inherit OpenZeppelin two-step ownership transfer. There is no protocol upgrade function, discretionary pledge rescue or oracle resolver replacement. External USDC/feed proxies retain their upstream trust model.
+
+## Position and loan transitions
+
+```text
+Position: NONE → OPEN → ENCUMBERED → REDEEMED (settlement)
+                        └────────→ RELEASED (repayment)
+                 └───────────────→ RELEASED (unfunded owner release)
+Loan: NONE → FUNDED → SETTLED or REPAID
+```
+
+## Verifier reasons
+
+| Number | Shared reason string |
+| --- | --- |
+| 0 | `OK_SHARED_SCALAR_THRESHOLD` |
+| 1 | `ERR_UNKNOWN_MARKET` |
+| 2 | `ERR_OBSERVATION_MISMATCH` |
+| 3 | `ERR_BAD_STRIKE_ORDER` |
+| 4 | `ERR_ZERO_UNITS` |
+| 5 | `ERR_ALREADY_RESOLVED_OR_MATURED` |
+| 6 | `ERR_NEW_COLLATERAL_DISABLED` |
+| 7 | `ERR_WRONG_SIDES` |
+
+Failure order matters: `verifyPair` checks empty quantities before IDs, then observation, ordering, timing/state and eligibility. `verifySelection` checks sides first. These are the implemented codes, not the blueprint's larger proposed taxonomy.
+
+## Integration sequence
+
+```text
+Collateral.approve(issuer, completeSetCost)
+OutcomeTokens.mintCompleteSet(lowerMarket, qLower)
+OutcomeTokens.mintCompleteSet(upperMarket, qUpper)
+OutcomeTokens.setApprovalForAll(vault, true)
+FloorVault.lockPair(lowerMarket, upperMarket, qLower, qUpper, beneficiary)
+CreditDesk.requestLoan(positionId, principal, maximumDue, expiry)
+Collateral.approve(desk, principal)                 // lender wallet
+CreditDesk.fundLoan(positionId, principal, totalDue) // lender wallet
+// After terminal observation:
+CreditDesk.settle(loanId)                         // any wallet
+// Alternative while funded:
+Collateral.approve(desk, totalDue)                 // borrower wallet
+CreditDesk.repay(loanId)                           // borrower wallet
+```
+
+Each line is a distinct wallet-authorized transaction where applicable. Read the [debt rules](/concepts/credit), exact ABI field order, manifest and live state before signing. Never infer success from a preview or request alone.

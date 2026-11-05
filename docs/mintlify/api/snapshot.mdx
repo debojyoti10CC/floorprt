@@ -1,0 +1,31 @@
+---
+title: "Direct chain snapshot"
+description: "GET /api/v1/snapshot — Pins related reads to one block; latest 200 per entity collection and about 5,000 blocks of activity. No wallet argument is accepted by this"
+---
+
+`GET /api/v1/snapshot`
+
+Pins related reads to one block; latest 200 per entity collection and about 5,000 blocks of activity. No wallet argument is accepted by this route, so walletAddress/walletBalance are null and market wallet balances are zero.
+
+## Request
+
+```bash
+curl 'http://127.0.0.1:8787/api/v1/snapshot'
+```
+
+## Response contract
+
+The following is a **schema**, not a transaction result. Shared types resolve in the [OpenAPI specification](/api/openapi.json).
+
+```json
+{
+  "$ref": "#/components/schemas/Snapshot"
+}
+```
+
+## Status codes
+
+- **200**: Successful read; proof validity is a separate field.
+- **500**: Runtime/manifest/RPC error; malformed preview JSON also reaches generic error handling.
+
+[API conventions and limitations](/api/overview)

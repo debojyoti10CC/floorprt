@@ -1,0 +1,50 @@
+---
+title: 'BigInt proof engine'
+description: 'Use the exact TypeScript pair evaluator without treating a preview as collateral authorization.'
+---
+
+Source: `packages/proof-engine/src/index.ts`, private workspace package `@floor/proof-engine`.
+
+```typescript
+import { parseAmount, parseUnits, floorOf, payout, maximumDue,
+  waterfall, scenarios } from '@floor/proof-engine';
+
+const pair = {
+  lower: parseAmount('5000', 8),
+  upper: parseAmount('6000', 8),
+  lowerUnits: parseUnits('1'),
+  upperUnits: parseUnits('1'),
+};
+
+floorOf(pair);                    // 1000000n
+payout(pair, parseAmount('5000', 8)); // 2000000n
+payout(pair, parseAmount('6000', 8)); // 1000000n
+payout(pair, 'CANCELLED');         // 1000000n
+maximumDue(floorOf(pair));        // 800000n
+waterfall(2000000n, 780000n);      // { lenderPaid: 780000n, borrowerPaid: 1220000n }
+```
+
+## Exported functions
+
+| Function | Behavior |
+| --- | --- |
+| `parseAmount(text, decimals=6)` | Exact nonnegative decimal conversion, precision 0–18; rejects exponent notation, leading-zero forms and excessive decimal places |
+| `parseUnits(text)` | Positive whole `uint64` quantity; rejects fractional/zero/overflow values |
+| `formatAmount(amount, decimals=6, digits=2)` | Grouped display string, truncates rather than rounds; not a transaction parser |
+| `assertPair(pair)` | Checks ordering, nonnegative lower strike and positive bounded quantities |
+| `floorOf(pair)` | Smaller quantity times `1000000n` |
+| `payout(pair, price)` | Exact numeric or common-cancellation payout |
+| `maximumDue(floor, bufferBps=2000n)` | Subtracts upward-rounded reserve |
+| `waterfall(redeemed, due)` | Full lender due and residual; throws if due is negative or underpaid |
+| `scenarios(pair)` | Six representative rows including equality endpoints and cancellation |
+| `analyzeThresholdPortfolio(legs)` | Exact offchain 2–8-leg shared-observation analysis, returns `onchainVerified: false` |
+
+The pure engine accepts a zero lower strike, unlike the factory, which requires a positive strike. Pure math does not validate market existence, issuer backing, observation openness or collateral custody. `waterfall` also does not check the certified floor; contracts do.
+
+If adjacent integer strikes leave no strictly interior price, the MID representative may coincide with lower equality. The payoff remains exact; scenario labels are explanatory, not additional admissible prices.
+
+## Generalized research
+
+The sweep evaluates nonnegative price zero, sorted distinct strikes and cancellation. GEQ payoffs are constant between these boundaries. All legs must share an observation ID, but that offchain identity alone does not establish supported onchain semantics. There is **no** generalized onchain certificate verifier, loan authorization or multi-leg vault.
+
+Tests include deterministic randomized boundary checks, an independent Python implementation and Solidity comparisons; see [testing](/operations/testing).

@@ -1,0 +1,34 @@
+---
+title: "Read one loan"
+description: "GET /api/v1/loans/{id} — Searches the bounded direct snapshot. Missing or older IDs return 404 even if older contract state still exists."
+---
+
+`GET /api/v1/loans/{id}`
+
+Searches the bounded direct snapshot. Missing or older IDs return 404 even if older contract state still exists.
+
+## Request
+
+```bash
+curl 'http://127.0.0.1:8787/api/v1/loans/2'
+```
+
+Path `id` is required. Use a decimal entity ID.
+
+## Response contract
+
+The following is a **schema**, not a transaction result. Shared types resolve in the [OpenAPI specification](/api/openapi.json).
+
+```json
+{
+  "$ref": "#/components/schemas/Loan"
+}
+```
+
+## Status codes
+
+- **200**: Successful read; proof validity is a separate field.
+- **404**: Entity not found inside the bounded snapshot.
+- **500**: Runtime/manifest/RPC error; malformed preview JSON also reaches generic error handling.
+
+[API conventions and limitations](/api/overview)

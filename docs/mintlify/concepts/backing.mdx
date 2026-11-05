@@ -1,0 +1,46 @@
+---
+title: 'Complete-set backing and custody'
+description: 'How escrow funds claims and how the vault accounts for exact pledged inventory.'
+---
+
+## Mint, merge, redeem
+
+`OutcomeMarketFactory` creates one approved `OutcomeTokens` issuer in its constructor. The issuer binds one registry and six-decimal collateral contract. No privileged free-claim mint exists.
+
+```text
+mintCompleteSet(market, q): take q × 1000000 collateral; mint q YES + q NO
+mergeCompleteSet(market, q): burn q YES + q NO; return q × 1000000
+redeem(market, side, q): burn caller's claims; pay fixed terminal payout
+```
+
+Mint and merge require unresolved state **strictly before observation time**. Mint also checks new-collateral eligibility. Merge remains possible for a disabled market if its observation is still open. Redemption requires FINALIZED or CANCELLED state, burns even losing claims and reduces per-market escrow by actual payout.
+
+The issuer verifies collateral received by balance delta on mint. Fee-on-transfer underfunding reverts atomically. Six decimals alone do not make an arbitrary token acceptable; deployment must select approved transferable collateral.
+
+## Token IDs
+
+For market ID m:
+
+```text
+YES = 2 × m + 1
+NO  = 2 × m + 2
+```
+
+For markets 2 and 3, the canonical pledged claims are YES token 5 and NO token 8. The counterpart tokens 6 and 7 remain in the wallet.
+
+## Acquisition cost is separate
+
+Minting one complete set in **each** of two markets costs 2 USDC and produces four claims. Pledging the selected pair certifies its one-USDC floor; the two counterpart claims remain unpledged. The certified floor is not proof of profit on the full acquisition strategy.
+
+## Vault safety boundary
+
+`lockPair` recomputes the proof, records immutable owner/beneficiary/quantities, and pulls an exact ERC-1155 batch. The receiver accepts only the known issuer, vault operator and expected sender/IDs/amounts/data context. Single or unsolicited batch deposits revert.
+
+Only the bound desk can encumber, redeem or release repaid collateral. The desk is bound once and must point back to the same vault. There is no admin collateral-rescue or upgrade route.
+
+- OPEN: owner may release the original inventory.
+- ENCUMBERED: owner cannot withdraw; one nonzero loan lien applies.
+- RELEASED: original claims returned to owner after unfunded release or full repayment.
+- REDEEMED: pledged claims burned and cash sent to the desk for settlement.
+
+`redeemFor` always burns **the caller's** claims, even with an ERC-1155 operator approval; it cannot burn another holder's inventory and redirect proceeds.

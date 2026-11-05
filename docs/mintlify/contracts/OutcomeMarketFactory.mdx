@@ -1,0 +1,156 @@
+---
+title: "OutcomeMarketFactory"
+description: "Compiler-ABI-derived callable functions, events and errors for OutcomeMarketFactory."
+---
+
+Curator creates positive distinct GEQ strikes for an open observation, with a global maximum of 4,096 markets. Constructor deploys the only bound issuer and requires six-decimal collateral. Disabling new eligibility preserves existing redemption rights.
+
+[Contract source](https://github.com/debojyoti10CC/floorprt/blob/main/packages/contracts/src/OutcomeMarketFactory.sol) · [Generated ABI](https://github.com/debojyoti10CC/floorprt/blob/main/packages/shared/src/abis.generated.ts)
+
+<Note>This reference is generated from the checked-in compiler ABI. It includes inherited OpenZeppelin interfaces. It is not a deployment/address claim. Amounts and IDs are integers; tuples expand below to exact ABI field order.</Note>
+
+## Constructor
+
+### Deploy
+
+```solidity
+constructor(address curator, address registry_, address collateral_)
+```
+
+## Functions
+
+### acceptOwnership
+
+```solidity
+function acceptOwnership() nonpayable
+```
+
+### collateral
+
+```solidity
+function collateral() view returns (address)
+```
+
+### createMarket
+
+```solidity
+function createMarket(uint256 observationId, uint256 strike) nonpayable returns (uint256 id)
+```
+
+### getMarket
+
+```solidity
+function getMarket(uint256 id) view returns ((uint256,uint256,uint256,bool) market)
+```
+
+### marketCount
+
+```solidity
+function marketCount() view returns (uint256)
+```
+
+### owner
+
+```solidity
+function owner() view returns (address)
+```
+
+### pendingOwner
+
+```solidity
+function pendingOwner() view returns (address)
+```
+
+### registry
+
+```solidity
+function registry() view returns (address)
+```
+
+### renounceOwnership
+
+```solidity
+function renounceOwnership() nonpayable
+```
+
+### setEnabled
+
+```solidity
+function setEnabled(uint256 id, bool enabled) nonpayable
+```
+
+### tokenId
+
+```solidity
+function tokenId(uint256 marketId, uint8 side) pure returns (uint256)
+```
+
+### tokens
+
+```solidity
+function tokens() view returns (address)
+```
+
+### transferOwnership
+
+```solidity
+function transferOwnership(address newOwner) nonpayable
+```
+
+## Events
+
+### MarketCreated
+
+```solidity
+event MarketCreated(uint256 indexed marketId, uint256 indexed observationId, uint256 strike)
+```
+
+### MarketEligibilityChanged
+
+```solidity
+event MarketEligibilityChanged(uint256 indexed marketId, bool enabled)
+```
+
+### OwnershipTransferStarted
+
+```solidity
+event OwnershipTransferStarted(address indexed previousOwner, address indexed newOwner)
+```
+
+### OwnershipTransferred
+
+```solidity
+event OwnershipTransferred(address indexed previousOwner, address indexed newOwner)
+```
+
+## Errors
+
+### InvalidCollateral
+
+```solidity
+error InvalidCollateral()
+```
+
+### InvalidMarket
+
+```solidity
+error InvalidMarket()
+```
+
+### OwnableInvalidOwner
+
+```solidity
+error OwnableInvalidOwner(address owner)
+```
+
+### OwnableUnauthorizedAccount
+
+```solidity
+error OwnableUnauthorizedAccount(address account)
+```
+
+### UnknownMarket
+
+```solidity
+error UnknownMarket()
+```

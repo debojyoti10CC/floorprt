@@ -1,0 +1,45 @@
+---
+title: 'Oracle integrations and CRE boundary'
+description: 'Distinguish the test resolver, historical Chainlink witness and unsigned report preparation.'
+---
+
+## Local trusted resolver
+
+The local registry binds a configured test account at construction. Only it may finalize a bounded unsigned numeric price after observation time. Anyone may invoke shared cancellation after `cancelAfter`. Local Operations explicitly advances Anvil time; public chain time cannot be advanced.
+
+## Historical Chainlink adapter
+
+`ChainlinkObservationResolver` creates a registry whose immutable resolver is the adapter itself. The constructor binds asset, feed, decimals, maximum age/window and the proxy phase at deployment. Its source commitment hashes:
+
+```text
+abi.encode("CHAINLINK_LAST_BEFORE_V2", chainId, feedAddress, maxAge, phase)
+```
+
+Anyone calls `finalizeFromFeed(observationId, roundId)`. The caller supplies **a round ID, not a price**. The adapter reads that round and its immediate successor.
+
+Acceptance requires:
+
+- Exact observation asset/source/precision binding.
+- Current feed phase equals deployment phase; witness and successor stay in that phase.
+- Matching returned IDs, positive answers and complete round metadata.
+- Valid nonzero start times no later than update times.
+- Prior publication at/before observation timestamp; successor strictly after it and not in the future.
+- Both publications within `maxAge` of observation time; maximum configurable window is one day.
+- Canonical prior answer at most `10^36`.
+- Registry maturity, resolver authorization and nonterminal state.
+
+The finalized price is the **last publication at or before** observation time, not interpolated spot price, an average, latest report at submission time or an arbitrary keeper input.
+
+Missing rounds, gaps, invalid timestamps or phase transitions fail closed. A phase upgrade requires a new instance for new supported observations. Old observations may use committed shared longstop cancellation. There is no hidden resolver replacement switch.
+
+`findFeedWitness` performs same-phase binary search for a contiguous witness; contract validation remains authoritative.
+
+## External deployments
+
+The Sepolia script uses canonical external Circle test USDC and the ETH/USD proxy. A pinned-fork test demonstrates the mechanism against their bytecode using test-provisioned balances. This does not produce a public transaction receipt. See [deployment](/operations/deployment).
+
+## CRE report preparation is not CRE execution
+
+`services/oracle-workflow/validate-report.ts` validates asset/source, precision, maturity, source-time window, freshness and canonical price. Defaults: report window 60 seconds after observation; maximum delay 300 seconds. It returns unsigned `finalize` calldata with `authorization: NONE_PREPARATION_ONLY`.
+
+Its observation-window semantics differ from the historical last-before adapter. It is not a feed witness, authenticated HTTP response, CRE workflow, successful CRE CLI simulation or DON write. To add CRE, use the official SDK and authenticated consumer/forwarder/workflow identities with a new appropriately bound registry and recorded execution evidence.

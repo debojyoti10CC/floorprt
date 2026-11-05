@@ -1,0 +1,186 @@
+---
+title: "Data Model, Public API and Integration Contracts"
+description: "Preserved repository document: docs/DATA_AND_API.md. Historical proposals may differ from current implementation."
+---
+
+<Warning>
+Preserved source document. Status, interface examples and proposals are historical where noted; consult the current guides and source-derived references before integration. This page is generated, not a new execution or audit claim.
+</Warning>
+
+[Original Markdown source](https://github.com/debojyoti10CC/floorprt/blob/main/docs/DATA_AND_API.md) · [Current documentation scope](/maintenance/source-audit)
+
+
+**Source-of-truth rule:** contracts hold economic state; database holds indexed, reorg-aware projections and optional research data. API can never issue a collateral proof that substitutes for `FloorVerifier.verifyPair`.
+
+## 1. Data types
+
+Use `bigint` / decimal strings for onchain amounts. `USDC` base units = integer with 6 decimals; `strike` and `price` integers with observation-specific `priceDecimals`. Persist raw uints as `numeric(78,0)` or text strings; never persist chain financial values as JS floating-point.
+
+### Observation
+
+```ts
+type ObservationDTO = {
+  chainId: number; id: string; assetId: `0x${string}`;
+  observedAt: string; priceDecimals: number;
+  sourceId: `0x${string}`; resolutionPolicyHash: `0x${string}`;
+  state: 'UNRESOLVED' | 'FINALIZED' | 'CANCELLED';
+  priceRaw?: string; cancelAfter: string; createdTx: `0x${string}`;
+};
+```
+
+### Market
+
+```ts
+type MarketDTO = {
+  id: string; observationId: string; strikeRaw: string;
+  predicate: 'GEQ'; yesTokenId: string; noTokenId: string;
+  collateralAddress: `0x${string}`; outcomeContract: `0x${string}`;
+  settlementPolicyVersion: string;
+  status: 'TRADING' | 'FINALIZED' | 'CANCELLED';
+  origin: 'LOCAL_CHAIN' | 'VENUE_READ_ONLY';
+  eligibleForCollateral: boolean;
+};
+```
+
+### Proof preview
+
+```ts
+type ProofPreview = {
+  pair: { lowerMarketId: string; upperMarketId: string;
+          lowerYesUnits: string; upperNoUnits: string };
+  valid: boolean; reasonCode: string;
+  floorUsdcBase: string; proofVersion: string;
+  scenarios: Array<{state: 'LOW'|'LOWER_EQUAL'|'MID'|'UPPER_EQUAL'|'HIGH'|'CANCELLED';
+                    payoutUsdcBase: string}>;
+  verifiedAtBlock: string; verifierAddress: `0x${string}`;
+  assumptions: string[];
+};
+```
+
+### Credit
+
+```ts
+type LoanDTO = {
+  id: string; vaultPositionId: string;
+  borrower: `0x${string}`; lender: `0x${string}`;
+  principalUsdcBase: string; dueUsdcBase: string;
+  certifiedFloorUsdcBase: string;
+  status: 'FUNDED'|'SETTLED'|'REPAID_EARLY';
+  fundedTx: `0x${string}`; settleTx?: `0x${string}`;
+};
+```
+
+## 2. Proposed tables (PostgreSQL/Drizzle)
+
+| Table | Primary key | Key columns | Origin |
+|---|---|---|---|
+| `chains` | `chain_id` | name, rpc_hint, explorer, finality_depth | configuration |
+| `observations` | `(chain_id,id)` | asset_id, observed_at, source_id, status, price_raw, policy_hash | onchain events + reads |
+| `markets` | `(chain_id,market_id)` | observation_id, strike_raw, predicate, token ids, issuer | onchain events + reads |
+| `outcome_balances` | `(chain_id,wallet,token_id)` | units, last_verified_block | indexed view |
+| `vault_positions` | `(chain_id,position_id)` | owner, beneficiary, two market/qty fields, floor, loan_id, state | onchain |
+| `borrow_requests` | `(chain_id,position_id)` | requested_principal, max_due, expiry, state | onchain |
+| `loans` | `(chain_id,loan_id)` | position, borrower, lender, principal, due, state | onchain |
+| `cashflows` | `(chain_id,tx_hash,log_index)` | position, loan, lender_paid, borrower_paid | onchain logs |
+| `chain_logs` | `(chain_id,block_hash,tx_hash,log_index)` | block_number, event_name, payload, canonical | raw indexer |
+| `indexer_cursors` | `(chain_id,worker)` | finalized_block, block_hash | indexer |
+| `external_markets` | `(venue,external_id)` | title, rules_text, observed_at, source_uri, license, status | untrusted feed |
+| `research_quotes` | `(venue,market_id,source_ts)` | price, fee, liquidity, stale_flag | external adapter |
+| `system_health` | `(service,checked_at)` | latency_ms, status, details | operations |
+
+**Reorg handling:** keep raw orphaned block records for audit, but only canonical logs project as current state. On block mismatch, rewind to latest stable ancestor and reapply. Verify public chain finality expectations; do not use a magic `12 confirmations` across all chains.
+
+## 3. Suggested HTTP endpoints — read only, except optional test-only admin
+
+| Method | Endpoint | Returns | Security |
+|---|---|---|---|
+| GET | `/api/v1/health` | chain/API/indexer/feed statuses | no private keys |
+| GET | `/api/v1/config` | allowed networks, collateral, contract code hashes, versions | signed/versioned static config |
+| GET | `/api/v1/observations` | paginated observation directory | validated filters |
+| GET | `/api/v1/markets` | onchain market metadata + supported flags | source-of-truth chain |
+| GET | `/api/v1/markets/:id` | one market + all observation references | read only |
+| POST | `/api/v1/proof/preview` | deterministic scenario chart + chain view verification | **not an authorization**; Zod payload |
+| GET | `/api/v1/vaults/:owner` | wallet-owned positions | chain-backed indexed state |
+| GET | `/api/v1/vaults/:id` | custody, floor, loan lien | indexed + direct verification option |
+| GET | `/api/v1/loans` | loan book with pagination and statuses | read only |
+| GET | `/api/v1/loans/:id` | loan terms, explorer links, settlement receipts | read only |
+| GET | `/api/v1/research/markets` | external Gamma metadata (not collateral eligible) | TTL, license/provenance |
+| GET | `/api/v1/activity` | indexed events timeline | filtered for address |
+| GET | `/api/v1/metrics` | TVL/collateral exposure/settlement stats | aggregate |
+
+**All writes** such as `lockPair`, `fundLoan` and `settle` are wallet-signed directly through `viem` and generated ABIs. Do not create privileged API endpoints that call onchain money functions on users' behalf.
+
+## 4. API example
+
+`POST /api/v1/proof/preview`
+
+```json
+{
+  "chainId": 31337,
+  "lowerMarketId": "1",
+  "upperMarketId": "2",
+  "lowerYesUnits": "1",
+  "upperNoUnits": "1"
+}
+```
+
+Response:
+
+```json
+{
+  "valid": true,
+  "reasonCode": "OK_SHARED_SCALAR_THRESHOLD",
+  "floorUsdcBase": "1000000",
+  "proofVersion": "FLOOR_PAIR_GEQ_V1",
+  "verifiedAtBlock": "812",
+  "assumptions": [
+    "Same immutable observation ID and oracle policy",
+    "Approved collateral-backed ERC-1155 issuer",
+    "Common 50/50 cancellation policy",
+    "Terminal redemption; not immediate secondary-market liquidity"
+  ]
+}
+```
+
+API must fetch current market IDs, validate against onchain registry, and never accept UI-passed strikes as authoritative.
+
+## 5. Suggested reason codes
+
+`OK_SHARED_SCALAR_THRESHOLD`, `ERR_UNKNOWN_MARKET`, `ERR_WRONG_FACTORY`, `ERR_OBSERVATION_MISMATCH`, `ERR_ASSET_MISMATCH`, `ERR_COLLATERAL_MISMATCH`, `ERR_ORACLE_POLICY_MISMATCH`, `ERR_CANCELLATION_MISMATCH`, `ERR_BAD_STRIKE_ORDER`, `ERR_WRONG_SIDES`, `ERR_ZERO_UNITS`, `ERR_ALREADY_RESOLVED`, `ERR_UNSUPPORTED_PAYOUT`, `ERR_OVER_MAX_UNITS`, `ERR_CHAIN_MISMATCH`, `ERR_LOAN_TOO_LARGE`, `ERR_POSITION_ALREADY_PLEDGED`.
+
+## 6. Polymarket Gamma adapter — research ONLY
+
+### Source characteristics
+
+The Senthos implementation uses a backend-driven curated Polymarket feed for market discovery. Implement our read-only adapter separately behind rate limiting, Zod validation and a cache. Treat the user's browser region, exchange terms, and data redistribution permissions as compliance requirements.
+
+### Normalization
+
+`externalId`, `marketQuestion`, `outcomeLabels`, `conditionId`, `resolutionSource`, `rules`, `endDate`, `livePrice`, `bid`, `ask`, `liquidity`, `updatedAt`, `sourceUri`, `venue`, `eligibility='RESEARCH_ONLY'`.
+
+### Strict separation
+
+External markets can populate searchable cards and 'candidate logical relationship' graphs. They cannot be used in `lockPair` because they are not the approved ERC-1155 tokens with shared observation ID and payout/cancel policy on Floor Protocol's chain. A future Polygon adapter requires exact onchain CTF condition/oracle verification and independent custody testing.
+
+## 7. Event indexing (example)
+
+```ts
+const cursor = { chainId, finalizedBlock, blockHash };
+for (const block of stableBlocksAfter(cursor)) {
+  assertCanonicalParent(block);
+  const logs = await getLogsForKnownContracts(block);
+  await db.transaction(async tx => {
+    for (const log of logs) {
+      await upsertLog(tx, log); // unique chainId+blockHash+txHash+logIndex
+      await applyProjection(tx, decodeKnownEvent(log));
+    }
+    await updateCursor(tx, block.number, block.hash);
+  });
+}
+```
+
+No offchain 'settled' label may overwrite a different contract state. Frontend transaction state resolution: `pending → included → confirmed → indexed`, with `reverted` and `reorged` as explicit exceptions.
+
+## 8. Observability and metrics
+
+Request IDs, structured JSON logs, chain ID, application version, proof rule version, finalized block lag, oracle age, external quote stale ratio, `loan_funding_failed_total`, `settlement_failed_total`, `vault_accounting_mismatch_total`, `indexer_reorg_total`, API p95. Do not log seed phrases, access tokens or borrower secrets.

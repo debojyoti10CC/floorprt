@@ -1,0 +1,39 @@
+---
+title: 'Implementation status'
+description: 'What is implemented, what is recorded evidence, and what is not delivered.'
+---
+
+## Delivered in source
+
+| Area | Implementation |
+| --- | --- |
+| Claims | Fully backed complete sets, pre-maturity merge, fixed 1/0 and common 0.5/0.5 redemption |
+| Proof and custody | Restricted shared-observation pair verifier, exact ERC-1155 batch custody, one lien |
+| Credit | Borrower consent, exact principal, distinct lender, fixed fee-inclusive due, upward-rounded reserve |
+| Exits | Permissionless terminal settlement and borrower-only full fixed-due repayment |
+| Terminal | Markets, composer, proof, credit, portfolio, settlement, operations and recorded read-only mode |
+| Read services | Hono API, bounded direct snapshots, persistent reorg-aware JSON journal, research feed |
+| External feed | Sepolia deployment path and phase-bound historical Chainlink resolver |
+| Research | Exact 2–8-leg offchain sweep; no generalized onchain collateral verification |
+
+## Evidence boundaries
+
+| Mode | Meaning | Does not prove |
+| --- | --- | --- |
+| Local Anvil | Real EVM state transitions using valueless test tokens | Public deployment or real-value safety |
+| Recorded snapshot | Historical local-chain receipts and reads | Current balances or transaction authorization |
+| Public Sepolia reads | RPC inspection of canonical USDC/feed | Protocol deployment or user transactions |
+| Pinned Sepolia fork | Full mechanism against external bytecode with test-provisioned balances | Public receipts |
+| Oracle report preparation | Tested validation and unsigned calldata | CRE CLI simulation, DON attestation or live workflow |
+
+The checked-in release record reports 19 unit tests, 75 offline Solidity tests, 12 Chromium cases and independent differential comparisons. These are **historical recorded results**, not a claim that this documentation change reran the protocol suite. See [evidence](/operations/evidence).
+
+## Not delivered
+
+- Public Sepolia protocol deployment receipts.
+- Successful CRE CLI simulation or live DON write.
+- EIP-712 RFQ book, tranche issuance or transferable vault certificates.
+- Live Polymarket/CTF custody, bridging, cross-chain collateral or generalized multi-leg loans.
+- Production-scale pagination, database projections, independent audit, legal clearance or mainnet support.
+
+Some terminal labels still assume local mock collateral/test resolver even when discussing the optional Sepolia path. Contract/manifest checks, not those labels, establish actual identity. See [source discrepancies](/maintenance/source-audit).
