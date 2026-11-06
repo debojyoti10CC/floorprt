@@ -24,6 +24,28 @@ Run `pnpm install --frozen-lockfile` and `pnpm dev` from the repository root. Op
 
 The local desk uses a curator-only forwarder and test collateral. It labels attestation receipts **Local forwarder**. Run `pnpm underwriting:demo --pending` to prepare a fresh local request using a sampled wallet. This script only creates a pending request; it does not impersonate consent, publish a report, fund or claim repayment. Finish the user-consented publication in the browser. Use `--controller &lt;address&gt;` only to exercise the local request setup for a supported Polygon proxy/controller pair. The script records the request event index and hashes in `work/underwriting/local-credit-demo.json`.
 
+## Polymarket holdings and position-backed requests
+
+The borrower can look up a Polymarket trading wallet or ENS name without signing. The desk shows up to 400 open positions from the v2 API and reads their token balances from the published Polygon ledgers at one finalized block. A separate badge identifies a connected trading address or verified supported controller. The market marks and P&amp;L are informational. Polygon positions are read-only. [Polymarket positions API](https://docs.polymarket.com/api-reference/wallet/list-positions-for-a-user-or-market) · [Polymarket position ledgers](https://docs.polymarket.com/resources/onchain-position-data)
+
+The isolated `pnpm dev:positions` profile uses one approved binary Gnosis Conditional Tokens condition on local chain 31337. Its complete set contains one YES and one NO backed by one test USDC. For balances `Y` and `N`, the wallet can pledge up to `min(Y, N)` complete pairs. Unpaired inventory contributes zero backing. The contract locks equal amounts of the two derived token IDs together with the cash bond. It verifies the transfer and leaves the legacy Floor vault and existing cash-bond desk on their own deployment.
+
+For locked pairs `Q`, bond `B`, principal `P` and fixed fee `F`, use the six-decimal integer units of the collateral asset:
+
+| Quantity | Calculation |
+| --- | --- |
+| Backing | `V = B + Q` |
+| Principal LTV | `P / V` |
+| Debt LTV | `(P + F) / V` |
+| Maximum total due | `floor(8,000 × V / 10,000)` |
+| Minimum pairs for the requested terms | `max(0, ceil((P + F) × 10,000 / 8,000) − B)` |
+
+The contract rejects any request whose principal plus fee exceeds the integer cap. The 20% buffer is a pilot policy. The underlying value comes from the complete set's merge into the original backing token. The existing performance threshold, bond minimum, principal and fee caps still apply. For $100 principal, $102 due and a $25 bond, exactly 102.5 pairs satisfy the cap. With 120 pairs the quote shows $145 backing, 68.96% principal LTV and 70.34% debt LTV. The UI truncates ratios to two decimals.
+
+After cancellation or repayment the borrower claims the pairs back. For an unpaid matured loan, anyone can settle. The contract merges the pairs, checks that the exact backing is recovered, pays the lender up to the fixed amount due and transfers excess collateral to the borrower. For the 120-pair example, default pays the lender $102 and returns $43 in test USDC to the borrower.
+
+The local reviewer can attest a labeled synthetic performance fixture for the funded test borrower. Borrower consent covers the exact report bytes, including the pledge and loan terms. Swarm stores the report and Arkiv indexes its pointer. The lender verifies the report, owner, digest and pledge against the lending contract. Follow [the storage guide](https://github.com/debojyoti10CC/floorprt/blob/main/arkiv/swarm.md#local-position-demo) to run this path.
+
 ## Replay evidence
 
 Run `pnpm underwriting:benchmark` to collect and replay the expanded November 2025–October 2026 sample. It schedules 768 BTC/ETH Polymarket markets across 12 UTC months. Candidate discovery samples activity wallets and large-win wallets per month. The schedule and caps are fixed in the capture manifest before outcomes are ranked. Re-running the command reuses successful normalized source captures and retries failures.

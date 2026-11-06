@@ -17,12 +17,15 @@ AQRA uses one wallet-owned, expiring credit packet to make an open loan request 
 | `group` | string | no | Sorted trader-wallet set hash committed by the loan |
 | `reportRef` | string | no | 64-character Swarm file reference |
 | `reportHash` | string | no | SHA-256 of the exact UTF-8 report bytes stored in Swarm |
+| `pledge` | optional string | no | Hash of the local position ledger, condition, YES and NO token IDs, and locked quantity |
+| `principal` | optional uint64 | no | Position-backed request principal in micro-USDC |
+| `maxDue` | optional string | no | Position-backed debt cap in micro-USDC |
 
-The actual Arkiv `$owner` must equal the borrower in `getLoan(loanId)`. The lender query filters indexed `app`, `lendingChain` and `desk`; the selected request is then checked against `loanId`, owner, contract state, score, funding deadline, cutoff, evidence digest, wallet-set hash and the contract's `assessmentHashOf` / `assessmentReferenceOf` values. `apps/web/src/lib/underwriting-packets.ts` defines and queries the schema.
+The actual Arkiv `$owner` must equal the borrower in `getLoan(loanId)`. The lender query filters indexed `app`, `lendingChain` and `desk`. The selected request is checked against the loan ID, owner, contract state, score, funding deadline, cutoff, evidence digest, wallet-set hash and the contract's `assessmentHashOf` and `assessmentReferenceOf` values. The optional position fields must match the current onchain pledge and debt cap before a position loan appears as fundable. `apps/web/src/lib/underwriting-packets.ts` defines and queries the schema.
 
 Assessment validity and record retention are separate: `fundBy` is the validity deadline for originating this loan; the Arkiv packet expires 90 days after `fundBy` to leave a review period. Contract loan state remains authoritative after packet expiry. The application does not currently extend Arkiv entities or publish settlement events.
 
-The borrower creates a read-only entity from their browser wallet after reviewing the report and signing the AQRA release message. Old `aqra.trader.credit.v1` packets lack a Swarm pointer and are not eligible for the new funding review flow. The earlier `aqra.floor.strategies.v1` recipe schema below remains a separate composer feature.
+On Rabdi, the borrower creates a read-only entity from their browser wallet after reviewing the report and signing the AQRA release message. The pinned local node stores the same fields under lowercase attribute names and scopes the query by the indexed `app` attribute. The lender verifies the onchain report commitment on both networks. Old `aqra.trader.credit.v1` packets lack a Swarm pointer and are not eligible for the new funding review flow. The earlier `aqra.floor.strategies.v1` recipe schema below remains a separate composer feature.
 
 ## Current report commitment
 
@@ -30,7 +33,7 @@ After Swarm upload and read-back verification, the borrower calls `commitAssessm
 
 ## Live evidence status
 
-The repository contains the SDK write and query path. This checkout has no configured Bee URL, postage batch, Rabdi writer wallet, or transaction receipt. Do not claim a live Arkiv entity/Swarm pair until a borrower has completed the flow and the receipt is recorded in the project README.
+The same schema is used by the [local position demo](swarm.md#local-position-demo). A public Rabdi transaction requires a separately funded wallet.
 
 ## Legacy trader credit packet v1 (pre-Swarm)
 

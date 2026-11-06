@@ -1,5 +1,24 @@
 # AQRA release evidence — 6 November 2026
 
+## Position credit browser run
+
+Chromium completed request #2 at desk `0x322813fd9a801c5507c9de605d63cea4f2ce6c44` on the isolated local lending chain. The borrower pledged 120 complete Conditional Tokens pairs plus 25 test USDC against 102 test USDC due. After Arkiv publication, the test reloaded the app, discovered the entity again and verified the report from Bee before funding. After repayment and release, the wallet held 150 YES and 150 NO shares. The desk held zero of both.
+
+| Step | Local receipt or reference |
+|---|---|
+| Request and lock | `0xcec7de1acf972e54ee7c36d94a7ecf7ec6988f8664566d367b8b48f98ed592f3` |
+| Local score attestation | `0x61fe51a46b619e9f46ea00bf1716829fd52f7842727b309cbb2748c2e8405710` |
+| Onchain report commitment | `0x233b4edd3aee4622983cd098c0473b7584d3d4607e3c4fa905cf4538713f62a7` |
+| Arkiv transaction | `0xbb0ac8c128f36b9efcd6b39bd56f425dfc654872192288c4fed30f03e55e9a18` |
+| Arkiv entity | `0x913b58c4c42b1d8536044365657eace55a4a944690a1a38aeb4f2ac34fbd12f5` |
+| Swarm file (1,681 bytes) | `d2fdaa4063216580badbbfaa0c0b1f5dfaae3f373427a8c9e7cd380f4ec1b6a0` |
+| File SHA-256 | `91287a6a3c8c728a4e108221e106e0a8fb299ebf256330b9fa2b1c34b0fe7814` |
+| Funding | `0x56bbeb220595382cb5049215e41e3d6d552f31810e3abb491bd0e04d5d37c96e` |
+| Repayment | `0x347d4550dbb8889960c4504e35886bcc26f47be284a316b78670494975468256` |
+| Collateral release | `0x4255ec6af7833da49e08abff97198c285a49dca7e0e31d020ce640945a9fd096` |
+
+The lending chain, Bee v2.8.0 and Arkiv v0.1.0-pure-6 ran locally. The score used the disclosed performance fixture. The separate public Polymarket check read 176 open rows and found a nonzero Polygon balance for all 176 at a finalized block.
+
 ## Release result
 
 The recorded full verification passed on commit `a63d033e096b319f30cb33bab109130cb08afe52` at 2026-11-05 22:20 UTC. Its command outputs are in `evidence/verification.json` and `evidence/logs/`. This is historical evidence for that committed snapshot; it does **not** cover later working-tree changes. The current source must pass fresh checks before claiming the same release gate.

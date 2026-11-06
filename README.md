@@ -6,7 +6,7 @@ The working interface has four navigation destinations:
 
 - **Data** — observed monthly wallet outcomes, cohort comparisons and dated wallet evidence.
 - **Risk engine** — expected loss, portfolio loss distribution, VaR, Expected Shortfall, reserve gap and a binding credit gate. Default probability and default correlation are explicit stress assumptions, not inferred from P&L.
-- **Borrow** — ENS/wallet discovery, performance-metric review and wallet-signed bonded credit requests. The policy gates request eligibility; it does not set pricing or approve lender funding.
+- **Borrow** — live Polymarket holdings with Polygon balance checks, ENS/wallet discovery, performance review and wallet-signed credit requests. The position demo adds full-pair escrow and a live LTV quote.
 - **Lend** — Arkiv discovery, borrower-consented Swarm reports, SHA-256 and onchain report-commitment verification, bond-adjusted principal shortfall, lender risk acknowledgement, funding, repayment/default state and transaction receipts.
 
 The first visit to the credit desk opens a Borrower/Lender chooser; the mode switch remains visible in the desk. Opening Lend automatically queries Arkiv Rabdi and shows the listing count, public RPC/key state, Swarm configuration state and Arkiv explorer link. A zero listing count is a real empty query, not demo data.
@@ -25,6 +25,12 @@ pnpm dev
 ```
 
 Open <http://127.0.0.1:3000/>. The local runner starts Anvil, deploys contracts, seeds the test stack and starts the read API. In the wallet menu, choose the labeled local borrower, lender or resolver account. This uses test USDC on local chain 31337. Wallet-authorized request, cancellation, repayment and settlement actions write to local contracts and show transaction receipts. Funding requires the separately configured Swarm/Arkiv evidence flow above.
+
+### Position collateral
+
+Run `pnpm dev:positions` and open [the position credit desk](http://127.0.0.1:3002/). **Borrow → Load Polymarket** reads a trading address or ENS name. **Preview public portfolio** reads a live public account. Mainnet positions are read-only.
+
+**Load test borrower** uses funded Conditional Tokens on a separate local chain and a labeled scoring fixture. A request locks equal YES and NO quantities for one binary condition plus a test USDC bond. Borrowing $100 with $102 due against 120 matched pairs and a $25 bond gives $145 backing and 70.34% debt LTV. The contract caps repayment at $116 under its 80% debt limit. For Swarm upload and Arkiv discovery, configure the [local storage nodes](arkiv/swarm.md#local-position-demo).
 
 For a local historical-evidence request that stops before borrower consent and funding, run `pnpm underwriting:demo --pending` against the local stack. It records local receipts at `work/underwriting/local-credit-demo.json`. This uses a historical public wallet under Anvil impersonation and must not be used to bypass the interactive public-report consent flow.
 
