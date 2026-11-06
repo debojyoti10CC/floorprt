@@ -3,7 +3,6 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { createTestClient, createWalletClient, http, isAddress, keccak256, parseEventLogs, zeroHash, type Address } from 'viem';
 import { CollateralTokenAbi, MockUSDCAbi, TraderCreditDeskAbi, chainFor, publicClientFor, type Deployment } from '../packages/shared/src/index.js';
 import { lastCompleteMonth, readLiveControllers, readLiveEvidence } from '../services/underwriting/live-evidence.js';
-import { localReportMetadata, scoreReport } from '../services/underwriting/reports.js';
 import type { UnderwritingRun } from '../services/underwriting/report.js';
 
 const deployment = JSON.parse(await readFile('apps/web/public/deployment.json', 'utf8')) as Deployment;
@@ -12,6 +11,8 @@ const rpcUrl = process.env.FLOOR_RPC_URL ?? deployment.rpcUrl;
 assert(desk && deployment.chainId === 31337 && deployment.traderCredit?.mode === 'LOCAL_FORWARDER'
   && deployment.mockCollateral && ['127.0.0.1', 'localhost', '[::1]'].includes(new URL(rpcUrl).hostname),
 'The trader replay can only impersonate a historical wallet on the loopback Anvil test deployment.');
+assert(process.argv.includes('--pending'),
+  'This command only prepares a local request. Complete report publication and funding in the browser with the borrower wallet and configured Swarm/Arkiv; it will not impersonate borrower consent.');
 const client = publicClientFor(deployment, rpcUrl);
 assert.equal(await client.getChainId(), 31337);
 const asset = deployment.contracts.CollateralToken;
@@ -33,7 +34,6 @@ assert(controller && isAddress(controller), 'Provide a valid Polygon controller 
 const borrower = controller;
 const linked = borrower.toLowerCase() !== trader.toLowerCase();
 const lender = deployment.roles.lender;
-const curator = deployment.roles.curator;
 const [evidence] = await Promise.all([readLiveEvidence([trader], row.month), readLiveControllers([trader], [borrower])]);
 assert(evidence.decision.qualified, evidence.decision.reason);
 const latest = await client.getBlock();
@@ -67,7 +67,6 @@ try {
   await test.setBalance({ address: borrower, value: 10n ** 18n });
   await confirmed(wallet(borrower).writeContract({ address: asset, abi: MockUSDCAbi, functionName: 'faucet', args: [100_000_000n] }));
   const borrowerBefore = await balance(borrower);
-  const lenderBefore = await balance(lender);
   await approve(borrower, bond);
   const terms = {
     principal, due, bond, termSeconds: 30 * 86400, asOf: BigInt(evidence.asOf),
@@ -93,30 +92,7 @@ try {
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code !== 'EEXIST') throw error;
   }
-  if (process.argv.includes('--pending')) {
-    await writeResult({ ...provenance, state: 'Requested' });
-  } else {
-    const [workflowId, author] = await Promise.all([
-      client.readContract({ address: desk, abi: TraderCreditDeskAbi, functionName: 'workflowId' }),
-      client.readContract({ address: desk, abi: TraderCreditDeskAbi, functionName: 'workflowOwner' }),
-    ]);
-    const report = scoreReport({ desk, chainId: 31337, id, borrower, walletSetHash: loan.walletSetHash,
-      evidenceDigest: loan.terms.evidenceDigest, asOf: loan.terms.asOf }, evidence);
-    const attest = await confirmed(wallet(curator).writeContract({ address: desk, abi: TraderCreditDeskAbi, functionName: 'onReport',
-      args: [localReportMetadata(workflowId, author), report] }));
-    assert.equal((await readLoan(id)).score, evidence.decision.score);
-    await approve(lender, principal);
-    const fund = await confirmed(wallet(lender).writeContract({ address: desk, abi: TraderCreditDeskAbi, functionName: 'fundLoan', args: [id] }));
-    assert.equal((await readLoan(id)).state, 2);
-    assert.equal(await balance(borrower), borrowerBefore + principal - bond);
-    await approve(borrower, due);
-    const repay = await confirmed(wallet(borrower).writeContract({ address: desk, abi: TraderCreditDeskAbi, functionName: 'repay', args: [id] }));
-    assert.equal((await readLoan(id)).state, 3);
-    assert.equal(await balance(borrower) - borrowerBefore, -2_000_000n);
-    assert.equal(await balance(lender) - lenderBefore, 2_000_000n);
-    await writeResult({ ...provenance, attestation: attest.transactionHash, funding: fund.transactionHash, repayment: repay.transactionHash,
-      borrowerNet: -2_000_000n, lenderNet: 2_000_000n, state: 'Repaid' });
-  }
+  await writeResult({ ...provenance, state: 'Requested; awaiting onchain report and borrower-signed Swarm publication' });
 } finally {
   await test.stopImpersonatingAccount({ address: borrower });
 }

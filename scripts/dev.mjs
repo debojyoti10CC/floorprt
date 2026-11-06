@@ -3,6 +3,7 @@ import {existsSync,readFileSync} from 'node:fs';
 import {createRequire} from 'node:module';
 import {contractFingerprint} from './contract-fingerprint.mjs';
 const require=createRequire(import.meta.url);
+if(existsSync('.env'))process.loadEnvFile('.env');
 const children=[];let stopping=false;
 function start(script,args=[]){const p=spawn(process.execPath,[script,...args],{stdio:'inherit',windowsHide:true});children.push(p);p.on('exit',code=>{if(!stopping&&code){console.error(`Service exited (${code}): ${script}`);shutdown(code)}});return p;}
 async function run(script,args=[]){await new Promise((resolve,reject)=>{const p=start(script,args);p.once('exit',code=>code===0?resolve():reject(new Error(`${script} failed with ${code}`)));});}
