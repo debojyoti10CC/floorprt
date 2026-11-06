@@ -21,6 +21,7 @@ export function PolymarketHoldings({ portfolio }: { portfolio: PolymarketPortfol
   const values = sorted.filter(row => row.value != null);
   const value = values.length ? values.reduce((sum, row) => sum + (row.value ?? 0), 0) : null;
   const confirmed = sorted.filter(row => row.onchain).length;
+  const fromActivity = portfolio.source === 'ACTIVITY';
 
   return <div className="polymarket-holdings">
     <div className="poly-account-line">
@@ -28,16 +29,16 @@ export function PolymarketHoldings({ portfolio }: { portfolio: PolymarketPortfol
       <div className="trader-inline">
         {portfolio.sampled && <Badge tone="muted">PUBLIC SAMPLE</Badge>}
         {portfolio.cached && <Badge tone="amber">CACHED SNAPSHOT</Badge>}
-        <Badge tone="blue"><Database size={12} /> POLYMARKET DATA API</Badge>
+        <Badge tone="blue"><Database size={12} /> {fromActivity ? 'POLYMARKET ACTIVITY' : 'POLYMARKET DATA API'}</Badge>
         <Badge tone={portfolio.polygonBlock ? 'green' : 'muted'}>{portfolio.polygonBlock ? 'POLYGON BLOCK ' + portfolio.polygonBlock : 'INDEXER SNAPSHOT'}</Badge>
       </div>
     </div>
-    <dl className="poly-portfolio-summary">
+    {fromActivity ? <p className="trader-note" role="status">Positions feed rate-limited. Showing Polygon balances for tokens found in recent activity.</p> : <dl className="poly-portfolio-summary">
       <div><dt>Loaded mark value</dt><dd>{money(value)}</dd></div>
       <div><dt>Open positions</dt><dd>{sorted.length}{portfolio.more ? '+' : ''}</dd></div>
       <div><dt>Polygon confirmed</dt><dd>{portfolio.ledgersChecked ? confirmed : '—'}</dd></div>
       <div><dt>Matched markets</dt><dd>{portfolio.ledgersChecked ? portfolio.matched.length : '—'}</dd></div>
-    </dl>
+    </dl>}
     {portfolio.matched.length > 0 && <div className="poly-pair-strip">
       <Layers3 size={17} aria-hidden="true" />
       <div><strong>Matched outcome balances</strong>
@@ -45,14 +46,16 @@ export function PolymarketHoldings({ portfolio }: { portfolio: PolymarketPortfol
         <small>Polygon inventory. Position escrow is available in the local lending demo.</small>
       </div>
     </div>}
-    {!sorted.length ? <p className="trader-note" role="status">No open holdings returned. Check the trading address shown in your Polymarket profile.</p> : <>
+    {!sorted.length ? <p className="trader-note" role="status">{fromActivity
+      ? 'Recent activity did not identify any currently held outcome tokens.'
+      : 'No open holdings returned. Check the trading address shown in your Polymarket profile.'}</p> : <>
       <div className="poly-table-controls">
         <span className="eyebrow">OUTCOME INVENTORY</span>
         <input aria-label="Filter Polymarket positions" placeholder="Filter positions" value={filter} onChange={event => setFilter(event.target.value)} />
       </div>
       <div className="poly-table-scroll">
-        <table className="poly-table">
-          <thead><tr><th scope="col">Market</th><th scope="col">Shares</th><th scope="col">Entry</th><th scope="col">Mark</th><th scope="col">Value</th><th scope="col">Open P&amp;L</th></tr></thead>
+        <table className="poly-table" data-activity={fromActivity || undefined}>
+          <thead><tr><th scope="col">Market</th><th scope="col">Shares</th>{!fromActivity && <><th scope="col">Entry</th><th scope="col">Mark</th><th scope="col">Value</th><th scope="col">Open P&amp;L</th></>}</tr></thead>
           <tbody>{visible.map(row => {
             const marketUrl = row.eventSlug && /^[a-z0-9-]{1,220}$/i.test(row.eventSlug) ? 'https://polymarket.com/event/' + row.eventSlug : null;
             const gain = row.unrealized !== null && row.unrealized >= 0;
@@ -65,11 +68,12 @@ export function PolymarketHoldings({ portfolio }: { portfolio: PolymarketPortfol
                   {row.redeemable && <span className="poly-confirmed">Redeemable</span>}
                 </div>
               </td>
-              <td title={'Polymarket indexed size: ' + row.size}>{row.onchain ? formatUnits(BigInt(row.onchain.units), 6) : shares.format(row.size)}</td>
-              <td>{price(row.average)}</td><td>{price(row.mark)}</td><td>{money(row.value)}</td>
-              <td className={row.unrealized === null ? '' : gain ? 'poly-gain' : 'trader-loss'}>
-                {row.unrealized !== null && (gain ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />)} {money(row.unrealized)}
-              </td>
+              <td title={fromActivity ? undefined : 'Polymarket indexed size: ' + row.size}>{row.onchain ? formatUnits(BigInt(row.onchain.units), 6) : shares.format(row.size)}</td>
+              {!fromActivity && <><td>{price(row.average)}</td><td>{price(row.mark)}</td><td>{money(row.value)}</td>
+                <td className={row.unrealized === null ? '' : gain ? 'poly-gain' : 'trader-loss'}>
+                  {row.unrealized !== null && (gain ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />)} {money(row.unrealized)}
+                </td>
+              </>}
             </tr>;
           })}</tbody>
         </table>

@@ -9,7 +9,7 @@ import { monthOf, offsetMonth } from '../../../services/underwriting/calendar.js
 import { lastCompleteMonth, readLiveControllers, readLiveEvidence } from '../../../services/underwriting/live-evidence.js';
 import { localReportMetadata, scoreReport } from '../../../services/underwriting/reports.js';
 import { verifyEvidence } from '../../../services/underwriting/policy.js';
-import { readPolymarketPortfolio, readPublicPolymarketSample } from '../../../services/underwriting/polymarket.js';
+import { PolymarketRateLimitError, readPolymarketPortfolio, readPublicPolymarketSample } from '../../../services/underwriting/polymarket.js';
 import { demoEvidence } from '../../../services/underwriting/demo-evidence.js';
 import { positionDisclosure, type PositionDisclosure } from '../../../services/underwriting/position-assessment.js';
 import { assessmentSha256, readAssessment, swarmConfigured, swarmStorageStatus, uploadAssessment, type SwarmAssessment } from '../../../services/underwriting/swarm.js';
@@ -82,6 +82,7 @@ export function createUnderwritingApi() {
     try {
       return c.json(sample ? await readPublicPolymarketSample() : await readPolymarketPortfolio(wallet.data!));
     } catch (error) {
+      if (error instanceof PolymarketRateLimitError) return c.json({ error: error.message }, 429);
       return c.json({ error: (error as Error).message }, 502);
     }
   });

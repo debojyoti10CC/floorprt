@@ -252,8 +252,8 @@ export function TraderBorrow({ onRequest, onConnectWallet }: {
           <Button variant="secondary" disabled={action.busy || !online} onClick={() => void action.run(loadTestBorrower)}>Load test borrower</Button>
         </div>}
         {portfolio && <PolymarketHoldings key={portfolio.account} portfolio={portfolio} />}
-        {portfolioError && <div className="error-box" role="alert">{portfolioError}</div>}
-        {evidenceError && <div className="error-box" role="alert">Performance history · {evidenceError}</div>}
+        {portfolioError && <div className="error-box" role="alert">{portfolioError === evidenceError ? portfolioError : 'Positions · ' + portfolioError}</div>}
+        {evidenceError && evidenceError !== portfolioError && <div className="error-box" role="alert">Performance history · {evidenceError}</div>}
         {portfolio && wallet && (sameWallet(wallet, portfolio.account) || sameWallet(wallet, linkedSigner))
           && <Badge tone="green">TRADER SIGNER VERIFIED</Badge>}
         {identity && <div className="trader-inline"><Badge tone="blue">{identity.name}</Badge><Address value={identity.primary} /><span className="trader-note">ENS block {identity.block}</span></div>}

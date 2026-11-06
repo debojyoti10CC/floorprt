@@ -21,11 +21,20 @@ export const sameWallet = (first: Address | null | undefined, second: Address | 
 
 export async function underwritingApi<T>(path: string, signal?: AbortSignal, init: RequestInit = {}): Promise<T> {
   const configured = process.env.NEXT_PUBLIC_FLOOR_API_URL?.trim().replace(/\/+$/, '');
-  const base = configured || (['127.0.0.1', 'localhost'].includes(window.location.hostname) ? 'http://127.0.0.1:8787' : '');
-  if (!base) throw new Error('Connect an AQRA read API to fetch wallet evidence.');
-  const response = await fetch(base + '/api/v1/underwriting' + path, { ...init, signal, cache: 'no-store' });
-  const data = await response.json();
-  if (!response.ok) throw new Error(data.error ?? 'The AQRA read API is unavailable.');
+  const { hostname, port } = window.location;
+  const localApi = ['127.0.0.1', 'localhost'].includes(hostname)
+    ? 'http://127.0.0.1:' + (port === '3002' ? '8788' : '8787')
+    : '';
+  const base = configured || localApi;
+  const response = await fetch(base + '/api/v1/underwriting' + path, { ...init, signal, cache: 'no-store' })
+    .catch(error => {
+      if (signal?.aborted) throw error;
+      throw new Error('AQRA’s data service is unreachable. Try again shortly.');
+    });
+  const data = await response.json().catch(() => null);
+  if (!response.ok || data === null) {
+    throw new Error(typeof data?.error === 'string' ? data.error : 'AQRA’s data service is unavailable on this page.');
+  }
   return data as T;
 }
 

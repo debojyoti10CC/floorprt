@@ -294,6 +294,7 @@
 .poly-demo-start .trader-note { max-width: 390px; }
 .polymarket-holdings, .poly-collateral-box { display: grid; min-width: 0; gap: var(--space-5); }
 .poly-account-line { padding-top: var(--space-5); border-top: 1px solid var(--color-border-default); }
+.poly-account-line strong { overflow-wrap: anywhere; }
 .poly-portfolio-summary {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -313,6 +314,8 @@
 .poly-table-controls input { width: min(100%, 190px); min-height: 34px; }
 .poly-table-scroll { max-width: 100%; overflow: auto; border: 1px solid var(--color-border-default); border-radius: var(--radius-xs); }
 .poly-table { width: 100%; min-width: 570px; border-collapse: collapse; font-size: var(--font-size-sm); }
+.poly-table[data-activity] { min-width: 0; }
+.poly-table[data-activity] :is(th, td):first-child { width: auto; }
 .poly-table th, .poly-table td { padding: var(--space-4); text-align: right; border-bottom: 1px solid var(--color-border-default); }
 .poly-table th:first-child, .poly-table td:first-child { width: 41%; text-align: left; }
 .poly-table th { background: var(--color-surface-muted); color: var(--color-text-secondary); font-weight: 500; }
