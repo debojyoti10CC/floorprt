@@ -10,18 +10,19 @@ Preserved source document. Status, interface examples and proposals are historic
 [Original Markdown source](https://github.com/debojyoti10CC/floorprt/blob/main/docs/TRADER_CREDIT.md) · [Current documentation scope](/maintenance/source-audit)
 
 
-AQRA is a prediction-market performance-metrics-based lending protocol pilot. Activity, repeat profitability, realized P&amp;L efficiency and drawdown determine whether a borrower meets the policy for a bonded loan request. The lender reloads the dated metrics, checks their digest against the authenticated report, and chooses whether to fund. The policy does not set pricing or predict repayment; trading history is not collateral.
+
+AQRA is a prediction-market performance-metrics-based lending protocol pilot. Activity, repeat profitability, realized P&amp;L efficiency and drawdown determine whether a borrower meets the policy for a bonded loan request. The borrower previews and consents to a public report; Swarm stores the exact JSON and Arkiv makes its listing discoverable. The lender downloads that report, verifies the file hash and onchain commitment, and chooses whether to fund. The policy does not set pricing or predict repayment; trading history is not collateral.
 
 ## Run the pilot
 
 Run `pnpm install --frozen-lockfile` and `pnpm dev` from the repository root. Open [AQRA](http://127.0.0.1:3000/).
 
 - **Data** compares completed walk-forward rounds. The current expanded run has 11 completed rounds; 70.0% of consistency-screen wallet-months and 73.6% of largest-monthly-P&amp;L wallet-months are positive next month. The simpler monthly-P&amp;L comparator is 3.6 percentage points higher; neither result measures loan repayment. Change the month, filter the selection policy and select a wallet for dated evidence. Download the replay JSON from the panel.
-- **Risk engine** exposes assumption-driven credit loss, dependence and reserve stresses. It does not infer PD from P&amp;L and it keeps pooled lending rejected until real credit outcomes, validation and committed capital exist. See [`RISK_ENGINE.md`](RISK_ENGINE.md) for the full model.
+- **Risk engine** exposes assumption-driven credit loss, dependence and reserve stresses. It does not infer PD from P&amp;L and it keeps pooled lending rejected until real credit outcomes, validation and committed capital exist. See [`RISK_ENGINE.md`](https://github.com/debojyoti10CC/floorprt/blob/main/docs/RISK_ENGINE.md) for the full model.
 - **Borrow** accepts one to four addresses or an ENS name. Check the latest closed month's history, review terms, verify the controllers, and sign the collateral allowance and request. The request appears in **Your request**. Cancel it before funding or repay by maturity.
-- **Lend** reads recent onchain requests and accepts an exact request ID. An attested request shows its bond, total due, deadline, maximum principal loss and receipts. Connect a distinct lender and acknowledge the loss to fund. After maturity any connected account can settle an unpaid loan.
+- **Lend** reads recent onchain requests and accepts an exact request ID. Select **Discover on Arkiv** to load report-backed listings. Inspect the exact Swarm report; funding stays unavailable unless its SHA-256, Swarm reference, evidence digest, cutoff, score and wallet group match the contract. A distinct lender acknowledges the loss to fund. After maturity any connected account can settle an unpaid loan.
 
-The local desk uses a curator-only forwarder and test collateral. It labels attestation receipts **Local forwarder**. Run `pnpm underwriting:demo` to exercise the contract with a wallet that passes the current performance screen. The script uses explicitly labeled localhost impersonation, fetches real history and checks confirmed balances. Run `pnpm underwriting:demo --pending` to prepare a fresh request for the local curator or CRE simulation. Use `--controller &lt;address&gt;` to verify a supported Polygon proxy/controller pair and impersonate the controller on Anvil. The script records the request event index and hashes in `work/underwriting/local-credit-demo.json`.
+The local desk uses a curator-only forwarder and test collateral. It labels attestation receipts **Local forwarder**. Run `pnpm underwriting:demo --pending` to prepare a fresh local request using a sampled wallet. This script only creates a pending request; it does not impersonate consent, publish a report, fund or claim repayment. Finish the user-consented publication in the browser. Use `--controller &lt;address&gt;` only to exercise the local request setup for a supported Polygon proxy/controller pair. The script records the request event index and hashes in `work/underwriting/local-credit-demo.json`.
 
 ## Replay evidence
 
@@ -53,9 +54,11 @@ cre workflow simulate ./services/trader-cre/workflow --project-root ./services/t
 
 For Sepolia, provision a manifest with `pnpm deploy:sepolia` and approved testnet credentials. Set `FLOOR_CRE_FORWARDER` to the Sepolia forwarder for your tenant and `FLOOR_CRE_WORKFLOW_OWNER` to the CRE workflow owner. Run `pnpm underwriting:deploy --sepolia`. Build and hash the workflow using the generated Sepolia config. Set `FLOOR_CRE_WORKFLOW_ID` to the resulting ID with its `0x` prefix. Run `pnpm underwriting:deploy --sepolia --pin-workflow` with the same deployer to pin it once. Deploy and activate the exact workflow through CRE, configure the frontend and API with the Sepolia manifest, and verify a fresh request and report receipt. [Forwarder directory](https://docs.chain.link/cre/guides/workflow/using-evm-client/forwarder-directory) · [Workflow hash](https://docs.chain.link/cre/reference/cli/workflow#cre-workflow-hash) · [Deploy access](https://docs.chain.link/cre/guides/operations/deploy-access)
 
-## Arkiv packets
+## Arkiv and Swarm
 
-An attested borrower can publish a read-only underwriting packet from the same injected wallet on Rabdi. It stores the request ID, chain, desk, score, funding cutoff, as-of timestamp, wallet-set hash and evidence digest. It expires at the cutoff, rounded to a Rabdi block. **Discover on Arkiv** finds packets for the active desk and checks the entity owner and every claim against the onchain request. A stale, funded, expired, or cancelled request drops out on refresh. The public query uses the rate-limited endpoint. Publishing requires tGLM in the borrower's wallet. [Rabdi network](https://docs.arkiv.network/networks/rabdi/)
+Configure `SWARM_BEE_URL`, `SWARM_POSTAGE_BATCH_ID`, optional `SWARM_BEE_API_TOKEN`, and `NEXT_PUBLIC_ARKIV_ACCESS_KEY` in `.env`. The API loads this file when launched by `pnpm dev` or `pnpm dev:api`. The borrower sees the exact wallet and metric preview, checks the public-disclosure consent, and signs a short-lived message. AQRA uses Bee to upload the canonical report and read it back. The borrower commits SHA-256 and the Swarm reference to the loan contract, then signs an expiring `aqra.trader.credit.v2` entity on Rabdi. The packet remains queryable 90 days after the funding deadline; `fundBy` remains the loan validity cutoff.
+
+**Discover on Arkiv** filters on namespace, lending chain and desk, then reconciles owner, loan state, terms and the report reference/hash against the contract. **Inspect assessment evidence** retrieves the exact Swarm file and independently checks its hash and recomputed evidence. A missing listing, expired request, hash mismatch or unavailable report keeps the funding action disabled. The app does not yet extend entity retention or store settlement files. No public writer/reference/receipt is recorded in this checkout. See [`../arkiv/swarm.md`](https://github.com/debojyoti10CC/floorprt/blob/main/arkiv/swarm.md) and [`../arkiv/schema.md`](https://github.com/debojyoti10CC/floorprt/blob/main/arkiv/schema.md).
 
 ## Read API
 
@@ -65,3 +68,7 @@ An attested borrower can publish a read-only underwriting packet from the same i
 | GET /api/v1/underwriting/identity?name=… | Finalized ENS primary and wallet group |
 | GET /api/v1/underwriting/controller?trader=…&amp;controller=… | Finalized Polygon proxy/controller match |
 | GET /api/v1/underwriting/local-report/:id | Unsigned input for the local curator on loopback Anvil |
+| GET /api/v1/underwriting/storage-status | Whether Swarm settings are present; no server secret is returned |
+| GET /api/v1/underwriting/assessment-challenge/:id | Loan-bound public-release preview, SHA-256 and short-lived consent message |
+| POST /api/v1/underwriting/assessment-publication/:id | Verify borrower signature, upload to Swarm and check read-back |
+| GET /api/v1/underwriting/assessment/:reference?sha256=… | Bounded Swarm retrieval and report/hash validation for lender review |

@@ -1,5 +1,5 @@
 import {readFile, writeFile, mkdir} from 'node:fs/promises';
-import {resolve, dirname} from 'node:path';
+import {resolve, dirname, relative} from 'node:path';
 import {fileURLToPath} from 'node:url';
 
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'..');
@@ -19,11 +19,19 @@ for(const name of specs){
   const path=`docs/${name==='IMPLEMENTATION_DECISIONS'?'ADR/':''}${name}.md`;
   const original=await readFile(resolve(root,path),'utf8');
   const title=original.match(/^# (.+)$/m)?.[1]??name;
+  const escapedTitle=title.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+  const source=original.replace(new RegExp(`^# ${escapedTitle}\\r?$`,'m'),'');
   let fence=null;
-  const body=original.replace(/^# .+\n/,'').split('\n').map(line=>{
+  const body=source.split('\n').map(line=>{
     const mark=line.match(/^\s*(`{3,}|~{3,})/);
     if(mark){if(!fence)fence=mark[1][0];else if(mark[1][0]===fence)fence=null;return line;}
-    return fence?line:line.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('{','&#123;').replaceAll('}','&#125;').replace(/ {2,}$/,'<br />');
+    if(fence)return line;
+    return line.replace(/^# /,'## ').replace(/\]\(([^)]+\.md(?:#[^)]+)?)\)/g,(link,target)=>{
+      if(/^(?:[a-z][a-z0-9+.-]*:|\/|#)/i.test(target))return link;
+      const [targetPath,...anchor]=target.split('#');
+      const sourcePath=relative(root,resolve(root,dirname(path),targetPath)).replaceAll('\\','/');
+      return `](${repo}${sourcePath}${anchor.length?`#${anchor.join('#')}`:''})`;
+    }).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('{','&#123;').replaceAll('}','&#125;').replace(/ {2,}$/,'<br />');
   }).join('\n');
   await emit(`specifications/${name}.mdx`,front(title,`Preserved repository document: ${path}. Historical proposals may differ from current implementation.`)+`<Warning>\nPreserved source document. Status, interface examples and proposals are historical where noted; consult the current guides and source-derived references before integration. This page is generated, not a new execution or audit claim.\n</Warning>\n\n[Original Markdown source](${repo}${path}) · [Current documentation scope](/maintenance/source-audit)\n\n${body}`);
 }
@@ -35,7 +43,7 @@ const intros={
   FloorVerifier:'Restricted YES(lower GEQ) plus NO(upper GEQ) proof. verifyPair fixes sides by grammar; verifySelection additionally checks explicit sides. The factory/issuer/registry identity is fixed by immutable construction.',
   FloorVault:'Nontransferable exact-inventory positions with immutable owner and beneficiary. Lock recomputes the proof; expected batch context rejects unsolicited deposits. Only the once-bound reciprocal CreditDesk may lien, redeem or release repaid claims. New-lock pauses do not pause exits.',
   CreditDesk:'Exact borrower-approved principal, bounded fixed due and expiry. One distinct lender per position. Full fixed-due borrower repayment or permissionless terminal settlement is atomic; shortfalls revert. Immutable bufferBps is 2,000 in deployment scripts, not a universal constructor constant.',
-  TraderCreditDesk:'Separate trader credit pilot with a first-loss bond and capped principal. An authenticated Chainlink workflow report binds a score to the borrower, evidence digest and exact request. A distinct lender can fund after attestation. The borrower can repay before maturity, and default releases the bond to the lender.',
+  TraderCreditDesk:'Separate trader credit pilot with a first-loss bond and capped principal. An authenticated workflow report binds a score to the borrower, evidence digest and exact request. The borrower immutably commits the public assessment SHA-256 and Swarm reference before funding. A distinct lender can fund after that commitment. The borrower can repay before maturity, and default releases the bond to the lender.',
   ChainlinkObservationResolver:'Permissionless historical-round witness submission, not arbitrary price submission or CRE. The last complete feed publication at/before observation time needs its contiguous successor after it, within the committed window and unchanged deployment phase.',
   MockUSDC:'LOCAL TEST MONEY ONLY. Freely mintable six-decimal tUSDC with no market value. faucet allows a positive amount up to 10,000 USDC per call, with no global issuance cap. The Sepolia deployment path uses external Circle USDC instead.'
 };

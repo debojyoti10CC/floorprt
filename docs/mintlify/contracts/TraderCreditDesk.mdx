@@ -3,7 +3,7 @@ title: "TraderCreditDesk"
 description: "Compiler-ABI-derived callable functions, events and errors for TraderCreditDesk."
 ---
 
-Separate trader credit pilot with a first-loss bond and capped principal. An authenticated Chainlink workflow report binds a score to the borrower, evidence digest and exact request. A distinct lender can fund after attestation. The borrower can repay before maturity, and default releases the bond to the lender.
+Separate trader credit pilot with a first-loss bond and capped principal. An authenticated workflow report binds a score to the borrower, evidence digest and exact request. The borrower immutably commits the public assessment SHA-256 and Swarm reference before funding. A distinct lender can fund after that commitment. The borrower can repay before maturity, and default releases the bond to the lender.
 
 [Contract source](https://github.com/debojyoti10CC/floorprt/blob/main/packages/contracts/src/TraderCreditDesk.sol) · [Generated ABI](https://github.com/debojyoti10CC/floorprt/blob/main/packages/shared/src/abis.generated.ts)
 
@@ -61,6 +61,18 @@ function PRINCIPAL_CAP() view returns (uint256)
 function activeForWallet(address) view returns (uint256)
 ```
 
+### assessmentHashOf
+
+```solidity
+function assessmentHashOf(uint256) view returns (bytes32)
+```
+
+### assessmentReferenceOf
+
+```solidity
+function assessmentReferenceOf(uint256) view returns (bytes32)
+```
+
 ### asset
 
 ```solidity
@@ -71,6 +83,12 @@ function asset() view returns (address)
 
 ```solidity
 function cancelRequest(uint256 id) nonpayable
+```
+
+### commitAssessment
+
+```solidity
+function commitAssessment(uint256 id, bytes32 reportHash, bytes32 swarmReference) nonpayable
 ```
 
 ### forwarder
@@ -182,6 +200,12 @@ function workflowOwner() view returns (address)
 ```
 
 ## Events
+
+### AssessmentCommitted
+
+```solidity
+event AssessmentCommitted(uint256 indexed loanId, bytes32 indexed reportHash, bytes32 swarmReference)
+```
 
 ### ScoreAttested
 

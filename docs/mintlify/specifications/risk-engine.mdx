@@ -3,7 +3,7 @@ title: "AQRA Credit Risk Engine"
 description: "Model equations, stress assumptions, validation gates and references for the trader-credit risk engine."
 ---
 
-# AQRA credit risk engine
+## AQRA credit risk engine
 
 The engine in `services/underwriting/risk-engine.ts` calculates loan principal loss and correlated portfolio stress. It does **not** estimate default probability from trader P&L. The performance dataset has no mature AQRA loan repayment/default labels, complete trader bankroll, or timestamped forecast probabilities.
 
@@ -11,55 +11,55 @@ Every PD, pairwise default correlation, bond-recovery haircut, capital charge, o
 
 ## Exposure and loss severity
 
-For exposure \(i\), \(EAD_i\) is outstanding principal at default. The model excludes unearned fee income from principal-loss calculations. The posted bond is \(B_i\), and \(h\) is the stress recovery fraction. Then:
+For exposure $i$, $EAD_i$ is outstanding principal at default. The model excludes unearned fee income from principal-loss calculations. The posted bond is $B_i$, and $h$ is the stress recovery fraction. Then:
 
-\[
+$$
 R_i=hB_i,\quad LGD_i=\frac{\max(0,EAD_i-R_i)}{EAD_i},\quad \ell_i=EAD_iLGD_i.
-\]
+$$
 
-Expected credit loss under PD \(p_i\) is:
+Expected credit loss under PD $p_i$ is:
 
-\[
+$$
 EL=\sum_i p_i\ell_i=\sum_i p_iEAD_iLGD_i.
-\]
+$$
 
 The demo escrows the bond in the repayment token and transfers it to the lender on matured default. Full face-value bond recovery is the default scenario; a haircut is exposed for stress analysis. Trading positions and future trading P&L are not collateral.
 
 ## Correlated default-count model
 
-For a homogeneous portfolio of \(N\) exposures with marginal default probability \(p\) and pairwise Bernoulli default correlation \(\rho\), the default count follows a beta-binomial distribution. For \(0<\rho<1\):
+For a homogeneous portfolio of $N$ exposures with marginal default probability $p$ and pairwise Bernoulli default correlation $\rho$, the default count follows a beta-binomial distribution. For $0<\rho<1$:
 
-\[
+$$
 \alpha=p\frac{1-\rho}{\rho},\quad \beta=(1-p)\frac{1-\rho}{\rho},
-\]
+$$
 
-\[
+$$
 P(K=k)=\binom Nk\frac{B(k+\alpha,N-k+\beta)}{B(\alpha,\beta)}.
-\]
+$$
 
-At \(\rho=0\), the implementation uses the binomial limit. At \(\rho=1\), it uses a common-shock mixture with probability \(1-p\) of zero defaults and probability \(p\) of all defaults. For equal loss \(\ell\), portfolio loss is \(L_k=k\ell\). The UI displays the full discrete mass function.
+At $\rho=0$, the implementation uses the binomial limit. At $\rho=1$, it uses a common-shock mixture with probability $1-p$ of zero defaults and probability $p$ of all defaults. For equal loss $\ell$, portfolio loss is $L_k=k\ell$. The UI displays the full discrete mass function.
 
 ## Tail loss, reserve and price
 
-For confidence \(q\), VaR is the smallest loss whose cumulative probability reaches \(q\). Expected Shortfall is the mean loss in the worst \(1-q\) probability mass. The discrete implementation includes only the fraction of the boundary probability atom needed to complete that tail.
+For confidence $q$, VaR is the smallest loss whose cumulative probability reaches $q$. Expected Shortfall is the mean loss in the worst $1-q$ probability mass. The discrete implementation includes only the fraction of the boundary probability atom needed to complete that tail.
 
 The stress capital requirement is:
 
-\[
+$$
 K_{req}=\max(ES_q,N\ell),\qquad K_{gap}=\max(0,K_{req}-K_{scenario}).
-\]
+$$
 
 It covers both tail loss and the common-shock all-default loss. The interface shows a hypothetical reserve scenario; it is not a committed balance.
 
-For loan fee \(F\), capital charge \(r_K\), and operating cost \(C\):
+For loan fee $F$, capital charge $r_K$, and operating cost $C$:
 
-\[
+$$
 Revenue_{fee}=N(1-p)F,\quad Cost_{capital}=r_K\max(0,ES_q-EL),
-\]
+$$
 
-\[
+$$
 Margin=Revenue_{fee}-EL-Cost_{capital}-NC.
-\]
+$$
 
 Break-even PD is the greatest modeled PD with nonnegative scenario margin. It is not a borrower-level PD estimate.
 

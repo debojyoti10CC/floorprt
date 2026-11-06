@@ -10,6 +10,7 @@ Preserved source document. Status, interface examples and proposals are historic
 [Original Markdown source](https://github.com/debojyoti10CC/floorprt/blob/main/docs/ETHGLOBAL_SUBMISSION.md) · [Current documentation scope](/maintenance/source-audit)
 
 
+
 **Status date:** 6 November 2026. This brief describes the current AQRA trader-credit app, not the earlier Floor Protocol terminal.
 
 ## One-line pitch
@@ -29,12 +30,15 @@ flowchart LR
   S --> R[Fixed loan request]
   C --> R
   R --> B[Escrowed USDC bond]
-  R --> W[Authenticated report]
-  W --> L[Distinct lender reviews shortfall]
+  R --> W[Workflow-attested evidence]
+  W --> C[Borrower-signed release]
+  C --> S[Swarm upload + byte read-back]
+  S --> H[Onchain report hash + reference]
+  H --> A[Borrower-owned Arkiv listing]
+  A --> L[Distinct lender fetches and verifies report]
   L --> F[Direct funding]
   F --> O[Repayment or matured bond recovery]
   O --> E[Onchain receipt]
-  A[Arkiv expiring request packet] -. discover / verify .-> L
   P[CRE: Polygon data + EVM request] -. attest exact request .-> W
 ```
 
@@ -43,7 +47,7 @@ flowchart LR
 1. **Data:** sampled market coverage, walk-forward policy comparison, address-level underwriting metrics and export.
 2. **Risk engine:** assumption-driven credit loss and discrete portfolio stress. It rejects pool underwriting because the model has no loan labels or committed reserve.
 3. **Borrow:** wallet/ENS discovery, as-of evidence, scoped linked-wallet consent, fixed terms and bond escrow.
-4. **Lend:** request review, loss acknowledgement, direct funding, borrower repayment or matured default, with receipts.
+4. **Lend:** Arkiv discovery, exact Swarm report retrieval and hash/recomputation checks, loss acknowledgement, direct funding, borrower repayment or matured default, with receipts.
 
 ## What the data says
 
@@ -67,22 +71,27 @@ The risk engine lets a user vary assumed PD, default dependence, recovery haircu
 
 ## Demo sequence
 
-1. Show the benchmark sample counts and the five observed cohort rates. Point out that the strongest simple comparator is 3.6 points above the consistency screen.
-2. Change one risk assumption and show loss distribution, VaR/ES and the unchanged `REJECT` gate.
-3. On Anvil 31337, create a request from the captured sample using the explicit local-only borrower impersonation tool. Show the request transaction and exact terms.
-4. Use the local curator to submit the report; distinguish it from CRE.
-5. Switch to a distinct lender, load the request's activity, P&amp;L, turnover, efficiency and drawdown; show the evidence digest matches the attested report.
-6. Inspect the $75 shortfall, acknowledge the risk and fund with test USDC.
-7. Repay using the borrower flow, or show the matured-default path if the event state is prepared. End on receipt-backed state.
-8. If a Rabdi testnet write/read is completed, show `Discover on Arkiv` and verify packet claims against the request. If not, omit Arkiv from the live demo.
-9. For the CRE bounty, run and show the successful official `cre workflow simulate` output with Polygon API reads and the local EVM request. Do not label this a public DON write.
+The repository does not currently have a Bee URL, funded postage batch or live Rabdi writer configured. The complete external storage flow is therefore implemented but not yet an honest live demo. Do not imply a testnet upload or loan funding has happened until it is executed with those resources.
+
+After configuration, use this sequence:
+
+1. Show the benchmark sample counts and observed cohort rates. Point out that the simple prior-month P&amp;L comparator exceeds the consistency screen by 3.6 percentage points and neither measures repayment.
+2. Change one risk assumption and show the loss distribution, VaR/ES and unchanged pooled-credit `REJECT` gate.
+3. Create or open a borrower-owned request and show its onchain attestation and fixed terms.
+4. Preview the complete report disclosure, inspect linked wallets/metrics/cutoff/SHA-256, and sign the time-limited public-release message.
+5. Show Bee upload, read-back verification, borrower commitment transaction, and wallet-owned Arkiv publication receipt.
+6. Switch to a separate lender session; discover the listing on Arkiv, fetch the exact Swarm reference, and show digest/hash/contract checks pass. Then acknowledge the $75 shortfall and fund with test USDC.
+7. Repay or mature the loan and show the receipt. Demonstrate that repayment/default still work if Arkiv/Swarm is unavailable.
+8. For the CRE bounty, run and show successful official `cre workflow simulate` output with Polygon API reads and the EVM request. Do not label this a public DON write.
+
+Without the external service configuration and a second wallet, limit the demo to the local request/attestation path and explicitly show funding disabled. The local impersonation utility is not borrower consent.
 
 ## Sponsor readiness
 
 | Sponsor path | Assessment on 6 November |
 | --- | --- |
 | **Chainlink CRE** | Closest fit. The workflow source is present and connects an external Polygon/Polymarket API with the EVM request. No successful official CLI simulation or live workflow is yet recorded. Complete that exact demo gate. |
-| **Arkiv existing projects** | Code path exists for an expiring request packet and a lender-visible query, but no public receipt or new event-work evidence is recorded. Existing-project prize requires Continuity registration; the team is unsure whether it has it. Confirm before claiming this track. |
+| **Arkiv + Swarm** | New code now uploads and reads back the consented assessment via Bee, commits SHA-256/reference in the lending contract, writes an expiring Arkiv v2 listing and fetches the exact report before UI funding. No Bee configuration, postage batch, Rabdi write/read receipt or second-wallet proof is recorded yet. The existing-project prize requires Continuity registration and event-new evidence; eligibility remains unconfirmed. |
 | **Arc** | No Arc integration exists here. Every Arc prize requires an Arc Studio-originated project, a shareable Studio project URL and showing Studio in the demo, plus a working app/backend, architecture diagram and presentation. Arc Continuity additionally requires Continuity registration. Do not claim Arc eligibility yet. |
 
 Official requirements: [ETHGlobal Mumbai prizes](https://ethglobal.com/events/mumbai/prizes), [Arc prizes](https://ethglobal.com/events/mumbai/prizes/arc), [Chainlink CRE](https://docs.chain.link/cre), [Arkiv Rabdi](https://docs.arkiv.network/networks/rabdi/).
@@ -93,7 +102,7 @@ Official requirements: [ETHGlobal Mumbai prizes](https://ethglobal.com/events/mu
 - Fixed-schedule benchmark artifact, source capture manifest and exact cohort table.
 - Contract addresses, code identity, chain ID, transaction hashes, event indices and before/after test-USDC balances for the recorded demo.
 - A CRE simulation transcript and workflow config with credentials removed; separately record any public DON transaction if one later exists.
-- If entering Arkiv: writer address, entity schema/expiry/ownership, reproducible query, transaction/entity key, user-facing read receipt and the required criterion files.
+- If entering Arkiv: writer address, entity schema/expiry/ownership, reproducible query, transaction/entity key, Swarm reference/hash pair, a lender-visible read receipt, and the required `/arkiv/` criterion files. The code path alone is not the external proof.
 - If entering Arc: shareable Studio project URL, functional Arc flow, architecture diagram and video showing Studio.
 - A short video, under the applicable event limit, showing the whole core flow and one fail-closed condition.
 
