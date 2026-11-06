@@ -22,6 +22,8 @@
     "dev:web": "pnpm --filter @floor/web dev",
     "dev:api": "tsx apps/api/src/server.ts",
     "chain": "node scripts/foundry.mjs anvil --host 127.0.0.1 --port 8545 --chain-id 31337 --silent",
+    "cre:chain": "node scripts/foundry.mjs anvil --host 127.0.0.1 --port 8550 --chain-id 31337 --silent",
+    "cre:margin:demo": "tsx scripts/cre-margin-demo.ts",
     "contracts:build": "node scripts/foundry.mjs forge build --root packages/contracts",
     "contracts:test": "node scripts/foundry.mjs forge test --root packages/contracts -vv",
     "contracts:fmt": "node scripts/foundry.mjs forge fmt --root packages/contracts",

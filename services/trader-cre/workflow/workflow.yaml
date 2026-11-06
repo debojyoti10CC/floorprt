@@ -14,3 +14,12 @@ sepolia:
     workflow-path: ./main.ts
     config-path: ./config.sepolia.json
     secrets-path: ""
+
+margin-simulation:
+  user-workflow:
+    workflow-name: aqra-margin
+    workflow-owner-address: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+  workflow-artifacts:
+    workflow-path: ./main.ts
+    config-path: ./config.margin.local.json
+    secrets-path: ""

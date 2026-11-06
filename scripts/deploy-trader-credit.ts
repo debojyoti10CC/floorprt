@@ -30,7 +30,8 @@ if (!forwarder || !isAddress(forwarder) || forwarder === zeroAddress || !owner |
 const workflowId = id as Hex;
 const configPath = 'services/trader-cre/workflow/config.' + (sepolia ? 'sepolia' : 'local') + '.json';
 const writeConfig = async (desk: Address) => {
-  if (!isolatedPath) await writeFile(configPath, JSON.stringify({ desk, chainId }, null, 2) + '\n');
+  // Pinning uses the workflow config already built and hashed by the operator.
+  if (!isolatedPath && !pin) await writeFile(configPath, JSON.stringify({ desk, chainId }, null, 2) + '\n');
 };
 const chain = chainFor(chainId, rpcUrl);
 const client = createPublicClient({ chain, transport: http(rpcUrl) });

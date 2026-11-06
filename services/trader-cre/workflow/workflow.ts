@@ -14,12 +14,19 @@ import { boundaryBlockMaxima, evidenceBoundaries, evidenceFromHistories, type Ac
 import { parsePnlHistory, pnlUrl } from '../../underwriting/pnl-wire.js';
 import { scoreReport } from '../../underwriting/reports.js';
 import { verifyControllers } from '../../underwriting/controllers.js';
+import { onLoanSweep } from './lifecycle.js';
 
+const contractAddress = z.string().refine(value => isAddress(value) && value !== zeroAddress).transform(value => value as Address);
 export const configSchema = z.object({
-  desk: z.string().refine(value => isAddress(value) && value !== zeroAddress).transform(value => value as Address),
+  desk: contractAddress,
   chainId: z.union([z.literal(31337), z.literal(11155111)]),
-});
-type Config = z.infer<typeof configSchema>;
+  keeper: contractAddress.optional(),
+  replayAt: z.number().int().positive().optional(),
+  replayRelayPort: z.number().int().min(1024).max(65535).optional(),
+}).refine(config => config.replayAt === undefined
+  ? config.replayRelayPort === undefined
+  : config.chainId === 31337 && config.keeper !== undefined);
+export type Config = z.infer<typeof configSchema>;
 const requestedTopic = toEventSelector('TraderCreditRequested(uint256,address,bytes32)');
 const sepoliaSelector = EVMClient.SUPPORTED_CHAIN_SELECTORS['ethereum-testnet-sepolia'];
 const polygonSelector = EVMClient.SUPPORTED_CHAIN_SELECTORS['polygon-mainnet'];
@@ -127,5 +134,6 @@ export function initWorkflow(config: Config) {
       topics: [{ values: [hexToBase64(requestedTopic)] }],
       confidence: 'CONFIDENCE_LEVEL_FINALIZED',
     }), onLoanRequested),
+    ...(config.keeper ? [cre.handler(new cre.capabilities.CronCapability().trigger({ schedule: '0 * * * * *' }), onLoanSweep)] : []),
   ];
 }
