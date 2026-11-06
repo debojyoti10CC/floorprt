@@ -13,7 +13,8 @@
     "OutcomeTokens": "0x75537828f2ce51be7289709686A69CbFDbB714F1",
     "FloorVerifier": "0xcf7ed3acca5a467e9e704c703e8d87f634fb0fc9",
     "FloorVault": "0xdc64a140aa3e981100a9beca4e685f962f0cf6c9",
-    "CreditDesk": "0x5fc8d32690cc91d4c39d9d3abcbd16989f875707"
+    "CreditDesk": "0x5fc8d32690cc91d4c39d9d3abcbd16989f875707",
+    "TraderCreditDesk": "0x322813fd9a801c5507c9de605d63cea4f2ce6c44"
   },
   "codeHashes": {
     "CollateralToken": "0xf2261789473cde7636c55dcc791b89626951360542cab3c93ca90a6b1feef8b2",
@@ -22,7 +23,8 @@
     "OutcomeTokens": "0x611258f4919962387e4a27747afee8036a120750b1407f04b4754e263b04c47e",
     "FloorVerifier": "0x508d2fb6fcb4055e50b537ab2f0d1cafbadb7b2062ec0622b04c111a2a6b6f59",
     "FloorVault": "0xaa7bb9fe9581aec332bb31349e227fa25a947beb67a44eae610ae7f74e9885f3",
-    "CreditDesk": "0x9feb04a27b81bc93671af3c090363987212f49514ba73696d9354594aaeab697"
+    "CreditDesk": "0x9feb04a27b81bc93671af3c090363987212f49514ba73696d9354594aaeab697",
+    "TraderCreditDesk": "0x6d570d9efde4f5f8c2f20a713c9b4996fb04a8733b12921f408cc162f7997560"
   },
   "roles": {
     "curator": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
@@ -34,8 +36,14 @@
   "oracleMode": "TRUSTED_TEST_RESOLVER",
   "seededBlock": "26",
   "defaultPair": {
-    "lower": "2",
-    "upper": "3"
+    "lower": "12",
+    "upper": "13"
   },
-  "buildFingerprint": "5171501f48984433f561bf0ca1e956ee3ebe44ab598a9948249674450714dc2d"
+  "buildFingerprint": "5171501f48984433f561bf0ca1e956ee3ebe44ab598a9948249674450714dc2d",
+  "traderCredit": {
+    "mode": "LOCAL_FORWARDER",
+    "buildHash": "0x84c9f9a9abde41c67946a6e5e75a3e5984f2508f7e2a0bd2045e7c05b0e4145c",
+    "deploymentBlock": "39",
+    "transactionHash": "0xfa50e7150d93eb587cc67732e11c9769261103e3c3ca478e9ae99d36f683026d"
+  }
 }
