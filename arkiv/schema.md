@@ -1,5 +1,13 @@
 # Arkiv strategy entity schema
 
+## Trader credit underwriting packets
+
+Schema `aqra.trader.credit.v1` uses Rabdi. It indexes the app discriminator, lending chain, desk, loan ID, score and funding deadline. The payload also commits to the as-of timestamp, evidence digest and wallet-set hash. The borrower signs a read-only entity using the same wallet that owns the request. Expiry is the funding cutoff rounded to a Rabdi block.
+
+The lender board joins public packets to onchain requests. A packet is accepted only if its owner, score, cutoff and commitments match an attested, unfunded request on the active desk. The lending contract authorizes funding. The packet supplies discovery and provenance.
+
+## Outcome strategy recipes
+
 **Schema:** `aqra.floor.strategies.v1`  
 **Network:** Rabdi testnet, chain ID `7794095`  
 **Expiry:** 30 days from create. AQRA does not extend an entity's lifetime when it is loaded.  

@@ -1,0 +1,300 @@
+---
+title: "TraderCreditDesk"
+description: "Compiler-ABI-derived callable functions, events and errors for TraderCreditDesk."
+---
+
+Separate trader credit pilot with a first-loss bond and capped principal. An authenticated Chainlink workflow report binds a score to the borrower, evidence digest and exact request. A distinct lender can fund after attestation. The borrower can repay before maturity, and default releases the bond to the lender.
+
+[Contract source](https://github.com/debojyoti10CC/floorprt/blob/main/packages/contracts/src/TraderCreditDesk.sol) · [Generated ABI](https://github.com/debojyoti10CC/floorprt/blob/main/packages/shared/src/abis.generated.ts)
+
+<Note>This reference is generated from the checked-in compiler ABI. It includes inherited OpenZeppelin interfaces. It is not a deployment/address claim. Amounts and IDs are integers; tuples expand below to exact ABI field order.</Note>
+
+## Constructor
+
+### Deploy
+
+```solidity
+constructor(address asset_, address forwarder_, address workflowOwner_, bytes32 workflowId_)
+```
+
+## Functions
+
+### EVIDENCE_MAX_AGE
+
+```solidity
+function EVIDENCE_MAX_AGE() view returns (uint256)
+```
+
+### MAX_FEE_BPS
+
+```solidity
+function MAX_FEE_BPS() view returns (uint256)
+```
+
+### MIN_BOND_BPS
+
+```solidity
+function MIN_BOND_BPS() view returns (uint256)
+```
+
+### MIN_SCORE
+
+```solidity
+function MIN_SCORE() view returns (uint256)
+```
+
+### POLICY_HASH
+
+```solidity
+function POLICY_HASH() view returns (bytes32)
+```
+
+### PRINCIPAL_CAP
+
+```solidity
+function PRINCIPAL_CAP() view returns (uint256)
+```
+
+### activeForWallet
+
+```solidity
+function activeForWallet(address) view returns (uint256)
+```
+
+### asset
+
+```solidity
+function asset() view returns (address)
+```
+
+### cancelRequest
+
+```solidity
+function cancelRequest(uint256 id) nonpayable
+```
+
+### forwarder
+
+```solidity
+function forwarder() view returns (address)
+```
+
+### fundLoan
+
+```solidity
+function fundLoan(uint256 id) nonpayable
+```
+
+### getLoan
+
+```solidity
+function getLoan(uint256 id) view returns (((uint96,uint96,uint96,uint32,uint64,uint64,bytes32,bytes32),address,address,uint64,uint64,uint8,uint8,bytes32))
+```
+
+### linkDigest
+
+```solidity
+function linkDigest(address borrower, address trader, bytes32 evidenceContext, uint256 nonce) view returns (bytes32)
+```
+
+### loanCount
+
+```solidity
+function loanCount() view returns (uint256)
+```
+
+### nextNonce
+
+```solidity
+function nextNonce(address) view returns (uint256)
+```
+
+### onReport
+
+```solidity
+function onReport(bytes metadata, bytes report) nonpayable
+```
+
+### pinWorkflow
+
+```solidity
+function pinWorkflow(bytes32 id) nonpayable
+```
+
+### repay
+
+```solidity
+function repay(uint256 id) nonpayable
+```
+
+### requestLoan
+
+```solidity
+function requestLoan((uint96,uint96,uint96,uint32,uint64,uint64,bytes32,bytes32) terms, address[] traders, bytes[] consents) nonpayable returns (uint256 id)
+```
+
+### requestLoanWithControllers
+
+```solidity
+function requestLoanWithControllers((uint96,uint96,uint96,uint32,uint64,uint64,bytes32,bytes32) terms, address[] traders, address[] controllers, bytes[] consents) nonpayable returns (uint256 id)
+```
+
+### settleDefault
+
+```solidity
+function settleDefault(uint256 id) nonpayable
+```
+
+### supportsInterface
+
+```solidity
+function supportsInterface(bytes4 interfaceId) pure returns (bool)
+```
+
+### traderControllers
+
+```solidity
+function traderControllers(uint256 id) view returns (address[])
+```
+
+### traderWallets
+
+```solidity
+function traderWallets(uint256 id) view returns (address[])
+```
+
+### workflowConfigurator
+
+```solidity
+function workflowConfigurator() view returns (address)
+```
+
+### workflowId
+
+```solidity
+function workflowId() view returns (bytes32)
+```
+
+### workflowOwner
+
+```solidity
+function workflowOwner() view returns (address)
+```
+
+## Events
+
+### ScoreAttested
+
+```solidity
+event ScoreAttested(uint256 indexed loanId, bytes32 indexed evidenceDigest, uint8 score)
+```
+
+### TraderCreditCancelled
+
+```solidity
+event TraderCreditCancelled(uint256 indexed loanId)
+```
+
+### TraderCreditRequested
+
+```solidity
+event TraderCreditRequested(uint256 indexed loanId, address indexed borrower, bytes32 indexed evidenceDigest)
+```
+
+### TraderLoanDefaulted
+
+```solidity
+event TraderLoanDefaulted(uint256 indexed loanId, uint256 lenderPaid, uint256 unpaidDue, uint256 principalLoss)
+```
+
+### TraderLoanFunded
+
+```solidity
+event TraderLoanFunded(uint256 indexed loanId, address indexed lender, uint256 principal, uint64 maturity)
+```
+
+### TraderLoanRepaid
+
+```solidity
+event TraderLoanRepaid(uint256 indexed loanId, uint256 lenderPaid, uint256 bondReturned)
+```
+
+### WorkflowPinned
+
+```solidity
+event WorkflowPinned(bytes32 indexed workflowId)
+```
+
+## Errors
+
+### Deadline
+
+```solidity
+error Deadline()
+```
+
+### InvalidConfiguration
+
+```solidity
+error InvalidConfiguration()
+```
+
+### InvalidReport
+
+```solidity
+error InvalidReport()
+```
+
+### InvalidState
+
+```solidity
+error InvalidState()
+```
+
+### InvalidTerms
+
+```solidity
+error InvalidTerms()
+```
+
+### InvalidWalletConsent
+
+```solidity
+error InvalidWalletConsent(address trader)
+```
+
+### InvalidWalletGroup
+
+```solidity
+error InvalidWalletGroup()
+```
+
+### ReentrancyGuardReentrantCall
+
+```solidity
+error ReentrancyGuardReentrantCall()
+```
+
+### SafeERC20FailedOperation
+
+```solidity
+error SafeERC20FailedOperation(address token)
+```
+
+### TransferMismatch
+
+```solidity
+error TransferMismatch()
+```
+
+### Unauthorized
+
+```solidity
+error Unauthorized()
+```
+
+### WalletAlreadyInUse
+
+```solidity
+error WalletAlreadyInUse(address trader)
+```

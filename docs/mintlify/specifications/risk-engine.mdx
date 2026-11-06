@@ -1,0 +1,88 @@
+---
+title: "AQRA Credit Risk Engine"
+description: "Model equations, stress assumptions, validation gates and references for the trader-credit risk engine."
+---
+
+# AQRA credit risk engine
+
+The engine in `services/underwriting/risk-engine.ts` calculates loan principal loss and correlated portfolio stress. It does **not** estimate default probability from trader P&L. The performance dataset has no mature AQRA loan repayment/default labels, complete trader bankroll, or timestamped forecast probabilities.
+
+Every PD, pairwise default correlation, bond-recovery haircut, capital charge, operating cost and scenario-capital input is an assumption. The scenario capital control is not funded. The application hard-gates pooled credit until real repayment labels, a calibrated model, out-of-time validation and committed loss capital exist.
+
+## Exposure and loss severity
+
+For exposure \(i\), \(EAD_i\) is outstanding principal at default. The model excludes unearned fee income from principal-loss calculations. The posted bond is \(B_i\), and \(h\) is the stress recovery fraction. Then:
+
+\[
+R_i=hB_i,\quad LGD_i=\frac{\max(0,EAD_i-R_i)}{EAD_i},\quad \ell_i=EAD_iLGD_i.
+\]
+
+Expected credit loss under PD \(p_i\) is:
+
+\[
+EL=\sum_i p_i\ell_i=\sum_i p_iEAD_iLGD_i.
+\]
+
+The demo escrows the bond in the repayment token and transfers it to the lender on matured default. Full face-value bond recovery is the default scenario; a haircut is exposed for stress analysis. Trading positions and future trading P&L are not collateral.
+
+## Correlated default-count model
+
+For a homogeneous portfolio of \(N\) exposures with marginal default probability \(p\) and pairwise Bernoulli default correlation \(\rho\), the default count follows a beta-binomial distribution. For \(0<\rho<1\):
+
+\[
+\alpha=p\frac{1-\rho}{\rho},\quad \beta=(1-p)\frac{1-\rho}{\rho},
+\]
+
+\[
+P(K=k)=\binom Nk\frac{B(k+\alpha,N-k+\beta)}{B(\alpha,\beta)}.
+\]
+
+At \(\rho=0\), the implementation uses the binomial limit. At \(\rho=1\), it uses a common-shock mixture with probability \(1-p\) of zero defaults and probability \(p\) of all defaults. For equal loss \(\ell\), portfolio loss is \(L_k=k\ell\). The UI displays the full discrete mass function.
+
+## Tail loss, reserve and price
+
+For confidence \(q\), VaR is the smallest loss whose cumulative probability reaches \(q\). Expected Shortfall is the mean loss in the worst \(1-q\) probability mass. The discrete implementation includes only the fraction of the boundary probability atom needed to complete that tail.
+
+The stress capital requirement is:
+
+\[
+K_{req}=\max(ES_q,N\ell),\qquad K_{gap}=\max(0,K_{req}-K_{scenario}).
+\]
+
+It covers both tail loss and the common-shock all-default loss. The interface shows a hypothetical reserve scenario; it is not a committed balance.
+
+For loan fee \(F\), capital charge \(r_K\), and operating cost \(C\):
+
+\[
+Revenue_{fee}=N(1-p)F,\quad Cost_{capital}=r_K\max(0,ES_q-EL),
+\]
+
+\[
+Margin=Revenue_{fee}-EL-Cost_{capital}-NC.
+\]
+
+Break-even PD is the greatest modeled PD with nonnegative scenario margin. It is not a borrower-level PD estimate.
+
+## Credit gate
+
+The binding decision is `REJECT`, `REDUCE_LIMIT` or `APPROVE`. It requires mature repayment labels, calibrated PD, successful out-of-time validation, a nonempty cohort and actual committed capital. If all data gates pass, it searches for the largest requested loan count whose stressed capital is covered and whose margin is nonnegative. Current labels, calibration and committed pool capital are zero, so pooled approval is rejected.
+
+## Validation work required
+
+Collect origination features at the decision cutoff and only label matured loans. Keep late, partial, cancelled and censored records distinct. Use time-based train/validation/test periods and a final untouched out-of-time set. Report PD uncertainty and calibration, observed/expected defaults, Brier/log loss for actual probability forecasts, recovery after realized costs, dependence, concentration, utilization and tail losses. Compare policies to fixed and random baselines. A Brier score requires timestamped probability forecasts paired with outcomes; trader P&L is not a forecast.
+
+## Implementation controls
+
+- Money inputs are integer micro-USDC; basis points use an integer scale.
+- Unsupported counts, ratios and values throw range errors.
+- The probability distribution is normalized before VaR and Expected Shortfall are calculated.
+- The decision gate receives actual labels, validation state and committed capital separately from scenario sliders.
+- Changes to calculations must update `RISK_ENGINE_VERSION` and this specification.
+
+## References
+
+- [Basel CRE 30: credit risk and PD/LGD/EAD](https://www.bis.org/committees/bcbs/basel-framework/standard/cre.htm)
+- [Brier (1950): verification of probability forecasts](https://doi.org/10.1175/1520-0493(1950)078%3C0001%3AVOFEIT%3E2.0.CO%3B2)
+- [Rockafellar and Uryasev: Conditional Value-at-Risk](https://sites.math.washington.edu/~rtr/papers/rtr187-CVaR2.pdf)
+- [Gordy (2003): systematic risk factors](https://www.sciencedirect.com/science/article/pii/S1042957303000408)
+- [Christoffersen (1998): forecast validation](https://users.ssc.wisc.edu/~bhansen/718/Christoffersen1998.pdf)
