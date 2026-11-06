@@ -4,25 +4,25 @@
   "chainName": "Anvil local devnet",
   "rpcUrl": "http://127.0.0.1:8545",
   "explorerUrl": "",
-  "deploymentBlock": "860",
-  "deployedAt": "2026-11-05T22:10:14.715Z",
+  "deploymentBlock": "1",
+  "deployedAt": "2026-11-06T00:53:05.332Z",
   "contracts": {
-    "CollateralToken": "0xc32609c91d6b6b51d48f2611308fef121b02041f",
-    "SharedObservationRegistry": "0x262e2b50219620226c5fb5956432a88fffd94ba7",
-    "OutcomeMarketFactory": "0x10e38ee9dd4c549b61400fc19347d00ed3edafc4",
-    "OutcomeTokens": "0x6540c32908EFE2d8A438C3A5F20cb83108cdE9D3",
-    "FloorVerifier": "0xd753c12650c280383ce873cc3a898f6f53973d16",
-    "FloorVault": "0xd710a67624ad831683c86a48291c597ade30f787",
-    "CreditDesk": "0xd30bf3219a0416602be8d482e0396ef332b0494e"
+    "CollateralToken": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+    "SharedObservationRegistry": "0xe7f1725e7734ce288f8367e1bb143e90bb3f0512",
+    "OutcomeMarketFactory": "0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0",
+    "OutcomeTokens": "0x75537828f2ce51be7289709686A69CbFDbB714F1",
+    "FloorVerifier": "0xcf7ed3acca5a467e9e704c703e8d87f634fb0fc9",
+    "FloorVault": "0xdc64a140aa3e981100a9beca4e685f962f0cf6c9",
+    "CreditDesk": "0x5fc8d32690cc91d4c39d9d3abcbd16989f875707"
   },
   "codeHashes": {
     "CollateralToken": "0xf2261789473cde7636c55dcc791b89626951360542cab3c93ca90a6b1feef8b2",
     "SharedObservationRegistry": "0x1e3bd6b31347b542b2203a868a2c395c0754d6a16d101b1030300a989ffe50ca",
-    "OutcomeMarketFactory": "0x14fcc581e66b3648eb90826c8a81d6241cbbb4a7cea71ed954e415268b4c4d66",
-    "OutcomeTokens": "0xc9bcc983ae701ec5e61f54ec3b82f0e2cc6ac3dd6c73b532f4a0012187be9cec",
-    "FloorVerifier": "0x618414ca964e1a056cd44a11f0f7fff6ea81152f74cb37e119be76a91f4e455c",
-    "FloorVault": "0x2e5c7ae4c6ff636e73584fbf0782f2a5ffa058c94255556e2bb0a7762c80ce6c",
-    "CreditDesk": "0xf3bf09b98d7e5b73a1e6cdf62b3f4ac0ea92da4a24fbf9c41d047bcf77b2c392"
+    "OutcomeMarketFactory": "0x973c499d9c9f704ebd61b3f5681105b191a1ed7b7ba2559419248d2b0a3c341f",
+    "OutcomeTokens": "0x611258f4919962387e4a27747afee8036a120750b1407f04b4754e263b04c47e",
+    "FloorVerifier": "0x508d2fb6fcb4055e50b537ab2f0d1cafbadb7b2062ec0622b04c111a2a6b6f59",
+    "FloorVault": "0xaa7bb9fe9581aec332bb31349e227fa25a947beb67a44eae610ae7f74e9885f3",
+    "CreditDesk": "0x9feb04a27b81bc93671af3c090363987212f49514ba73696d9354594aaeab697"
   },
   "roles": {
     "curator": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
@@ -32,10 +32,10 @@
   },
   "mockCollateral": true,
   "oracleMode": "TRUSTED_TEST_RESOLVER",
-  "seededBlock": "885",
+  "seededBlock": "26",
   "defaultPair": {
-    "lower": "48",
-    "upper": "49"
+    "lower": "2",
+    "upper": "3"
   },
-  "buildFingerprint": "e789df0e08d98c83091bb32249a3470ce3b55c73042059b6982c762cc472d189"
+  "buildFingerprint": "5171501f48984433f561bf0ca1e956ee3ebe44ab598a9948249674450714dc2d"
 }

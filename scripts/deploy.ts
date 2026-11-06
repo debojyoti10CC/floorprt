@@ -73,7 +73,7 @@ if(chainId===31337){
 }
 for(const name of contractNames){const code=await client.getCode({address:contracts[name]});if(!code)throw new Error(`No code for ${name}`);codeHashes[name]=keccak256(code);}
 if(contracts.ChainlinkObservationResolver)codeHashes.ChainlinkObservationResolver=keccak256((await client.getCode({address:contracts.ChainlinkObservationResolver}))!);
-const manifest:Deployment={schema:'floor-deployment/v1',chainId,chainName:chain.name,rpcUrl,explorerUrl:process.env.FLOOR_EXPLORER_URL??(chainId===11155111?'https://sepolia.etherscan.io':''),deploymentBlock:firstBlock.toString(),deployedAt:new Date().toISOString(),contracts,codeHashes,roles,mockCollateral:chainId===31337,oracleMode:oracle?'CHAINLINK_HISTORICAL':'TRUSTED_TEST_RESOLVER',oracle,seededBlock:(await client.getBlockNumber()).toString(),defaultPair:{lower:'2',upper:'3'}};
+const manifest:Deployment={schema:'floor-deployment/v1',chainId,chainName:chain.name,rpcUrl,explorerUrl:process.env.FLOOR_EXPLORER_URL??(chainId===11155111?'https://sepolia.etherscan.io':''),deploymentBlock:firstBlock.toString(),deployedAt:new Date().toISOString(),contracts,codeHashes,roles,mockCollateral:chainId===31337,oracleMode:oracle?'CHAINLINK_HISTORICAL':'TRUSTED_TEST_RESOLVER',oracle,seededBlock:(await client.getBlockNumber({cacheTime:0})).toString(),defaultPair:{lower:'2',upper:'3'}};
 await mkdir('packages/contracts/deployments',{recursive:true});await mkdir('apps/web/public',{recursive:true});
 manifest.buildFingerprint=await contractFingerprint();
 await writeFile(`packages/contracts/deployments/${chainId}.json`,JSON.stringify(manifest,null,2));
