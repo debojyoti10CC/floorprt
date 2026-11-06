@@ -25,7 +25,7 @@ export type MarketRow={id:string;observationId:string;strike:string;enabledForNe
 export type PositionRow={id:string;owner:Address;beneficiary:Address;marketLower:string;marketUpper:string;unitsLower:string;unitsUpper:string;observationId:string;certifiedFloor:string;state:number;lienLoanId:string;request:{principal:string;maximumDue:string;expiry:string;active:boolean}};
 export type LoanRow={id:string;positionId:string;lender:Address;borrower:Address;principal:string;due:string;certifiedFloor:string;fundedAt:string;targetMaturity:string;state:number};
 export type Activity={event:string;args:Record<string,unknown>;transactionHash:Hash;blockNumber:string;blockHash:Hash;logIndex:number;address:Address};
-export type Snapshot={chainId:number;blockNumber:string;blockHash:Hash;timestamp:string;observations:ObservationRow[];markets:MarketRow[];positions:PositionRow[];loans:LoanRow[];activity:Activity[];walletAddress:Address|null;walletBalance:string|null;bufferBps:number;source:'DIRECT_CHAIN'|'RECORDED_CHAIN';fetchedAt:string};
+export type Snapshot={chainId:number;blockNumber:string;blockHash:Hash;timestamp:string;observations:ObservationRow[];markets:MarketRow[];positions:PositionRow[];loans:LoanRow[];activity:Activity[];walletAddress:Address|null;walletBalance:string|null;bufferBps:number;source:'DIRECT_CHAIN';fetchedAt:string};
 
 /** All related reads are pinned to one block to avoid a mixed-state snapshot. */
 export async function readSnapshot(deployment:Deployment,wallet?:Address,rpcUrl?:string):Promise<Snapshot>{

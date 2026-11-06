@@ -17,6 +17,7 @@ type ProtocolContext={deployment:Deployment|null;data:Snapshot|null;online:boole
 const Ctx=createContext<ProtocolContext|null>(null);
 
 const loopback=(url:string)=>{try{return ['localhost','127.0.0.1','[::1]'].includes(new URL(url).hostname)}catch{return false}};
+const localDemoUi=process.env.NEXT_PUBLIC_ENABLE_LOCAL_DEMO_UI==='true';
 
 export function ProtocolProvider({children}:{children:React.ReactNode}){
 
@@ -30,7 +31,7 @@ export function ProtocolProvider({children}:{children:React.ReactNode}){
 
   const [draft,setDraft]=useState<Draft>({lower:'2',upper:'3',lowerUnits:'1',upperUnits:'1'});
 
-  const pending=useRef(false),refreshing=useRef(false),recorded=useRef<Snapshot|null>(null),initialized=useRef(false),draftTouched=useRef(false);
+  const pending=useRef(false),refreshing=useRef(false),initialized=useRef(false),draftTouched=useRef(false);
 
   useEffect(()=>{let cancelled=false;(async()=>{
 
@@ -55,10 +56,6 @@ export function ProtocolProvider({children}:{children:React.ReactNode}){
 
       if(manifest.defaultPair&&!draftTouched.current)setDraft(current=>({...current,lower:manifest.defaultPair.lower,upper:manifest.defaultPair.upper}));
 
-      const record=await fetch('/recorded-run.json').catch(()=>null);
-
-      if(record?.ok){const r=await record.json();if(!cancelled&&r.snapshot?.chainId===manifest.chainId&&r.deployment?.contracts?.CreditDesk===manifest.contracts.CreditDesk&&r.deployment?.codeHashes?.CreditDesk===manifest.codeHashes.CreditDesk){recorded.current={...r.snapshot,source:'RECORDED_CHAIN'};setData(current=>current?.source==='DIRECT_CHAIN'?current:recorded.current);setLoading(false);}}
-
     }catch(e){if(!cancelled){setError(message(e));setLoading(false);}}
 
   })();return()=>{cancelled=true}},[]);
@@ -69,7 +66,7 @@ export function ProtocolProvider({children}:{children:React.ReactNode}){
 
     try{const snapshot=await readSnapshot(deployment,address??undefined,rpcUrl);setData(snapshot);if(!initialized.current){initialized.current=true;const pair=latestEligiblePair(snapshot);if(pair&&!draftTouched.current)setDraft(current=>({...current,...pair}));}setOnline(true);setError(null);}
 
-    catch(e){setOnline(false);setError(message(e));setData(current=>current?{...current,source:'RECORDED_CHAIN'}:recorded.current);}
+    catch(e){setOnline(false);setError(message(e));setData(null);}
 
     finally{refreshing.current=false;setLoading(false);}
 
@@ -109,7 +106,7 @@ export function ProtocolProvider({children}:{children:React.ReactNode}){
 
     if(!deployment)throw new Error('Deployment is not configured');
 
-    if(!window.ethereum)throw new Error('Install an Ethereum wallet, or start the local devnet and choose a demo wallet.');
+    if(!window.ethereum)throw new Error('Install an Ethereum wallet to continue.');
 
     const accounts=await window.ethereum.request({method:'eth_requestAccounts'}) as Address[];
 
@@ -119,9 +116,11 @@ export function ProtocolProvider({children}:{children:React.ReactNode}){
 
       try{await window.ethereum.request({method:'wallet_switchEthereumChain',params:[{chainId:'0x'+deployment.chainId.toString(16)}]});}
 
-      catch(e){if((e as {code:number}).code===4902)await window.ethereum.request({method:'wallet_addEthereumChain',params:[{chainId:'0x'+deployment.chainId.toString(16),chainName:deployment.chainName,nativeCurrency:{name:'Test Ether',symbol:'ETH',decimals:18},rpcUrls:[rpcUrl]}]});else throw e;}
+      catch(e){if((e as {code:number}).code===4902){const chain=chainFor(deployment.chainId,rpcUrl);await window.ethereum.request({method:'wallet_addEthereumChain',params:[{chainId:'0x'+deployment.chainId.toString(16),chainName:deployment.chainName,nativeCurrency:chain.nativeCurrency,rpcUrls:[rpcUrl]}]});await window.ethereum.request({method:'wallet_switchEthereumChain',params:[{chainId:'0x'+deployment.chainId.toString(16)}]});}else throw e;}
 
     }
+
+    if(await wallet.getChainId()!==deployment.chainId)throw new Error('Wallet did not switch to the configured AQRA network.');
 
     await validateCode();setAddress(accounts[0]);setMode('injected');localStorage.setItem('floor-wallet',JSON.stringify({mode:'injected',chainId:deployment.chainId,desk:deployment.contracts.CreditDesk}));
 
@@ -134,7 +133,7 @@ export function ProtocolProvider({children}:{children:React.ReactNode}){
       const saved=JSON.parse(localStorage.getItem('floor-wallet')??'null');
       if(!saved||saved.chainId!==deployment.chainId||saved.desk!==deployment.contracts.CreditDesk)return;
       await validateCode();if(cancelled)return;
-      if(saved.mode==='local'&&deployment.chainId===31337&&loopback(rpcUrl)&&['borrower','lender','resolver'].includes(saved.role)){
+      if(saved.mode==='local'&&localDemoUi&&deployment.chainId===31337&&loopback(rpcUrl)&&['borrower','lender','resolver'].includes(saved.role)){
         const accounts=await createWalletClient({transport:http(rpcUrl)}).getAddresses();const selected=deployment.roles[saved.role as 'borrower'|'lender'|'resolver'];
         if(!cancelled&&accounts.some(a=>a.toLowerCase()===selected.toLowerCase())){setAddress(selected);setMode('local');}
       }else if(saved.mode==='injected'&&window.ethereum){
@@ -187,7 +186,7 @@ export function ProtocolProvider({children}:{children:React.ReactNode}){
 
     if(!deployment||!address||!mode)throw new Error('Connect a wallet before signing.');
 
-    if(!online)throw new Error('RPC disconnected. Recorded evidence cannot authorize transactions.');
+    if(!online)throw new Error('RPC disconnected. Transactions are paused until the live chain connection returns.');
 
     if(pending.current)throw new Error('A transaction is still pending. Wait for its receipt.');
 
