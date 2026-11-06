@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react';
 import { ArrowUpRight, Radio, RefreshCw } from 'lucide-react';
 import type { Address as EvmAddress, Hex } from 'viem';
+import type { Evidence } from '../../../../services/underwriting/policy';
+import { monthOf, offsetMonth } from '../../../../services/underwriting/calendar';
 import { message, useProtocol } from '../lib/protocol';
 import { approveTraderCredit, repaySeededLocalDemo, sameWallet, traderDesk, underwritingApi, type TraderLoan } from '../lib/trader-credit';
 import { arkivExplorer, packetMatches, publishPacket, readPackets } from '../lib/underwriting-packets';
@@ -23,6 +25,9 @@ function LoanCard({ row, now, active, demoRequestId, onChange }: { row: Row; now
   const p = useProtocol();
   const action = useAction();
   const [acceptedBy, setAcceptedBy] = useState<EvmAddress | null>(null);
+  const [performanceOpen, setPerformanceOpen] = useState(false);
+  const [performanceLoading, setPerformanceLoading] = useState(false);
+  const [performanceEvidence, setPerformanceEvidence] = useState<Evidence | null>(null);
   const [published, setPublished] = useState<{ entityKey: Hex; txHash: Hex } | null>(null);
   const { id, loan, packet } = row;
   const local = p.deployment?.traderCredit?.mode === 'LOCAL_FORWARDER';
@@ -39,6 +44,29 @@ function LoanCard({ row, now, active, demoRequestId, onChange }: { row: Row; now
   const canRepayDemo = local && demoRequestId === id && funded;
   const acknowledged = sameWallet(acceptedBy, p.address);
   const loss = loan.terms.principal > loan.terms.bond ? loan.terms.principal - loan.terms.bond : 0n;
+  const reviewPerformance = () => {
+    setPerformanceOpen(value => !value);
+    if (performanceEvidence || performanceOpen) return;
+    setPerformanceLoading(true);
+    void action.run(async () => {
+      try {
+        const live = await traderDesk(p);
+        const wallets = await live.client.readContract({ ...live.contract, functionName: 'traderWallets', args: [id] });
+        const month = offsetMonth(monthOf(Number(loan.terms.asOf)), -1);
+        const query = new URLSearchParams({ month });
+        for (const wallet of wallets) query.append('wallet', wallet);
+        const evidence = await underwritingApi<Evidence>('/evidence?' + query);
+        if (evidence.asOf !== Number(loan.terms.asOf)
+          || evidence.digest.toLowerCase() !== loan.terms.evidenceDigest.toLowerCase()
+          || evidence.decision.score !== loan.score) {
+          throw new Error('The current performance data does not match the report attested to this request. Do not use it to review this loan.');
+        }
+        setPerformanceEvidence(evidence);
+      } finally {
+        setPerformanceLoading(false);
+      }
+    });
+  };
   const history = p.data?.activity.filter(event => event.address.toLowerCase() === desk?.toLowerCase()
     && String(event.args.loanId) === id.toString() && eventNames[event.event]) ?? [];
   const transact = (label: string, fn: string, allowance?: bigint) => void action.run(async () => {
@@ -78,7 +106,7 @@ function LoanCard({ row, now, active, demoRequestId, onChange }: { row: Row; now
     <div className="trader-inline">
       <span className="trader-note">Borrower</span><Address value={loan.borrower} />
       {loan.lender !== '0x0000000000000000000000000000000000000000' && <><span className="trader-note">Lender</span><Address value={loan.lender} /></>}
-      {attested && <Badge tone="blue">Performance screen {loan.score}/100 · {local ? 'Local forwarder' : 'Chainlink CRE'}</Badge>}
+      {attested && <Badge tone="blue">Performance policy {loan.score}/100 · {local ? 'Local forwarder' : 'Chainlink CRE'}</Badge>}
       {packet && <Badge tone="blue">Arkiv packet matched</Badge>}
     </div>
     <dl className="trader-metrics">
@@ -92,13 +120,31 @@ function LoanCard({ row, now, active, demoRequestId, onChange }: { row: Row; now
       <span>Evidence <Address value={loan.terms.evidenceDigest} /></span>
       {history.map(event => <TxLink key={event.transactionHash + ':' + event.logIndex} hash={event.transactionHash} label={eventNames[event.event]} />)}
     </div>
+    {attested && <div className="trader-performance-review">
+      <Button variant="secondary" disabled={action.busy} onClick={reviewPerformance}>
+        {performanceLoading ? 'Checking report…' : performanceOpen ? 'Hide performance metrics' : 'Review performance metrics'}
+      </Button>
+      {performanceOpen && performanceEvidence && <>
+        <div className="trader-inline"><Badge tone="green">Evidence digest matches attested report</Badge><span className="trader-note">As of {new Date(performanceEvidence.asOf * 1000).toISOString().slice(0, 10)}</span></div>
+        <dl className="trader-metrics">
+          <div><dt>Performance score</dt><dd>{performanceEvidence.decision.score}/100</dd></div>
+          <div><dt>Active / positive months</dt><dd>{performanceEvidence.decision.activeMonths} / {performanceEvidence.decision.positiveMonths}</dd></div>
+          <div><dt>Active-window realized P&amp;L</dt><dd>{usd(performanceEvidence.decision.pnl)}</dd></div>
+          <div><dt>Turnover</dt><dd>{usd(performanceEvidence.decision.turnover)}</dd></div>
+          <div><dt>Realized efficiency</dt><dd>{(performanceEvidence.decision.efficiencyBps / 100).toFixed(2)}%</dd></div>
+          <div><dt>Drawdown / turnover</dt><dd>{(performanceEvidence.decision.drawdownBps / 100).toFixed(2)}%</dd></div>
+        </dl>
+        <p className="trader-note">Score components · consistency {performanceEvidence.decision.components.consistency}/40 · efficiency {performanceEvidence.decision.components.efficiency}/35 · drawdown {performanceEvidence.decision.components.drawdown}/25</p>
+        <p className="trader-note">This report informs the pilot eligibility policy. It is not repayment history, borrower income or a probability of default.</p>
+      </>}
+    </div>}
     {canReviewFunding && <label className="trader-inline trader-risk">
       <input type="checkbox" checked={acknowledged} disabled={!p.address} onChange={event => setAcceptedBy(event.target.checked ? p.address : null)} />
       I accept a principal shortfall of up to {usd(loss)}, assuming full bond recovery.
     </label>}
     <div className="trader-inline">
       {requested && canAttest && <Button variant="secondary" disabled={!canAct} onClick={attest}>Submit local report</Button>}
-      {canReviewFunding && <Button disabled={!canAct || !acknowledged} onClick={() => transact('Fund trader loan', 'fundLoan', loan.terms.principal)}>Fund {usd(loan.terms.principal)}</Button>}
+      {canReviewFunding && <Button disabled={!canAct || !acknowledged || !performanceEvidence} onClick={() => transact('Fund trader loan', 'fundLoan', loan.terms.principal)}>Fund {usd(loan.terms.principal)}</Button>}
       {requested && (borrower || expired) && <Button variant="secondary" disabled={!canAct} onClick={() => transact('Cancel request and return bond', 'cancelRequest')}>Cancel and return bond</Button>}
       {requested && attested && !expired && borrower && p.mode === 'injected' && !packet && !published && <Button variant="secondary" disabled={!canAct} onClick={publish}><Radio size={14} /> Publish on Arkiv</Button>}
       {funded && borrower && !mature && <Button disabled={!canAct} onClick={() => transact('Repay trader loan', 'repay', loan.terms.due)}>Repay {usd(loan.terms.due)}</Button>}

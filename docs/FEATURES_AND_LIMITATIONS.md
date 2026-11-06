@@ -2,9 +2,9 @@
 
 ## The product in one sentence
 
-AQRA lets a prediction-market trader present dated public trading history and a cash bond to an independent lender deciding whether to fund a small fixed-term loan.
+AQRA uses dated prediction-market performance metrics to gate borrower eligibility for a bonded loan request, then lets an independent lender review the matching report and decide whether to fund.
 
-Performance is an experimental screening signal. The escrowed bond is the only recovery source the contract can deliver to a lender after default. The loan is undercollateralized at the demo terms; the lender accepts the residual loss directly.
+The metrics are the protocol's underwriting input, but they have only been benchmarked against future trader P&L—not loan repayment. They do not set loan pricing or guarantee repayment. The escrowed bond is the only recovery source the contract can deliver to a lender after default, and the lender accepts the residual loss directly.
 
 ## Working surfaces
 
@@ -23,12 +23,12 @@ Performance is an experimental screening signal. The escrowed bond is the only r
 ### Borrow
 
 - Resolves ENS primary names and the optional `com.aqra.wallets` group; linked controllers must provide request-scoped consent.
-- Loads dated Polymarket evidence, submits a fixed-term request and escrows a borrower bond through the connected wallet.
-- At default demo values, borrower requests $100, owes $102 and escrows $25. The performance screen does not guarantee repayment or approve funding.
+- Loads dated Polymarket evidence and displays the policy inputs: activity, positive months, realized P&L, turnover, efficiency and drawdown. A passing policy allows the borrower to submit a fixed-term request and escrow a bond.
+- At default demo values, borrower requests $100, owes $102 and escrows $25. Performance metrics gate policy eligibility; a distinct lender approves funding and assumes loss beyond the bond.
 
 ### Lend
 
-- Reads requests from the lending contract, requires a distinct lender, presents the bond-adjusted principal shortfall and records the lender's acknowledgement before funding.
+- Reads requests from the lending contract, reloads the dated performance inputs, requires a digest match to the attested report, then presents the bond-adjusted principal shortfall and records the lender's acknowledgement before the app enables funding.
 - Supports full repayment before maturity and matured default settlement from the escrowed bond. Transaction status is read from chain state and receipts.
 - A lender can lose up to $75 of principal at the $100/$25 terms if the bond transfers in full; lower bond recovery or token/contract failures can increase the loss.
 

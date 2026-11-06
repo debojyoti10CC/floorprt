@@ -10,15 +10,16 @@ Preserved source document. Status, interface examples and proposals are historic
 [Original Markdown source](https://github.com/debojyoti10CC/floorprt/blob/main/docs/BUILD_STATUS.md) · [Current documentation scope](/maintenance/source-audit)
 
 
-**Current product:** the AQRA prediction-market trader-credit pilot. The earlier seven-screen outcome-token terminal remains in the repository as a separate contract/research codebase; it is not the current AQRA app journey.
+**Current product:** a prediction-market performance-metrics-based lending protocol pilot. The earlier seven-screen outcome-token terminal remains in the repository as separate contract/research history; it is not the AQRA app journey.
 
 ## Product mechanism
 
 1. A trader connects one wallet or an ENS-discovered wallet group and reviews dated public Polymarket evidence.
-2. A deterministic pilot policy checks the evidence. Its score is a performance screen, not a probability of default, loan approval or repayment forecast.
+2. A deterministic policy scores activity, repeat profitability, realized P&amp;L efficiency and drawdown. Meeting the policy gates a borrower request and lender review; it does not set loan pricing or estimate repayment probability.
 3. A borrower who passes can sign a fixed-term request and escrow the bond in the repayment token. Linked wallets must give scoped consent.
-4. A report is attached to that exact request. A distinct lender reviews the principal shortfall and decides whether to fund it.
-5. The borrower can repay before maturity. After maturity, the contract can transfer the escrowed bond to the lender and record the remaining principal loss.
+4. An authenticated workflow report binds the score to that exact request (Chainlink CRE when configured; a clearly labelled local forwarder on Anvil). In the lender app, the lender can reload the dated inputs and must see the recomputed evidence digest match the attestation before the funding control enables.
+5. The lender reviews the principal shortfall and decides whether to fund it.
+6. The borrower can repay before maturity. After maturity, the contract can transfer the escrowed bond to the lender and record the remaining principal loss.
 
 For the current demo terms, principal is $100, total due is $102, and the bond is $25. That leaves a $75 principal shortfall if the entire bond is recovered. Bond recovery can be impaired by token, contract or operational failure. Future prediction-market P&amp;L cannot be seized and is not collateral.
 
@@ -26,8 +27,8 @@ For the current demo terms, principal is $100, total due is $102, and the bond i
 
 - **Data:** committed Polymarket replay, sample coverage, monthly forward outcomes, wallet-level evidence, export, and the separate credit-loss stress engine.
 - **Risk engine:** assumption-driven PD, default dependence, bond recovery, discrete loss distribution, VaR/Expected Shortfall, capital gap and a binding pooled-credit `REJECT` gate.
-- **Borrow:** live evidence lookup, ENS primary/wallet-group resolution, controller consent, fixed terms, bond approval and borrower-signed request.
-- **Lend:** direct request discovery, report review, lender loss acknowledgement, funding, early repayment, matured default and chain receipts.
+- **Borrow:** live evidence lookup, visible policy metrics, ENS primary/wallet-group resolution, controller consent, fixed terms, bond approval and borrower-signed request.
+- **Lend:** direct request discovery, attested metric reload with digest comparison, lender loss acknowledgement, funding, early repayment, matured default and chain receipts.
 
 ## Implemented and evidenced
 

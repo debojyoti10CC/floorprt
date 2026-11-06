@@ -14,7 +14,7 @@ Preserved source document. Status, interface examples and proposals are historic
 
 ## Recommended narrative
 
-**AQRA is a performance-informed, bond-backed direct-lending pilot for prediction-market traders.** It turns dated public Polymarket history into a transparent screening signal, then makes the borrower post cash collateral and asks an independent lender to accept the uncovered risk. The performance signal is not a default probability, repayment promise or collateral.
+**AQRA is a prediction-market performance-metrics-based lending protocol pilot.** Dated activity, repeat profitability, realized P&amp;L efficiency and drawdown determine whether a request meets the underwriting policy. A borrower posts cash collateral; a separate lender verifies the attested inputs and accepts or rejects the uncovered risk. The metrics do not establish a default probability or repayment promise and are not collateral.
 
 At the demo terms, the borrower requests $100, owes $102 and escrows $25. The lender can lose $75 of principal even if the entire bond transfers. Token, contract and operational failures can increase that loss. There is no pool; the risk engine rejects pooled underwriting until real credit outcomes and funded reserves exist.
 
@@ -45,9 +45,9 @@ ENS discovers the wallet group; it is not a credit signal or proof of common con
 
 1. **Show the evidence.** Use the captured benchmark and report the actual result: consistency screen 154/220 positive next month (70.0%); monthly-P&amp;L ranking 162/220 (73.6%); seeded sample baseline 61/220 (27.7%). State that wallet-months repeat and do not measure repayment. The simple P&amp;L comparator is 3.6 percentage points above the consistency screen.
 2. **Show the gate.** Change risk assumptions and explain that the engine remains `REJECT` for a pool because it has no matured loan labels, calibrated PD, out-of-time validation or committed capital.
-3. **Show one borrower.** Resolve wallet history, display the cutoff and evidence digest, create a fixed-term request and escrow the $25 bond on local Anvil test USDC.
+3. **Show performance-based eligibility.** Resolve wallet history, display active and positive months, realized P&amp;L, turnover, efficiency, drawdown, cutoff and digest; create a request and escrow the $25 bond on local Anvil test USDC.
 4. **Show authenticated evidence.** Run the CRE simulation successfully and demonstrate one rejection path (mismatched, stale or ineligible evidence does not get funded). Label simulation separately from a live onchain DON report.
-5. **Show lender choice.** Switch to a distinct lender; show $100 principal, $102 due, $25 bond and $75 shortfall under full bond recovery. Acknowledge risk, fund, then show the borrower repayment or matured-default path and receipts.
+5. **Show lender choice.** Switch to a distinct lender; reload the request's metrics and verify the attested digest matches. Then show $100 principal, $102 due, $25 bond and $75 shortfall under full bond recovery. Acknowledge risk, fund, and show repayment or matured-default receipts.
 6. **Show Arkiv only if the new write/read transaction is ready and eligibility is confirmed.** The lender must query and verify the packet, not merely see an Arkiv logo.
 
 ## Evidence that must not be claimed

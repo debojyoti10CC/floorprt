@@ -4,14 +4,14 @@ import { ArrowLeft, ArrowUpRight } from 'lucide-react';
 export function Whitepaper() {
   return <article className="whitepaper">
     <header className="whitepaper-head">
-      <div><span className="eyebrow">AQRA / PROTOCOL PAPER · 06 NOV 2026</span><h1>Trader credit</h1><p>Evidence-backed lending for prediction-market traders.</p></div>
+      <div><span className="eyebrow">AQRA / PROTOCOL PAPER · 06 NOV 2026</span><h1>Performance-based lending</h1><p>Prediction-market metrics inform who can request credit; lenders decide whether to fund.</p></div>
       <Link href="/underwriting/" className="button secondary"><ArrowLeft size={14}/> Data</Link>
     </header>
 
     <section className="whitepaper-section">
       <h2>Abstract</h2>
-      <p>AQRA evaluates a trader’s publicly observable, settled prediction-market history before a lender funds a small fixed-term loan. A deterministic underwriting policy, wallet consent and a borrower-funded first-loss bond make each request inspectable. The lender still assumes loss beyond the bond.</p>
-      <p>The product tests a narrow claim: a past-performance screen may help organize credit decisions for prediction-market traders. It does not establish future profitability, repayment probability or principal protection.</p>
+      <p>AQRA is a prediction-market performance-metrics-based lending protocol pilot. It converts a trader’s dated, consented history into an eligibility report, then connects an eligible request to a fixed-term, bond-backed loan funded by a separate lender.</p>
+      <p>Historical performance metrics determine whether a request can proceed under the pilot policy. They do not determine loan pricing, establish repayment probability or protect principal. The lender chooses whether to fund and accepts loss beyond the recoverable bond.</p>
     </section>
 
     <section className="whitepaper-section">
@@ -35,7 +35,7 @@ export function Whitepaper() {
         <div className="whitepaper-fact"><span>Observed drawdown</span><strong>25 points</strong></div>
         <div className="whitepaper-fact"><span>Maximum test principal</span><strong>$100</strong></div>
       </div>
-      <p>These are screening rules, not a credit rating. The score is deterministic and tied to the policy version and evidence digest. Missing or unaudited history is held from funding.</p>
+      <p>This metric policy determines eligibility to request a pilot loan; it does not change the fee or principal cap. The score is deterministic and tied to the policy version and evidence digest. Missing or unaudited history is held from funding.</p>
     </section>
 
     <section className="whitepaper-section">

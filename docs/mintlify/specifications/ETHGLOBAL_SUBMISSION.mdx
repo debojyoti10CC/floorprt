@@ -14,11 +14,11 @@ Preserved source document. Status, interface examples and proposals are historic
 
 ## One-line pitch
 
-**AQRA pairs a point-in-time prediction-market performance screen with a borrower-posted cash bond and a lender's explicit decision to fund a small direct loan.** Performance does not stand in for collateral or a proven default model.
+**AQRA is a prediction-market performance-metrics-based lending protocol: it scores dated trader history to gate a bonded loan request, then lets a lender verify the attested metrics and choose whether to fund.** The score is not a repayment model or collateral.
 
 ## Submission description
 
-Prediction-market traders can expose public, settled trading history, but that history is not a credit record. AQRA turns it into a dated, reproducible screening signal; requires a borrower-funded USDC bond; and lets a separate lender inspect and accept the uncovered loss before funding. The prototype benchmarks future trader P&amp;L, models loan losses only from explicit assumptions, and keeps pooled lending rejected until real repayment data exists.
+Prediction-market traders can expose public, settled trading history, but that history is not a credit record. AQRA uses activity, repeat profitability, realized P&amp;L efficiency and drawdown as explicit underwriting metrics. A qualifying borrower posts a USDC bond; the lender reads the dated inputs, checks that their digest matches the attested report, and chooses whether to accept the uncovered loss. The benchmark tests future trader P&amp;L—not repayment—and pooled lending stays rejected until real loan outcomes and committed capital exist.
 
 ## The mechanism
 
@@ -40,7 +40,7 @@ flowchart LR
 
 ### Four application destinations
 
-1. **Data:** sampled market coverage, walk-forward comparison, address-level evidence and export.
+1. **Data:** sampled market coverage, walk-forward policy comparison, address-level underwriting metrics and export.
 2. **Risk engine:** assumption-driven credit loss and discrete portfolio stress. It rejects pool underwriting because the model has no loan labels or committed reserve.
 3. **Borrow:** wallet/ENS discovery, as-of evidence, scoped linked-wallet consent, fixed terms and bond escrow.
 4. **Lend:** request review, loss acknowledgement, direct funding, borrower repayment or matured default, with receipts.
@@ -71,10 +71,11 @@ The risk engine lets a user vary assumed PD, default dependence, recovery haircu
 2. Change one risk assumption and show loss distribution, VaR/ES and the unchanged `REJECT` gate.
 3. On Anvil 31337, create a request from the captured sample using the explicit local-only borrower impersonation tool. Show the request transaction and exact terms.
 4. Use the local curator to submit the report; distinguish it from CRE.
-5. Switch to a distinct lender, inspect the $75 shortfall, acknowledge the risk and fund with test USDC.
-6. Repay using the borrower flow, or show the matured-default path if the event state is prepared. End on receipt-backed state.
-7. If a Rabdi testnet write/read is completed, show `Discover on Arkiv` and verify packet claims against the request. If not, omit Arkiv from the live demo.
-8. For the CRE bounty, run and show the successful official `cre workflow simulate` output with Polygon API reads and the local EVM request. Do not label this a public DON write.
+5. Switch to a distinct lender, load the request's activity, P&amp;L, turnover, efficiency and drawdown; show the evidence digest matches the attested report.
+6. Inspect the $75 shortfall, acknowledge the risk and fund with test USDC.
+7. Repay using the borrower flow, or show the matured-default path if the event state is prepared. End on receipt-backed state.
+8. If a Rabdi testnet write/read is completed, show `Discover on Arkiv` and verify packet claims against the request. If not, omit Arkiv from the live demo.
+9. For the CRE bounty, run and show the successful official `cre workflow simulate` output with Polygon API reads and the local EVM request. Do not label this a public DON write.
 
 ## Sponsor readiness
 
@@ -98,7 +99,7 @@ Official requirements: [ETHGlobal Mumbai prizes](https://ethglobal.com/events/mu
 
 ## Submission guardrails
 
-- Say **performance-informed screening**, **bond-backed direct loan**, and **lender-accepted shortfall**.
+- Say **prediction-market performance-metrics-based lending**, **policy-gated borrower request**, **bond-backed direct loan**, and **lender-accepted shortfall**.
 - Do not say that trader history predicts repayment, that the 70% outcome is credit accuracy, or that the loan is safe because of the bond.
 - Do not describe the local impersonation demo as real borrower consent or real funds.
 - Do not describe a CRE simulation as a live oracle write, an Arkiv code path as a confirmed transaction, or the current repo as an Arc project.

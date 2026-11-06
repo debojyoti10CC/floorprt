@@ -5,11 +5,12 @@ description: 'Inspect the report and shortfall before advancing principal as a d
 
 1. Connect a wallet that is different from the borrower.
 2. Open **Lend** and refresh the onchain request list, or find a request by ID.
-3. Check borrower address, report status, evidence digest, principal, fixed due, bond and deadline.
-4. Review **Shortfall after full bond recovery**. At $100 principal and a $25 bond, the lender may lose $75 principal even if the entire bond transfers. Lower recovery can increase the loss.
-5. Check the loss-acceptance box, approve the exact principal and choose **Fund**.
-6. Wait for the confirmed funding receipt and refresh the request state.
+3. Choose **Review performance metrics**. The app reloads the linked wallets at the request's cutoff and checks that the evidence digest matches the attested report. Review active/positive months, realized P&L, turnover, efficiency and drawdown.
+4. Check borrower address, report status, principal, fixed due, bond and deadline.
+5. Review **Shortfall after full bond recovery**. At $100 principal and a $25 bond, the lender may lose $75 principal even if the entire bond transfers. Lower recovery can increase the loss.
+6. Check the loss-acceptance box, approve the exact principal and choose **Fund**.
+7. Wait for the confirmed funding receipt and refresh the request state.
 
-There is no shared lending pool. Each request has one direct lender. The benchmark score is a research screen, not a borrower's PD or guarantee.
+There is no shared lending pool. Each request has one direct lender. The performance policy gates request eligibility; it does not set pricing or estimate repayment probability. The benchmark measures trader P&L, not loan repayment.
 
 If the borrower repays the fixed due by maturity, the bond is returned. If the deadline passes unpaid, any connected wallet can trigger matured-default handling; the contract transfers the bond to the lender and records the remaining principal shortfall.

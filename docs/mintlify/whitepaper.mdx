@@ -1,17 +1,17 @@
 ---
-title: "AQRA Trader Credit Protocol"
-description: "Evidence-backed lending for prediction-market traders, including the benchmark method and prototype limits."
+title: "AQRA Performance-Metrics-Based Lending Protocol"
+description: "How prediction-market metrics gate loan requests, how lenders verify reports, and where the benchmark stops."
 ---
 
-# AQRA — Trader Credit Protocol
+# AQRA — Performance-Metrics-Based Lending Protocol
 
 **Version 0.1 · 6 November 2026**
 
 ## Abstract
 
-AQRA evaluates a trader’s publicly observable, settled prediction-market history before a lender funds a small fixed-term loan. A deterministic underwriting policy, wallet consent and a borrower-funded first-loss bond make each request inspectable. The lender still assumes loss beyond the bond.
+AQRA is a prediction-market performance-metrics-based lending protocol pilot. It uses dated activity, repeat profitability, realized P&L efficiency and drawdown to gate a bonded loan request. A lender can reload those inputs, verify the evidence digest matches the attested report, and choose whether to fund.
 
-The product tests a narrow claim: a past-performance screen may help organize credit decisions for prediction-market traders. It does not establish future profitability, repayment probability or principal protection.
+The benchmark evaluates future trader P&L, not loan repayment. The metric policy does not set pricing, prove ability to repay or protect principal. The lender can lose beyond the posted bond.
 
 ## Protocol
 
@@ -27,7 +27,7 @@ The trader-credit desk does not custody or liquidate native Polymarket positions
 
 Policy `aqra-trader-credit-v1` evaluates the three completed UTC months before the cutoff. A month is active at $500 or more of turnover and at least 20 trades. Eligibility requires two active months, two positive active months, positive combined realized P&L, activity in the latest month and a score of at least 60 out of 100.
 
-The score allocates up to 40 points to consistency, 35 to realized efficiency and 25 to observed drawdown. Missing or unaudited history is held from funding. A score is a deterministic screening output tied to the policy version and evidence digest, not a credit guarantee.
+The score allocates up to 40 points to consistency, 35 to realized efficiency and 25 to observed drawdown. Missing or unaudited history is held from funding. A score is the pilot's deterministic eligibility input, tied to the policy version and evidence digest. It does not set principal or fee terms and is not a calibrated credit rating.
 
 ## Benchmark design
 

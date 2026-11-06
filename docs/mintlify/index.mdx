@@ -1,12 +1,12 @@
 ---
-title: 'AQRA trader credit'
-description: 'Prediction-market trader data, underwriting and bonded test loans.'
+title: 'AQRA performance-based lending'
+description: 'Prediction-market performance metrics gate bonded loan requests; lenders decide whether to fund.'
 ---
 
-AQRA evaluates public, settled Polymarket history before a separate lender funds a small fixed-term request. Wallet consent and a borrower-funded bond are recorded with the request.
+AQRA is a prediction-market performance-metrics-based lending protocol pilot. Its dated activity, realized P&L, repeat profitability and drawdown policy gates bonded loan requests. A separate lender reviews the report and decides whether to fund.
 
 <Warning>
-This is a local/testnet prototype using test funds. A performance score does not guarantee repayment. The lender can lose principal beyond the borrower bond.
+This is a local/testnet prototype using test funds. The metrics are not validated repayment predictors or collateral. The lender can lose principal beyond the borrower bond.
 </Warning>
 
 <CardGroup cols={2}>
@@ -20,14 +20,15 @@ This is a local/testnet prototype using test funds. A performance score does not
 
 ```mermaid
 flowchart LR
-  D[Historical market data] --> E[As-of evidence]
-  E --> B[Borrower request + bond]
-  B --> A[Authenticated score report]
-  A --> L[Separate lender funds]
-  L --> R[Repayment or recorded default]
+  D[Historical performance metrics] --> E[As-of policy score]
+  E --> B[Eligible borrower request + bond]
+  B --> A[Attested score + evidence digest]
+  A --> L[Lender verifies metrics and chooses]
+  L --> F[Direct loan funding]
+  F --> R[Repayment or recorded default]
 ```
 
-The current trader-credit desk does not custody Polymarket positions. Trading history supports screening research, and the first-loss bond is the only pledged asset. Forward outcomes are observed trader P&L and activity, not loan returns. The risk engine uses explicit PD and correlation stress assumptions; it does not infer default risk from trading history.
+The policy controls whether a borrower can request a pilot loan; it does not set pricing, approve the lender's advance or infer default risk. The lender loads the linked wallets' dated metrics and the app verifies that their digest matches the attested score. The first-loss bond is the only pledged asset. The benchmark's forward outcomes are trader P&L and activity, not loan returns. The risk engine uses explicit PD and correlation stress assumptions.
 
 ## Evidence boundaries
 

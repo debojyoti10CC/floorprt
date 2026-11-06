@@ -1,10 +1,10 @@
-# AQRA — Prediction-Market Trader Credit
+# AQRA — Prediction-Market Performance-Based Lending
 
 **Engineering note · 6 November 2026**
 
 ## Abstract
 
-AQRA studies whether public prediction-market history can inform small-loan screening. The prototype combines dated Polymarket wallet evidence, walk-forward trader-outcome benchmarking, borrower-consented credit requests, an escrowed first-loss bond, and lender-funded test loans. Trader performance is not treated as repayment probability, collateral, or guaranteed income.
+AQRA is a prediction-market performance-metrics-based lending protocol pilot. It turns dated Polymarket wallet history into a deterministic eligibility policy, binds the resulting evidence digest to a borrower-consented request, and lets a separate lender review the metrics before funding a bond-backed test loan. The metrics determine pilot request eligibility; they are not repayment probability, collateral, guaranteed income or a dynamic credit limit.
 
 The technical risk engine computes explicit default and bond-recovery scenarios, correlated portfolio loss distributions, tail loss, capital gap and scenario margin. Those outputs are not calibrated estimates: the current dataset contains no mature AQRA loan repayment/default labels or actual pool reserve. Pooled credit therefore remains rejected by a binding gate.
 
@@ -13,14 +13,15 @@ The technical risk engine computes explicit default and bond-recovery scenarios,
 1. AQRA reads public, dated wallet performance and records evidence for a UTC cutoff.
 2. A borrower can associate up to four addresses and must obtain scoped consent from additional wallet controllers. ENS helps discover a wallet group but does not prove that the borrower controls each address.
 3. An eligible borrower requests fixed terms and escrows a bond in the repayment token.
-4. An authenticated report records the underwriting result. A separate lender sees the terms and maximum principal shortfall, acknowledges the risk and funds the request.
-5. Repayment returns the bond. A matured default can transfer the bond to the lender and records principal shortfall. There is no automatic access to the borrower's market account or future P&L.
+4. An authenticated report binds the score to the wallet set, policy version, cutoff and evidence digest. The lender reloads those dated metrics and confirms the digest matches before the app enables funding.
+5. The lender reviews terms and maximum principal shortfall, acknowledges the risk and chooses whether to fund.
+6. Repayment returns the bond. A matured default can transfer the bond to the lender and records principal shortfall. There is no automatic access to the borrower's market account or future P&L.
 
 The local/testnet demonstration uses $100 principal, $102 due and a $25 bond. These are prototype terms. The lender's principal shortfall can reach $75 before recovery haircuts and fees. No production pool, external Polymarket-position custody or public Chainlink DON execution is claimed.
 
 ## Evidence and benchmark
 
-The benchmark samples resolved BTC and ETH 15-minute Polymarket markets and wallet histories. At each monthly cutoff, candidate policies use only information available through that cutoff; the following month measures trader P&L, activity and frequency of positive realized P&L. It compares selection policies against a deterministic sample baseline.
+The benchmark samples resolved BTC and ETH 15-minute Polymarket markets and wallet histories. At each monthly cutoff, candidate policies use only information available through that cutoff; the following month measures trader P&L, activity and frequency of positive realized P&L. This tests the performance-selection input to lending—not loan repayment—and compares metric-based policies against a deterministic sample baseline and a simple prior-month P&L ranking.
 
 The expanded checked-in run contains 3,906 wallet histories, 3,647,433 fill rows, 1,025,654 daily observations, 15/15 audited UTC month-boundary blocks, 6,155 candidate wallet-month rows and 11 completed forward rounds. Of 768 pre-scheduled BTC/ETH 15-minute market sessions, 764 resolved markets were captured. Exact artifact and capture limitations are in `apps/web/public/underwriting/run.json` and the source manifest.
 

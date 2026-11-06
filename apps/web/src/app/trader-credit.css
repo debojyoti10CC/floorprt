@@ -98,6 +98,7 @@
 .trader-discovery input { width: 128px; }
 .trader-loan-card { border: 1px solid var(--color-border-default); border-radius: var(--radius-sm); padding: var(--space-5); display: grid; gap: var(--space-4); }
 .trader-loan-card h3 { font-size: var(--font-size-xl); font-weight: 500; margin: 0; }
+.trader-performance-review { display: grid; gap: var(--space-4); }
 .trader-inline.trader-risk { color: var(--color-warning); }
 .trader-risk input[type=checkbox] { min-height: auto; accent-color: var(--color-accent); }
 .trader-risk-gate {

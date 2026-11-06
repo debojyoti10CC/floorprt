@@ -1,13 +1,15 @@
 ---
-title: 'Performance-informed, bond-backed credit'
-description: 'How AQRA separates trading evidence, posted collateral and lender risk.'
+title: 'Performance-metrics-based lending'
+description: 'How trader performance gates pilot eligibility and lenders review bonded loan requests.'
 ---
 
-AQRA's active product is a direct lender and borrower flow. Public settled prediction-market history is an experimental screen. A borrower posts the escrowed bond; a distinct lender decides whether to advance the principal and accepts the uncovered shortfall.
+AQRA's pilot uses dated prediction-market metrics—activity, repeat profitability, realized P&L efficiency and drawdown—to determine whether a borrower meets the request policy. A qualifying borrower escrows a bond and receives an attested report. The lender reloads the metric inputs, checks the evidence digest, and decides whether to fund.
 
 ## What is enforceable
 
 - The request binds the borrower, evidence digest, fixed terms and linked-wallet consent.
+- The policy score gates a request; it does not set the rate or prove repayment ability.
+- The lender app enables funding only after the loaded metric packet matches the attested digest.
 - The bond is held in the repayment token until repayment, cancellation or matured default.
 - One distinct lender funds the fixed principal. Funding is not pooled or automatic.
 - Full repayment before the deadline returns the bond and pays the fixed due.
@@ -23,4 +25,4 @@ If the bond token loses value or a token/contract/operational failure prevents r
 
 ## Separate from credit proof
 
-The performance score is not a probability of default, repayment forecast, loan approval or collateral. PD and default-dependence inputs on the Risk engine page are assumptions. AQRA's pooled-credit gate stays rejected until matured loan outcomes, validated PD and committed capital exist.
+The performance score is the pilot's eligibility input, not a probability of default, repayment forecast or collateral. PD and default-dependence inputs on the Risk engine page are assumptions. The benchmark measures next-month trader P&L, and the simple monthly-P&L ranking (73.6%) exceeds the consistency policy (70.0%). AQRA's pooled-credit gate stays rejected until matured loan outcomes, validated PD and committed capital exist.

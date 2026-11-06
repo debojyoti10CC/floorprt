@@ -1,8 +1,8 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "theme": "maple",
-  "name": "AQRA · Trader Credit",
-  "description": "Prediction-market trader data and bond-backed direct lending.",
+  "name": "AQRA · Performance Lending",
+  "description": "Prediction-market performance metrics gate bonded loan requests; lenders decide whether to fund.",
   "colors": {"primary": "#B7B9F4", "light": "#B7B9F4", "dark": "#777AC5"},
   "appearance": {"default": "dark", "strict": false},
   "logo": {"light": "/logo/light.svg", "dark": "/logo/dark.svg"},

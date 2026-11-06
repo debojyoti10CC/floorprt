@@ -1,6 +1,6 @@
 # AQRA trader credit
 
-AQRA is a performance-informed, bond-backed direct-lending pilot for prediction-market traders. The replay compares trader outcomes under fixed historical cutoffs. The desk escrows a first-loss bond and requires an authenticated report before a separate lender can decide whether to fund. A performance score is not probability of default, loan approval, collateral or a repayment forecast.
+AQRA is a prediction-market performance-metrics-based lending protocol pilot. Activity, repeat profitability, realized P&L efficiency and drawdown determine whether a borrower meets the policy for a bonded loan request. The lender reloads the dated metrics, checks their digest against the authenticated report, and chooses whether to fund. The policy does not set pricing or predict repayment; trading history is not collateral.
 
 ## Run the pilot
 

@@ -145,15 +145,21 @@ export function TraderBorrow({ onRequest }: { onRequest: (id: bigint) => void })
         </form>
         {identity && <div className="trader-inline"><Badge tone="blue">{identity.name}</Badge><Address value={identity.primary} /><span className="trader-note">ENS block {identity.block}</span></div>}
         {evidence && <>
-          <div className="trader-inline"><Badge tone={evidence.decision.qualified ? 'green' : 'amber'}>{evidence.decision.qualified ? 'Passes pilot screen' : 'Below pilot screen'}</Badge>
+          <div className="trader-inline"><Badge tone={evidence.decision.qualified ? 'green' : 'amber'}>{evidence.decision.qualified ? 'Meets performance policy' : 'Below performance policy'}</Badge>
             <strong className="mono">{evidence.decision.score}/100</strong><span className="trader-note">{evidence.decision.reason}</span></div>
           <div className="trader-inline">{evidence.wallets.map(address => <Address value={address} key={address} />)}</div>
           <dl className="trader-metrics">
             <div><dt>Evidence as of</dt><dd>{new Date(evidence.asOf * 1000).toISOString().slice(0, 10)}</dd></div>
             <div><dt>Active months</dt><dd>{evidence.decision.activeMonths}/3</dd></div>
+            <div><dt>Positive months</dt><dd>{evidence.decision.positiveMonths}/{evidence.decision.activeMonths}</dd></div>
+            <div><dt>Active-window realized P&amp;L</dt><dd>{usd(evidence.decision.pnl)}</dd></div>
+            <div><dt>Trading turnover</dt><dd>{usd(evidence.decision.turnover)}</dd></div>
+            <div><dt>Realized efficiency</dt><dd>{(evidence.decision.efficiencyBps / 100).toFixed(2)}%</dd></div>
+            <div><dt>Drawdown / turnover</dt><dd>{(evidence.decision.drawdownBps / 100).toFixed(2)}%</dd></div>
             <div><dt>Wallets in group</dt><dd>{evidence.wallets.length}</dd></div>
           </dl>
-          <p className="trader-note">This performance screen is not a repayment forecast or loan approval. A separate lender decides whether to fund.</p>
+          <p className="trader-note">Score components · consistency {evidence.decision.components.consistency}/40 · efficiency {evidence.decision.components.efficiency}/35 · drawdown {evidence.decision.components.drawdown}/25</p>
+          <p className="trader-note">These metrics determine pilot eligibility, not loan pricing or repayment probability. A separate lender decides whether to fund.</p>
           {wallet && identity && !sameWallet(identity.primary, wallet) && <p className="trader-note" role="status">Connect {short(identity.primary)} to borrow under this name.</p>}
           {evidence.decision.qualified && <details className="trader-method">
             <summary>Trading proxy controllers</summary>

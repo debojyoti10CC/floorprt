@@ -5,11 +5,11 @@ description: 'What works in AQRA now and what the evidence still does not suppor
 
 ## Current product
 
-The active app is a four-destination trader-credit pilot: **Data**, **Risk engine**, **Borrow** and **Lend**. The earlier outcome-token terminal is a separate historical direction.
+The active app is a four-destination prediction-market performance-metrics-based lending pilot: **Data**, **Risk engine**, **Borrow** and **Lend**. The policy gates borrower request eligibility; the lender reviews the matching dated metrics and chooses whether to fund. The earlier outcome-token terminal is separate historical work.
 
 ## Working local flow
 
-The app reads the committed walk-forward sample and live public wallet evidence. On local Anvil 31337, the borrower request, bond escrow, report, separate lender funding, repayment and matured-default state all use deployed contracts and show chain receipts. The local seeded-wallet path is explicitly labeled and uses test-only Anvil impersonation.
+The app reads the committed walk-forward sample and live public wallet evidence. A borrower sees the cutoff, recent activity, profitability, P&L efficiency and drawdown. The lender can reload the report inputs and must see the recomputed digest match the onchain attestation before the funding control enables. On local Anvil 31337, the borrower request, bond escrow, local-forwarder report, separate lender funding, repayment and matured-default state all use deployed contracts and show chain receipts. The local seeded-wallet path is explicitly labeled and uses test-only Anvil impersonation.
 
 The current example is $100 principal, $102 due and $25 bond. If the full bond is recovered, the lender still has up to $75 principal shortfall. This is a direct lender's accepted risk; it is not principal protection.
 
