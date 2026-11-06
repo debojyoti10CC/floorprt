@@ -61,6 +61,7 @@ export function TraderBorrow({ onRequest, onConnectWallet }: {
   const terms = loanTerms(principal, bond, days);
   const wallet = p.address;
   const { deployment, rpcUrl, online } = p;
+  const requestBlockTag = deployment?.chainId === 31337 ? 'pending' : undefined;
   const blockNumber = p.data?.blockNumber;
   const positionMarket = deployment?.traderCredit?.positionCollateral;
   const currentInventory = sameWallet(wallet, inventory?.owner) ? inventory?.data : undefined;
@@ -156,7 +157,8 @@ export function TraderBorrow({ onRequest, onConnectWallet }: {
     }
     const { client, contract, block, address } = await traderDesk(p);
     const nonce = await client.readContract({ ...contract, functionName: 'nextNonce', args: [wallet] });
-    const expires = block.timestamp + 3600n;
+    const signingBlock = requestBlockTag ? await client.getBlock({ blockTag: requestBlockTag }) : block;
+    const expires = signingBlock.timestamp + 3600n;
     const context = linkContext(evidence, identity?.node ?? zeroHash, expires);
     const proofs = await Promise.all(others.map(async ({ trader, controller }) => {
       const digest = await client.readContract({ ...contract, functionName: 'linkDigest', args: [wallet, trader, context, nonce] });
@@ -186,14 +188,18 @@ export function TraderBorrow({ onRequest, onConnectWallet }: {
     }
     const { client, contract, block, active } = await traderDesk(p);
     const asOf = BigInt(evidence.asOf);
-    if (block.timestamp < asOf || block.timestamp >= asOf + 35n * 86400n) throw new Error('The evidence is outside the funding window.');
+    const checkEvidenceTime = (timestamp: bigint) => {
+      if (timestamp < asOf || timestamp >= asOf + 35n * 86400n) throw new Error('The evidence is outside the funding window.');
+    };
+    const signingBlock = requestBlockTag ? await client.getBlock({ blockTag: requestBlockTag }) : block;
+    checkEvidenceTime(signingBlock.timestamp);
     const traders = evidence.wallets as EvmAddress[];
     const controllers = links.map(link => link.controller);
     const activeIds = await Promise.all([...new Set([wallet, ...traders, ...controllers])].map(active));
     if (activeIds.some(id => id > 0n)) throw new Error('A borrower or linked wallet already has an active request.');
     if (others.length) {
       const nonce = await client.readContract({ ...contract, functionName: 'nextNonce', args: [wallet] });
-      if (!isPrepared || !signaturesReady || consent.expires <= block.timestamp || consent.nonce !== nonce) {
+      if (!isPrepared || !signaturesReady || consent.expires <= signingBlock.timestamp || consent.nonce !== nonce) {
         throw new Error('Prepare and sign a fresh consent for each linked trader wallet.');
       }
       for (const proof of consent.proofs) {
@@ -205,10 +211,6 @@ export function TraderBorrow({ onRequest, onConnectWallet }: {
     const proxies = links.filter(link => !sameWallet(link.trader, link.controller));
     await Promise.all(proxies.map(link => underwritingApi('/controller?' + new URLSearchParams(link))));
     const consents = links.map(({ trader, controller }) => sameWallet(controller, wallet) ? '0x' : consent!.proofs.find(proof => proof.trader === trader)!.signature.trim());
-    const args = [{
-      ...terms, asOf, evidenceDigest: evidence.digest, ensNode: identity?.node ?? zeroHash,
-      linkExpires: others.length ? consent!.expires : block.timestamp + 3600n,
-    }, traders];
     if (usePositions) {
       const pledged = await positionInventory(p, wallet);
       if (!pledged || pairs <= 0n || pairs > pledged.pairs) throw new Error('The wallet no longer has enough matched shares.');
@@ -220,9 +222,19 @@ export function TraderBorrow({ onRequest, onConnectWallet }: {
       }
     }
     await approveTraderCredit(p, terms.bond);
+    const { timestamp } = await client.getBlock({ blockTag: requestBlockTag });
+    checkEvidenceTime(timestamp);
+    if (others.length && consent!.expires <= timestamp) {
+      throw new Error('Consent expired during approvals. Prepare and sign fresh consent.');
+    }
+    const args = [{
+      ...terms, asOf, evidenceDigest: evidence.digest, ensNode: identity?.node ?? zeroHash,
+      linkExpires: others.length ? consent!.expires : timestamp + 3600n,
+    }, traders];
     const receipt = await p.transact(usePositions ? 'Lock positions and request credit' : 'Escrow bond and request credit', 'TraderCreditDesk',
       usePositions ? 'requestLoanWithPositions' : proxies.length ? 'requestLoanWithControllers' : 'requestLoan',
-      usePositions ? [...args, controllers, consents, pairs] : proxies.length ? [...args, controllers, consents] : [...args, consents]);
+      usePositions ? [...args, controllers, consents, pairs] : proxies.length ? [...args, controllers, consents] : [...args, consents],
+      requestBlockTag);
     const id = eventArgs(receipt, 'TraderCreditDesk', 'TraderCreditRequested').loanId as bigint;
     setConsent(null);
     onRequest(id, fixture);

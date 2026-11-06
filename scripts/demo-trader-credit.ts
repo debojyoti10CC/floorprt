@@ -36,7 +36,7 @@ const linked = borrower.toLowerCase() !== trader.toLowerCase();
 const lender = deployment.roles.lender;
 const [evidence] = await Promise.all([readLiveEvidence([trader], row.month), readLiveControllers([trader], [borrower])]);
 assert(evidence.decision.qualified, evidence.decision.reason);
-const latest = await client.getBlock();
+const latest = await client.getBlock({ blockTag: 'pending' });
 assert(BigInt(evidence.asOf) <= latest.timestamp && latest.timestamp < BigInt(evidence.asOf) + 35n * 86400n,
   'The local chain clock is outside the live evidence window.');
 assert.equal(await client.readContract({ address: desk, abi: TraderCreditDeskAbi, functionName: 'activeForWallet', args: [borrower] }),
@@ -68,9 +68,10 @@ try {
   await confirmed(wallet(borrower).writeContract({ address: asset, abi: MockUSDCAbi, functionName: 'faucet', args: [100_000_000n] }));
   const borrowerBefore = await balance(borrower);
   await approve(borrower, bond);
+  const { timestamp } = await client.getBlock({ blockTag: 'pending' });
   const terms = {
     principal, due, bond, termSeconds: 30 * 86400, asOf: BigInt(evidence.asOf),
-    linkExpires: latest.timestamp + 3600n, evidenceDigest: evidence.digest, ensNode: zeroHash,
+    linkExpires: timestamp + 3600n, evidenceDigest: evidence.digest, ensNode: zeroHash,
   };
   const contract = { address: desk, abi: TraderCreditDeskAbi } as const;
   const request = await confirmed(linked

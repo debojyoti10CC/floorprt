@@ -12,7 +12,7 @@ export type TransactionState={label:string;status:'signing'|'pending'|'confirmed
 
 type Draft={lower:string;upper:string;lowerUnits:string;upperUnits:string};
 
-type ProtocolContext={deployment:Deployment|null;data:Snapshot|null;online:boolean;loading:boolean;error:string|null;address:Address|null;mode:'local'|'injected'|null;tx:TransactionState|null;rpcUrl:string;draft:Draft;setDraft:React.Dispatch<React.SetStateAction<Draft>>;refresh:()=>Promise<void>;connectLocal:(role:'borrower'|'lender'|'resolver')=>Promise<void>;connectInjected:()=>Promise<void>;disconnect:()=>void;signMessage:(message:string,expected:Address)=>Promise<Hex>;transact:(label:string,name:ContractName,fn:string,args:unknown[])=>Promise<TransactionReceipt>;dismissTx:()=>void;configure:(rpc:string,manifest?:Deployment)=>void};
+type ProtocolContext={deployment:Deployment|null;data:Snapshot|null;online:boolean;loading:boolean;error:string|null;address:Address|null;mode:'local'|'injected'|null;tx:TransactionState|null;rpcUrl:string;draft:Draft;setDraft:React.Dispatch<React.SetStateAction<Draft>>;refresh:()=>Promise<void>;connectLocal:(role:'borrower'|'lender'|'resolver')=>Promise<void>;connectInjected:()=>Promise<void>;disconnect:()=>void;signMessage:(message:string,expected:Address)=>Promise<Hex>;transact:(label:string,name:ContractName,fn:string,args:unknown[],blockTag?:'pending')=>Promise<TransactionReceipt>;dismissTx:()=>void;configure:(rpc:string,manifest?:Deployment)=>void};
 
 const Ctx=createContext<ProtocolContext|null>(null);
 
@@ -206,7 +206,7 @@ export function ProtocolProvider({children}:{children:React.ReactNode}){
     return wallet.signMessage({ message: text });
   };
 
-  const transact=async(label:string,name:ContractName,fn:string,args:unknown[])=>{
+  const transact=async(label:string,name:ContractName,fn:string,args:unknown[],blockTag?:'pending')=>{
 
     if(!deployment||!address||!mode)throw new Error('Connect a wallet before signing.');
 
@@ -247,7 +247,7 @@ export function ProtocolProvider({children}:{children:React.ReactNode}){
 
       if(await wallet.getChainId()!==deployment.chainId)throw new Error('ERR_CHAIN_MISMATCH');
 
-      const simulation=await client.simulateContract({account:address,address:deployment.contracts[name]!,abi:(fn==='faucet'?MockUSDCAbi:abis[name]) as Abi,functionName:fn,args});
+      const simulation=await client.simulateContract({account:address,address:deployment.contracts[name]!,abi:(fn==='faucet'?MockUSDCAbi:abis[name]) as Abi,functionName:fn,args,blockTag});
 
       const hash=await wallet.writeContract({...simulation.request,account:address,chain});
 

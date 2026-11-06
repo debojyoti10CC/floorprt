@@ -134,14 +134,8 @@ export async function createLocalDemoRequest(p: CreditConnection) {
     }
     if (!evidence.decision.qualified || evidence.wallets.length !== 1
       || evidence.wallets[0]?.toLowerCase() !== borrower.toLowerCase()) continue;
-    const block = await live.client.getBlock();
     const principal = 100_000_000n;
     const bond = 25_000_000n;
-    const terms = {
-      principal, due: 102_000_000n, bond, termSeconds: 30 * 86400,
-      asOf: BigInt(evidence.asOf), evidenceDigest: evidence.digest, ensNode: zeroHash,
-      linkExpires: block.timestamp + 3600n,
-    };
     const wallet = createWalletClient({ account: borrower, chain, transport: http(p.rpcUrl) });
     const collateral = { address: deployment.contracts.CollateralToken, abi: CollateralTokenAbi } as const;
     await test.impersonateAccount({ address: borrower });
@@ -150,7 +144,13 @@ export async function createLocalDemoRequest(p: CreditConnection) {
       const balance = await live.client.readContract({ ...collateral, functionName: 'balanceOf', args: [borrower] });
       if (balance < bond) await wallet.writeContract({ address: collateral.address, abi: MockUSDCAbi, functionName: 'faucet', args: [principal] });
       await wallet.writeContract({ ...collateral, functionName: 'approve', args: [live.address, bond] });
-      const simulation = await live.client.simulateContract({ ...live.contract, account: borrower, functionName: 'requestLoan', args: [terms, [borrower], ['0x' as Hex]] });
+      const { timestamp } = await live.client.getBlock({ blockTag: 'pending' });
+      const terms = {
+        principal, due: 102_000_000n, bond, termSeconds: 30 * 86400,
+        asOf: BigInt(evidence.asOf), evidenceDigest: evidence.digest, ensNode: zeroHash, linkExpires: timestamp + 3600n,
+      };
+      const simulation = await live.client.simulateContract({ address: live.address, abi: TraderCreditDeskAbi,
+        account: borrower, functionName: 'requestLoan', args: [terms, [borrower], ['0x' as Hex]], blockTag: 'pending' });
       const hash = await wallet.writeContract({ ...simulation.request, account: borrower, chain });
       const receipt = await live.client.waitForTransactionReceipt({ hash, timeout: 120_000 });
       if (receipt.status !== 'success') throw new Error('The local request transaction reverted.');
