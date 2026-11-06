@@ -11,7 +11,7 @@ import { z } from 'zod';
 import { TraderCreditDeskAbi } from '../../../packages/shared/src/abis.generated.js';
 import { monthOf, offsetMonth } from '../../underwriting/calendar.js';
 import { boundaryBlockMaxima, evidenceBoundaries, evidenceFromHistories, type AccountHistory } from '../../underwriting/policy.js';
-import { parsePnlHistory, pnlUrl } from '../../underwriting/pnl-wire.js';
+import { parsePnlWindow, PnlApiOrigin } from '../../underwriting/pnl-wire.js';
 import { scoreReport } from '../../underwriting/reports.js';
 import { verifyControllers } from '../../underwriting/controllers.js';
 import { onLoanSweep } from './lifecycle.js';
@@ -21,31 +21,24 @@ export const configSchema = z.object({
   desk: contractAddress,
   chainId: z.union([z.literal(31337), z.literal(11155111)]),
   keeper: contractAddress.optional(),
+  pnlApiUrl: PnlApiOrigin.optional(),
   replayAt: z.number().int().positive().optional(),
   replayRelayPort: z.number().int().min(1024).max(65535).optional(),
 }).refine(config => config.replayAt === undefined
   ? config.replayRelayPort === undefined
-  : config.chainId === 31337 && config.keeper !== undefined);
+  : config.chainId === 31337 && config.keeper !== undefined)
+  .refine(config => config.chainId === 31337 || config.pnlApiUrl?.startsWith('https://'),
+    'Configure an HTTPS AQRA read API for Sepolia.');
 export type Config = z.infer<typeof configSchema>;
 const requestedTopic = toEventSelector('TraderCreditRequested(uint256,address,bytes32)');
 const sepoliaSelector = EVMClient.SUPPORTED_CHAIN_SELECTORS['ethereum-testnet-sepolia'];
 const polygonSelector = EVMClient.SUPPORTED_CHAIN_SELECTORS['polygon-mainnet'];
 
-function fetchHistory(send: HTTPSendRequester, wallet: Address, from: number, through: number) {
-  const response = send.sendRequest({ method: 'GET', url: pnlUrl(wallet) }).result();
-  if (!ok(response)) throw new Error('Polymarket P&L returned ' + response.statusCode);
-  const history = parsePnlHistory(JSON.parse(text(response)), wallet);
-  const points = (history?.points ?? [])
-    .filter(point => point.timestamp >= from && point.timestamp <= through)
-    .sort((a, b) => a.timestamp - b.timestamp)
-    .map(point => ({
-      timestamp: point.timestamp,
-      source_block: point.source_block,
-      realized_market_pnl: point.realized_market_pnl,
-      volume_usdc: point.volume_usdc,
-      trade_count: point.trade_count,
-    }));
-  return JSON.stringify({ proxy_wallet: wallet.toLowerCase(), points });
+function fetchHistory(send: HTTPSendRequester, origin: string, wallet: Address, month: string) {
+  const url = origin + '/api/v1/underwriting/pnl-window?wallet=' + wallet.toLowerCase() + '&month=' + month;
+  const response = send.sendRequest({ method: 'GET', url }).result();
+  if (!ok(response)) throw new Error('AQRA P&L window returned ' + response.statusCode);
+  return JSON.stringify(parsePnlWindow(JSON.parse(text(response)), wallet, month));
 }
 
 export async function onLoanRequested(runtime: Runtime<Config>, log: EVMLog) {
@@ -86,9 +79,10 @@ export async function onLoanRequested(runtime: Runtime<Config>, log: EVMLog) {
   const boundaries = evidenceBoundaries(month);
   const through = boundaries[boundaries.length - 1];
   if (BigInt(through) !== loan.terms.asOf) throw new Error('Evidence must end at a UTC month boundary.');
+  const origin = runtime.config.pnlApiUrl ?? 'http://127.0.0.1:8787';
   const httpClient = new HTTPClient();
   const fetches = wallets.map(wallet => httpClient.sendRequest(runtime, fetchHistory, consensusIdenticalAggregation<string>())(
-    wallet, boundaries[0], through,
+    origin, wallet, month,
   ));
   const histories = fetches.map(response => JSON.parse(response.result()) as AccountHistory);
   const verified = new Set<number>();

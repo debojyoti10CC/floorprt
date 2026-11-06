@@ -89,11 +89,11 @@ function markPerShare(bids: { price: bigint; size: bigint }[], shares: bigint) {
 }
 
 function fetchActivityAudit(send: HTTPSendRequester, trader: string) {
-  const response = send.sendRequest({ method: 'GET', url: pnlUrl(trader) }).result();
+  const response = send.sendRequest({ method: 'GET', url: pnlUrl(trader, '1m') }).result();
   if (!ok(response)) throw new Error('Polymarket performance history HTTP ' + response.statusCode);
   const points = parsePnlHistory(JSON.parse(text(response)), trader)?.points ?? [];
   const latest = points.reduce<number>((maximum, row) => Math.max(maximum, row.timestamp), 0);
-  return JSON.stringify({ trader, points: points.length, latest });
+  return JSON.stringify({ trader, window: '1m', points: points.length, latest });
 }
 
 export function onLoanSweep(runtime: Runtime<Config>): LoanSweepResult {

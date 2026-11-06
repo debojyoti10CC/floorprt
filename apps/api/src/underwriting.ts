@@ -9,6 +9,8 @@ import { monthOf, offsetMonth } from '../../../services/underwriting/calendar.js
 import { lastCompleteMonth, readLiveControllers, readLiveEvidence } from '../../../services/underwriting/live-evidence.js';
 import { localReportMetadata, scoreReport } from '../../../services/underwriting/reports.js';
 import { verifyEvidence } from '../../../services/underwriting/policy.js';
+import { projectPnlWindow } from '../../../services/underwriting/pnl-wire.js';
+import { readPnlHistory } from '../../../services/underwriting/sources.js';
 import { PolymarketRateLimitError, readPolymarketPortfolio, readPublicPolymarketSample } from '../../../services/underwriting/polymarket.js';
 import { demoEvidence } from '../../../services/underwriting/demo-evidence.js';
 import { positionDisclosure, type PositionDisclosure } from '../../../services/underwriting/position-assessment.js';
@@ -88,6 +90,19 @@ export function createUnderwritingApi() {
   });
 
   app.get('/storage-status', async c => c.json(await swarmStorageStatus()));
+
+  app.get('/pnl-window', async c => {
+    const wallet = AddressSchema.safeParse(c.req.query('wallet'));
+    const month = Month.safeParse(c.req.query('month'));
+    if (!wallet.success || !month.success || month.data > lastCompleteMonth()) {
+      return c.json({ error: 'Provide a trading wallet and a completed UTC month.' }, 400);
+    }
+    try {
+      return c.json(projectPnlWindow(await readPnlHistory(wallet.data), wallet.data, month.data));
+    } catch {
+      return c.json({ error: 'Polymarket daily observations are unavailable for this window.' }, 502);
+    }
+  });
 
   app.get('/evidence', async c => {
     const parsed = Wallets.safeParse(c.req.queries('wallet') ?? []);

@@ -4,6 +4,7 @@ import { privateKeyToAccount } from 'viem/accounts';
 import { PositionCreditDeskAbi, TraderCreditDeskAbi } from '../packages/shared/src/abis.generated.js';
 import { chainFor, type Deployment } from '../packages/shared/src/chain.js';
 import { positionTokenAbi, SHARE_UNIT } from '../packages/shared/src/position-credit.js';
+import { PnlApiOrigin } from '../services/underwriting/pnl-wire.js';
 
 const sepolia = process.argv.includes('--sepolia');
 const isolatedPath = sepolia ? undefined : process.env.FLOOR_DEPLOYMENT_FILE;
@@ -29,9 +30,14 @@ if (!forwarder || !isAddress(forwarder) || forwarder === zeroAddress || !owner |
 }
 const workflowId = id as Hex;
 const configPath = 'services/trader-cre/workflow/config.' + (sepolia ? 'sepolia' : 'local') + '.json';
+const configuredApi = process.env.FLOOR_CRE_PNL_API_URL?.trim();
+if (sepolia && !pin && !configuredApi?.startsWith('https://')) {
+  throw new Error('Set FLOOR_CRE_PNL_API_URL to the HTTPS origin of the AQRA read API.');
+}
+const pnlApiUrl = pin ? undefined : PnlApiOrigin.parse(configuredApi || 'http://127.0.0.1:' + (process.env.FLOOR_API_PORT || '8787'));
 const writeConfig = async (desk: Address) => {
   // Pinning uses the workflow config already built and hashed by the operator.
-  if (!isolatedPath && !pin) await writeFile(configPath, JSON.stringify({ desk, chainId }, null, 2) + '\n');
+  if (!isolatedPath && !pin) await writeFile(configPath, JSON.stringify({ desk, chainId, pnlApiUrl }, null, 2) + '\n');
 };
 const chain = chainFor(chainId, rpcUrl);
 const client = createPublicClient({ chain, transport: http(rpcUrl) });
