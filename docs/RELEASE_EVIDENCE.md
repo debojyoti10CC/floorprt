@@ -1,4 +1,28 @@
-# AQRA release evidence — 6 November 2026
+# AQRA release evidence
+
+## Chainlink CRE margin replay
+
+On 7 November 2026, CRE CLI v1.39.0 completed the funding-mark, price-drop and share-release Cron simulations. CRE read the loan and its custody from the isolated EVM and fetched two prices from the Polymarket CLOB history API. The desk escrowed 120 test Conditional Tokens shares, a 12.50 tUSDC bond and a 38.50 tUSDC funded bid. A separate lender advanced 50 tUSDC.
+
+| Observation | Polymarket timestamp (UTC Unix seconds) | Mark per share | Marked backing | Debt LTV |
+| --- | ---: | ---: | ---: | ---: |
+| Funding | 1793974817 | $0.505 | $73.10 | 69.76% |
+| Liquidation | 1793975419 | $0.0005 | $12.56 | 406.05% |
+
+The script delivered the official CLI payloads through the pinned local account. The contract liquidated before the one-day maturity, increased the lender's token balance by exactly 51 tUSDC and recorded zero unpaid debt. The next Cron simulation produced the share-release report and the bidder received all 120 shares. The desk held zero shares and zero test USDC after release.
+
+| Step | Local receipt |
+| --- | --- |
+| Backstop bid | `0x51fcfbed8468e81ad95e586904fba2e8f6fc4df326ba903924b0ab6c2acc87a1` |
+| Pledge and loan request | `0x6f846c3f584d584a08a41e01311db0bcdc8656d2f3988109ad65fb66ddad09c4` |
+| First mark | `0x469c15d7450292ca590dc49ff34b6dfd0a2881b3d1c2f5f02bdac05a9159762d` |
+| Funding | `0x67366c31ed898eb29fbf381b3d93154050f50bc116a2bb94c2782b13476c5c48` |
+| Early liquidation and lender payment | `0x532b8df65e50f8f5ab99e59875c48db2c631f2797ead42e858f13e70aaa725be` |
+| Share delivery | `0x35535274e5e2f628976b2fae18142e68accbce9b50f8eaa7f4334b87fbfaa5bc` |
+
+Chromium verified the funding and liquidation LTVs and the exact recovery on **Lend**. The chain is local and the score is a labeled test fixture. The price observations come from Polymarket. The separate complete-pair profile covers the local Arkiv and Swarm round trip below. [Replay instructions](TRADER_CREDIT.md#run-the-official-cre-replay) · [Direct API simulation results and receipts](https://github.com/debojyoti10CC/floorprt/blob/main/evidence/cre-margin-direct.json) · [Polymarket source response](https://github.com/debojyoti10CC/floorprt/blob/main/evidence/cre-margin-polymarket.json)
+
+The official CLI transcripts record the market observations, report payloads and successful results. [Funding mark](https://github.com/debojyoti10CC/floorprt/blob/main/evidence/logs/cre-margin-funding.log) · [Liquidation mark](https://github.com/debojyoti10CC/floorprt/blob/main/evidence/logs/cre-margin-liquidation.log) · [Share release](https://github.com/debojyoti10CC/floorprt/blob/main/evidence/logs/cre-margin-release.log)
 
 ## Position credit browser run
 

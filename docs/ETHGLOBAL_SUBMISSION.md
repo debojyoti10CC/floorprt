@@ -1,14 +1,14 @@
 # AQRA — ETHGlobal Mumbai submission brief
 
-**Status date:** 6 November 2026. This brief describes the current AQRA trader-credit app, not the earlier Floor Protocol terminal.
+**Status date** 7 November 2026.
 
 ## One-line pitch
 
-**AQRA is a prediction-market performance-metrics-based lending protocol: it scores dated trader history to gate a bonded loan request, then lets a lender verify the attested metrics and choose whether to fund.** The score is not a repayment model or collateral.
+**AQRA underwrites loans using prediction-market performance metrics and uses escrowed collateral to recover a lender's money when a position deteriorates.**
 
 ## Submission description
 
-Prediction-market traders can expose public, settled trading history, but that history is not a credit record. AQRA uses activity, repeat profitability, realized P&L efficiency and drawdown as explicit underwriting metrics. A qualifying borrower posts a USDC bond; the lender reads the dated inputs, checks that their digest matches the attested report, and chooses whether to accept the uncovered loss. The benchmark tests future trader P&L—not repayment—and pooled lending stays rejected until real loan outcomes and committed capital exist.
+AQRA screens activity, repeat profitability, realized P&L efficiency and drawdown. The lender verifies the borrower's dated report and chooses whether to fund. In the directional pilot, the borrower locks shares and a bond, and a market maker funds the recovery bid. Chainlink CRE checks escrow against Polymarket prices and triggers early recovery when debt reaches 90% of marked backing. The benchmark evaluates future trader P&L. Loan recovery comes from contract custody and committed cash.
 
 ## The mechanism
 
@@ -20,15 +20,16 @@ flowchart LR
   C --> R
   R --> B[Escrowed USDC bond]
   R --> W[Workflow-attested evidence]
-  W --> C[Borrower-signed release]
-  C --> S[Swarm upload + byte read-back]
-  S --> H[Onchain report hash + reference]
-  H --> A[Borrower-owned Arkiv listing]
+  W --> D[Borrower-signed release]
+  D --> SW[Swarm upload + byte read-back]
+  SW --> AH[Onchain report hash + reference]
+  AH --> A[Borrower-owned Arkiv listing]
   A --> L[Distinct lender fetches and verifies report]
   L --> F[Direct funding]
-  F --> O[Repayment or matured bond recovery]
+  F --> O[Repayment or collateral recovery]
   O --> E[Onchain receipt]
   P[CRE: Polygon data + EVM request] -. attest exact request .-> W
+  M[CRE: Polymarket prices + escrow state] --> O
 ```
 
 ### Four application destinations
@@ -36,7 +37,7 @@ flowchart LR
 1. **Data:** sampled market coverage, walk-forward policy comparison, address-level underwriting metrics and export.
 2. **Risk engine:** assumption-driven credit loss and discrete portfolio stress. It rejects pool underwriting because the model has no loan labels or committed reserve.
 3. **Borrow:** wallet/ENS discovery, as-of evidence, scoped linked-wallet consent, fixed terms and bond escrow.
-4. **Lend:** Arkiv discovery, exact Swarm report retrieval and hash/recomputation checks, loss acknowledgement, direct funding, borrower repayment or matured default, with receipts.
+4. **Lend** shows report verification, direct funding, repayment and recovery. The local CRE replay displays confirmed liquidation receipts and before/after LTV.
 
 ## What the data says
 
@@ -54,33 +55,23 @@ The consistency screen is 42.3 percentage points above the seeded baseline and 3
 
 ## Loan economics and the honest risk statement
 
-Current demo terms are $100 principal, $102 total due and $25 posted bond. If the borrower defaults and the entire bond is recovered, up to $75 of principal remains unpaid. A token, contract or operational failure can make recovery lower. The lender knowingly takes that risk; there is no pool, guarantee, seized trading position or right to future trading profits.
+The directional replay locks 120 test shares, a 12.50 tUSDC bond and a 38.50 tUSDC bid. The lender advances 50 tUSDC against 51 tUSDC due. A Polymarket price drop from $0.505 to $0.0005 moves debt LTV from 69.76% to 406.05%. The lender receives the full 51 tUSDC before maturity. The bidder receives the shares and takes their price risk. [Replay receipts](RELEASE_EVIDENCE.md#chainlink-cre-margin-replay)
 
 The risk engine lets a user vary assumed PD, default dependence, recovery haircut, tail confidence, costs and scenario capital. These are not measured loan statistics. The pooled-credit gate remains `REJECT` until AQRA has matured repayment/default labels, calibrated and out-of-time-validated PD, and genuinely committed loss capital.
 
 ## Demo sequence
 
-The repository does not currently have a Bee URL, funded postage batch or live Rabdi writer configured. The complete external storage flow is therefore implemented but not yet an honest live demo. Do not imply a testnet upload or loan funding has happened until it is executed with those resources.
-
-After configuration, use this sequence:
-
-1. Show the benchmark sample counts and observed cohort rates. Point out that the simple prior-month P&L comparator exceeds the consistency screen by 3.6 percentage points and neither measures repayment.
-2. Change one risk assumption and show the loss distribution, VaR/ES and unchanged pooled-credit `REJECT` gate.
-3. Create or open a borrower-owned request and show its onchain attestation and fixed terms.
-4. Preview the complete report disclosure, inspect linked wallets/metrics/cutoff/SHA-256, and sign the time-limited public-release message.
-5. Show Bee upload, read-back verification, borrower commitment transaction, and wallet-owned Arkiv publication receipt.
-6. Switch to a separate lender session; discover the listing on Arkiv, fetch the exact Swarm reference, and show digest/hash/contract checks pass. Then acknowledge the $75 shortfall and fund with test USDC.
-7. Repay or mature the loan and show the receipt. Demonstrate that repayment/default still work if Arkiv/Swarm is unavailable.
-8. For the CRE bounty, run and show successful official `cre workflow simulate` output with Polygon API reads and the EVM request. Do not label this a public DON write.
-
-Without the external service configuration and a second wallet, limit the demo to the local request/attestation path and explicitly show funding disabled. The local impersonation utility is not borrower consent.
+1. Show the dated trader metrics and the two benchmark comparators. State that 70.0% and 73.6% measure following-month profitability.
+2. Run `pnpm cre:margin:demo` and show the 120-share pledge, borrower bond and cash bid before funding.
+3. Show the successful CRE CLI mark and the lender's wallet-signed funding. Replay the second Polymarket observation, then show the exact lender recovery and share-transfer receipts in **Lend**.
+4. For Arkiv and Swarm, use the separate complete-pair position profile. Publish the consented assessment, rediscover it in the lender view and verify the file before funding. This flow has a recorded local browser run. [Position credit receipts](RELEASE_EVIDENCE.md#position-credit-browser-run)
 
 ## Sponsor readiness
 
-| Sponsor path | Assessment on 6 November |
+| Sponsor path | Assessment on 7 November |
 | --- | --- |
-| **Chainlink CRE** | Closest fit. The workflow source is present and connects an external Polygon/Polymarket API with the EVM request. No successful official CLI simulation or live workflow is yet recorded. Complete that exact demo gate. |
-| **Arkiv + Swarm** | New code now uploads and reads back the consented assessment via Bee, commits SHA-256/reference in the lending contract, writes an expiring Arkiv v2 listing and fetches the exact report before UI funding. No Bee configuration, postage batch, Rabdi write/read receipt or second-wallet proof is recorded yet. The existing-project prize requires Continuity registration and event-new evidence; eligibility remains unconfirmed. |
+| **Chainlink CRE** | The official CLI completed three Cron simulations using local EVM escrow and the Polymarket API. Applying the reports produced confirmed local liquidation and release transactions. The run uses the simulation route in the prize criteria. |
+| **Arkiv + Swarm** | A local two-wallet run verifies publication, discovery after reload, Swarm read-back, funding and repayment. Public Rabdi evidence and Continuity eligibility remain open. |
 | **Arc** | No Arc integration exists here. Every Arc prize requires an Arc Studio-originated project, a shareable Studio project URL and showing Studio in the demo, plus a working app/backend, architecture diagram and presentation. Arc Continuity additionally requires Continuity registration. Do not claim Arc eligibility yet. |
 
 Official requirements: [ETHGlobal Mumbai prizes](https://ethglobal.com/events/mumbai/prizes), [Arc prizes](https://ethglobal.com/events/mumbai/prizes/arc), [Chainlink CRE](https://docs.chain.link/cre), [Arkiv Rabdi](https://docs.arkiv.network/networks/rabdi/).

@@ -32,6 +32,8 @@ Run `pnpm dev:positions` and open [the position credit desk](http://127.0.0.1:30
 
 **Load test borrower** uses funded Conditional Tokens on a separate local chain and a labeled scoring fixture. A request locks equal YES and NO quantities for one binary condition plus a test USDC bond. Borrowing $100 with $102 due against 120 matched pairs and a $25 bond gives $145 backing and 70.34% debt LTV. The contract caps repayment at $116 under its 80% debt limit. For Swarm upload and Arkiv discovery, configure the [local storage nodes](arkiv/swarm.md#local-position-demo).
 
+The [Chainlink CRE replay](docs/TRADER_CREDIT.md#run-the-official-cre-replay) locks a directional outcome and replays a real Polymarket price drop. Run `pnpm cre:margin:demo` with the isolated chain and Bee running. Open **Lend** to inspect the lender payment and share release receipts.
+
 For a local historical-evidence request that stops before borrower consent and funding, run `pnpm underwriting:demo --pending` against the local stack. It records local receipts at `work/underwriting/local-credit-demo.json`. This uses a historical public wallet under Anvil impersonation and must not be used to bypass the interactive public-report consent flow.
 
 ## Reproduce the benchmark

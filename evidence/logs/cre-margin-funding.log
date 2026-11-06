@@ -1,0 +1,42 @@
+  Reading pre-built WASM binary...
+✓ Loaded WASM binary from margin.27980.local.wasm
+✓ Simulation limits enabled
+  HTTP: req=120kb resp=250kb timeout=10s | ConfHTTP: req=125kb resp=500kb timeout=1m30s | Consensus obs=25kb | ChainWrite evm_report=50kb evm_gas=10000000 solana_report=265b solana_cu=300000 | WASM binary=100mb compressed=20mb
+  Binary hash: f711b766686d4e7700b8b71f37dad55453b715176b7337b940ae4f3a9fc8f7e4
+  Config hash: 67ec74e0d3d2616bcdf9616bbf30b2d60a38e82de7dc5348e0bc730cac103d47
+2026-11-07T03:35:01Z [SIMULATION] Simulator Initialized
+
+2026-11-07T03:35:01Z [SIMULATION] Running trigger trigger=cron-trigger@1.0.0
+2026-11-07T03:35:02Z [USER LOG] AQRA checked 1 loans at 1794000905 · {"source":"POLYMARKET_HISTORY","transport":"DIRECT","time":1793974817,"price":"505000"}
+2026-11-07T03:35:02Z [USER LOG] Loan 1 · LTV 6976 bps · liquidate false
+
+✓ Workflow Simulation Result:
+{
+  "actions": [],
+  "audit": "{\"source\":\"POLYMARKET_HISTORY\",\"transport\":\"DIRECT\",\"time\":1793974817,\"price\":\"505000\"}",
+  "marks": [
+    {
+      "backing": "73100000",
+      "debtLtvBps": "6976",
+      "liquidate": false,
+      "loanId": "1",
+      "payload": "0x0789db7be4873ec8805be3fc5379b8cc7edc26cd09a5e1e4500799f229aba2180000000000000000000000000000000000000000000000000000000000007a690000000000000000000000002bdcc0de6be1f7d2ee689a0342d76f52e8efaba30000000000000000000000000000000000000000000000000000000000000001cfba47aa9b7656792aef004487b679984e21f6175068ed1aa0118df545bc98f0000000000000000000000000000000000000000000000000000000000007b4a8000000000000000000000000000000000000000000000000000000006aee4809418bb697a1eeecad20ce30645deb8b6df84c94b18208aee36fdcdf74871b5dea",
+      "price": "505000"
+    }
+  ],
+  "observedAt": "1794000905"
+}
+
+2026-11-07T03:35:02Z [SIMULATION] Execution finished signal received
+2026-11-07T03:35:02Z [SIMULATION] Skipping WorkflowEngineV2
+
+╭──────────────────────────────────────────────────────╮
+│ Simulation complete! Ready to deploy your workflow?  │
+│                                                      │
+│ Run cre account access to request deployment access. │
+╰──────────────────────────────────────────────────────╯
+
+Initializing...
+Loading settings...
+! Using default private key for chain write simulation. To use your own key, set CRE_ETH_PRIVATE_KEY in your .env file or system environment.
+Checking RPC connectivity...

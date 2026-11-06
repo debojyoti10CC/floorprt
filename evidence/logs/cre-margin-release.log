@@ -1,0 +1,38 @@
+  Reading pre-built WASM binary...
+✓ Loaded WASM binary from margin.27980.local.wasm
+✓ Simulation limits enabled
+  HTTP: req=120kb resp=250kb timeout=10s | ConfHTTP: req=125kb resp=500kb timeout=1m30s | Consensus obs=25kb | ChainWrite evm_report=50kb evm_gas=10000000 solana_report=265b solana_cu=300000 | WASM binary=100mb compressed=20mb
+  Binary hash: f711b766686d4e7700b8b71f37dad55453b715176b7337b940ae4f3a9fc8f7e4
+  Config hash: dd0d13f1286384dabe114c51baccd5f2a682b27c6b8270b64de6216d45337f34
+2026-11-07T03:35:07Z [SIMULATION] Simulator Initialized
+
+2026-11-07T03:35:07Z [SIMULATION] Running trigger trigger=cron-trigger@1.0.0
+2026-11-07T03:35:08Z [USER LOG] AQRA checked 1 loans at 1794000915 · No active borrower
+
+✓ Workflow Simulation Result:
+{
+  "actions": [
+    {
+      "action": 3,
+      "loanId": "1"
+    }
+  ],
+  "audit": "No active borrower",
+  "marks": [],
+  "observedAt": "1794000915",
+  "sweep": "0x0000000000000000000000000000000000000000000000000000000000007a690000000000000000000000007969c5ed335650692bc04293b07f5bf2e7a673c00000000000000000000000002bdcc0de6be1f7d2ee689a0342d76f52e8efaba300000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000006aee4813594a7cc7257c297c510e3a9d3485f5c308ecf2bd902839d7dba25da2bac83960"
+}
+
+2026-11-07T03:35:08Z [SIMULATION] Execution finished signal received
+2026-11-07T03:35:08Z [SIMULATION] Skipping WorkflowEngineV2
+
+╭──────────────────────────────────────────────────────╮
+│ Simulation complete! Ready to deploy your workflow?  │
+│                                                      │
+│ Run cre account access to request deployment access. │
+╰──────────────────────────────────────────────────────╯
+
+Initializing...
+Loading settings...
+! Using default private key for chain write simulation. To use your own key, set CRE_ETH_PRIVATE_KEY in your .env file or system environment.
+Checking RPC connectivity...
