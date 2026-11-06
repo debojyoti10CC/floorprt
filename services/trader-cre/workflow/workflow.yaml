@@ -1,0 +1,16 @@
+local-simulation:
+  user-workflow:
+    workflow-name: aqra-trader-credit-local
+  workflow-artifacts:
+    workflow-path: ./main.ts
+    config-path: ./config.local.json
+    secrets-path: ""
+
+sepolia:
+  user-workflow:
+    workflow-name: aqra-trader-credit
+    deployment-registry: private
+  workflow-artifacts:
+    workflow-path: ./main.ts
+    config-path: ./config.sepolia.json
+    secrets-path: ""

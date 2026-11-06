@@ -1,0 +1,13 @@
+local-simulation:
+  rpcs:
+    - chain-name: ethereum-testnet-sepolia
+      url: http://127.0.0.1:8545
+    - chain-name: polygon-mainnet
+      url: https://polygon.drpc.org
+
+sepolia:
+  rpcs:
+    - chain-name: ethereum-testnet-sepolia
+      url: https://ethereum-sepolia-rpc.publicnode.com
+    - chain-name: polygon-mainnet
+      url: https://polygon.drpc.org
