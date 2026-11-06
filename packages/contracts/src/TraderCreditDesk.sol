@@ -92,11 +92,14 @@ contract TraderCreditDesk is ReentrancyGuard, IERC165, ITraderReportReceiver {
     mapping(address => uint256) public nextNonce;
     mapping(address => uint256) public activeForWallet;
     mapping(uint256 => Loan) private _loans;
+    mapping(uint256 => bytes32) public assessmentHashOf;
+    mapping(uint256 => bytes32) public assessmentReferenceOf;
     mapping(uint256 => address[]) private _traderWallets;
     mapping(uint256 => address[]) private _traderControllers;
 
     event TraderCreditRequested(uint256 indexed loanId, address indexed borrower, bytes32 indexed evidenceDigest);
     event ScoreAttested(uint256 indexed loanId, bytes32 indexed evidenceDigest, uint8 score);
+    event AssessmentCommitted(uint256 indexed loanId, bytes32 indexed reportHash, bytes32 swarmReference);
     event TraderLoanFunded(uint256 indexed loanId, address indexed lender, uint256 principal, uint64 maturity);
     event TraderLoanRepaid(uint256 indexed loanId, uint256 lenderPaid, uint256 bondReturned);
     event TraderLoanDefaulted(uint256 indexed loanId, uint256 lenderPaid, uint256 unpaidDue, uint256 principalLoss);
@@ -234,10 +237,31 @@ contract TraderCreditDesk is ReentrancyGuard, IERC165, ITraderReportReceiver {
         emit ScoreAttested(scoreReport.loanId, scoreReport.evidenceDigest, scoreReport.score);
     }
 
+    /// @notice Binds a loan to the public Swarm report the borrower consented to publish.
+    /// @dev This commits the report bytes and location; lenders still verify the fetched bytes before funding.
+    function commitAssessment(uint256 id, bytes32 reportHash, bytes32 swarmReference) external {
+        Loan storage loan = _loans[id];
+        if (loan.state != State.Requested || loan.score < MIN_SCORE || block.timestamp >= loan.fundBy) {
+            revert InvalidState();
+        }
+        if (msg.sender != loan.borrower) revert Unauthorized();
+        if (reportHash == bytes32(0) || swarmReference == bytes32(0)) revert InvalidReport();
+        bytes32 currentHash = assessmentHashOf[id];
+        bytes32 currentReference = assessmentReferenceOf[id];
+        if (currentHash != bytes32(0) || currentReference != bytes32(0)) {
+            if (currentHash != reportHash || currentReference != swarmReference) revert InvalidReport();
+            return;
+        }
+        assessmentHashOf[id] = reportHash;
+        assessmentReferenceOf[id] = swarmReference;
+        emit AssessmentCommitted(id, reportHash, swarmReference);
+    }
+
     function fundLoan(uint256 id) external nonReentrant {
         Loan storage loan = _loans[id];
         if (loan.state != State.Requested || loan.score < MIN_SCORE) revert InvalidState();
         if (block.timestamp >= loan.fundBy) revert Deadline();
+        if (assessmentHashOf[id] == bytes32(0) || assessmentReferenceOf[id] == bytes32(0)) revert InvalidReport();
         if (msg.sender == loan.borrower || activeForWallet[msg.sender] == id || msg.sender == address(this)) {
             revert Unauthorized();
         }

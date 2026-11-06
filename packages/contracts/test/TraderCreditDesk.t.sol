@@ -15,6 +15,8 @@ contract TraderCreditDeskTest is Test {
     address private author;
     bytes32 private constant WORKFLOW = keccak256("workflow");
     bytes32 private constant EVIDENCE = keccak256("observed-wallet-evidence");
+    bytes32 private constant REPORT_HASH = keccak256("public report bytes");
+    bytes32 private constant SWARM_REFERENCE = keccak256("swarm reference");
 
     function setUp() public {
         vm.warp(1_794_000_000);
@@ -50,6 +52,10 @@ contract TraderCreditDeskTest is Test {
         desk.onReport(_metadata(author), report);
         vm.expectRevert(TraderCreditDesk.InvalidReport.selector);
         desk.onReport(_metadata(author), report);
+        vm.prank(lender);
+        vm.expectRevert(TraderCreditDesk.InvalidReport.selector);
+        desk.fundLoan(id);
+        _commitAssessment(id);
         vm.prank(borrower);
         vm.expectRevert(TraderCreditDesk.Unauthorized.selector);
         desk.fundLoan(id);
@@ -71,6 +77,7 @@ contract TraderCreditDeskTest is Test {
     function test_DefaultPaysOnlyEscrowedBondAndReleasesIdentity() public {
         uint256 id = _request();
         desk.onReport(_metadata(author), _report(id, EVIDENCE, 78));
+        _commitAssessment(id);
         vm.prank(lender);
         desk.fundLoan(id);
         vm.expectRevert(TraderCreditDesk.Deadline.selector);
@@ -87,6 +94,26 @@ contract TraderCreditDeskTest is Test {
         assertEq(uint8(desk.getLoan(id).state), uint8(TraderCreditDesk.State.Defaulted));
         vm.expectRevert(TraderCreditDesk.InvalidState.selector);
         desk.settleDefault(id);
+    }
+
+    function test_AssessmentCommitIsBorrowerOwnedAndImmutable() public {
+        uint256 id = _request();
+        desk.onReport(_metadata(author), _report(id, EVIDENCE, 78));
+        vm.prank(lender);
+        vm.expectRevert(TraderCreditDesk.Unauthorized.selector);
+        desk.commitAssessment(id, REPORT_HASH, SWARM_REFERENCE);
+
+        _commitAssessment(id);
+        assertEq(desk.assessmentHashOf(id), REPORT_HASH);
+        assertEq(desk.assessmentReferenceOf(id), SWARM_REFERENCE);
+        vm.prank(borrower);
+        desk.commitAssessment(id, REPORT_HASH, SWARM_REFERENCE);
+        vm.prank(borrower);
+        vm.expectRevert(TraderCreditDesk.InvalidReport.selector);
+        desk.commitAssessment(id, keccak256("different report"), SWARM_REFERENCE);
+        vm.prank(borrower);
+        vm.expectRevert(TraderCreditDesk.InvalidReport.selector);
+        desk.commitAssessment(id, bytes32(0), SWARM_REFERENCE);
     }
 
     function test_LinkConsentIsScopedAndCannotBeReused() public {
@@ -166,6 +193,7 @@ contract TraderCreditDeskTest is Test {
         assertEq(desk.activeForWallet(lender), 0);
         desk.onReport(_metadata(author), _report(id, EVIDENCE, 78));
         assertEq(desk.activeForWallet(lender), id);
+        _commitAssessment(id);
         vm.prank(lender);
         vm.expectRevert(TraderCreditDesk.Unauthorized.selector);
         desk.fundLoan(id);
@@ -226,6 +254,11 @@ contract TraderCreditDeskTest is Test {
         traders[0] = borrower;
         vm.prank(borrower);
         return desk.requestLoan(terms, traders, new bytes[](1));
+    }
+
+    function _commitAssessment(uint256 id) private {
+        vm.prank(borrower);
+        desk.commitAssessment(id, REPORT_HASH, SWARM_REFERENCE);
     }
 
     function _metadata(address owner) private pure returns (bytes memory) {
