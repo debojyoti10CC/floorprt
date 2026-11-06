@@ -2,6 +2,6 @@
   "seed": "20261105",
   "pythonVsTypescriptVectors": 10000,
   "solidityVsTypescriptVectors": 100,
-  "verifiedAtBlock": "885",
+  "verifiedAtBlock": "26",
   "status": "PASS"
 }

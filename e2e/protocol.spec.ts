@@ -10,16 +10,24 @@ const balance=(who:'borrower'|'lender')=>client.readContract({address:d.contract
 const results:unknown[]=[];
 test.describe.serial('wallet-signed outcome collateral lifecycle',()=>{
   test.beforeAll(async()=>{await import('../scripts/differential');});
-  test('interactive command center changes exact payouts and rotates its 3D surface',async({page})=>{
-    await page.goto('/');await expect(page.getByTestId('payoff-surface')).toBeVisible();
-    await expect(page.getByTestId('overview-scenario-payout')).toContainText('$2.00');
-    await page.getByTestId('overview-below').click();await expect(page.getByTestId('overview-scenario-payout')).toContainText('$1.00');
-    await page.getByTestId('overview-cancelled').click();await expect(page.getByTestId('overview-scenario-payout')).toContainText('$1.00');
-    await page.getByTestId('overview-inside').click();
-    const svg=page.getByTestId('payoff-surface').locator('svg'),before=await svg.locator('polygon').first().getAttribute('points'),box=(await svg.boundingBox())!;
-    await page.mouse.move(box.x+box.width*.4,box.y+box.height*.6);await page.mouse.down();await page.mouse.move(box.x+box.width*.6,box.y+box.height*.6,{steps:8});await page.mouse.up();
-    expect(await svg.locator('polygon').first().getAttribute('points')).not.toBe(before);
-    await page.getByRole('button',{name:'State matrix',exact:true}).click();await expect(svg.locator('rect')).toHaveCount(78);
+  test('portfolio composer recalculates payouts for settlement prices and cancellation',async({page})=>{
+    await page.goto('/compose/');await expect(page.getByRole('heading',{name:'Portfolio composer'})).toBeVisible();
+    const payout=page.locator('.chart-summary strong').first();await expect(payout).toContainText('$2.00');
+    const price=page.getByRole('textbox',{name:'Scenario settlement price'});
+    await price.fill('4000');await expect(payout).toContainText('$1.00');
+    await page.getByRole('button',{name:'Explore cancellation result'}).click();await expect(payout).toContainText('$1.00');
+    await page.getByRole('button',{name:'Use price settlement'}).click();
+    await price.fill('5500');await expect(payout).toContainText('$2.00');
+    const slider=page.getByRole('slider',{name:'Explore settlement price'}),before=await slider.inputValue();await slider.focus();await page.keyboard.press('ArrowRight');await expect(slider).not.toHaveValue(before);
+  });
+  test('market terminal mints fully backed complete sets onchain',async({page})=>{
+    await page.goto('/');await expect(page.getByRole('heading',{name:'Market terminal'})).toBeVisible();await connect(page,'borrower');await page.getByRole('tab',{name:/AQRA collateral/}).click();
+    const marketId=BigInt(await page.getByLabel('Choose an AQRA collateral market').inputValue());
+    const yesToken=marketId*2n+1n,noToken=yesToken+1n;
+    const readBalance=(tokenId:bigint)=>client.readContract({address:d.contracts.OutcomeTokens,abi:OutcomeTokensAbi,functionName:'balanceOf',args:[d.roles.borrower,tokenId]});
+    const beforeYes=await readBalance(yesToken),beforeNo=await readBalance(noToken);
+    const mint=page.getByTestId('mint-complete-set');await expect(mint).toBeEnabled();await mint.click();
+    await expect.poll(()=>readBalance(yesToken)).toBe(beforeYes+1n);await expect.poll(()=>readBalance(noToken)).toBe(beforeNo+1n);
   });
   test('outcome palette supports drag and keyboard selection',async({page})=>{
     await page.goto('/compose/');
@@ -51,7 +59,7 @@ test.describe.serial('wallet-signed outcome collateral lifecycle',()=>{
       const observationId=await client.readContract({address:d.contracts.SharedObservationRegistry,abi:SharedObservationRegistryAbi,functionName:'observationCount'});
       await bp.goto('/compose/');await connect(bp,'borrower');
       await bp.getByTestId('lower-market').selectOption(lower.toString());await bp.getByTestId('upper-market').selectOption(upper.toString());
-      const mintButtons=bp.getByRole('button',{name:'Mint a funded complete set'});
+      const mintButtons=bp.getByRole('button',{name:'Mint complete set'});
       await mintButtons.nth(0).click();await expect.poll(()=>client.readContract({address:d.contracts.OutcomeTokens,abi:OutcomeTokensAbi,functionName:'balanceOf',args:[d.roles.borrower,lower*2n+1n]})).toBe(1n);
       await expect(mintButtons.nth(1)).toBeEnabled();await mintButtons.nth(1).click();
       await expect.poll(()=>client.readContract({address:d.contracts.OutcomeTokens,abi:OutcomeTokensAbi,functionName:'balanceOf',args:[d.roles.borrower,upper*2n+2n]})).toBe(1n);
@@ -75,7 +83,7 @@ test.describe.serial('wallet-signed outcome collateral lifecycle',()=>{
       const loanId=await client.readContract({address:d.contracts.CreditDesk,abi:CreditDeskAbi,functionName:'loanCount'});
       expect(await balance('borrower')-beforeBorrower).toBe(750000n);expect(beforeLender-await balance('lender')).toBe(750000n);
       if(scenario==='repaid'){
-        await bp.getByRole('link',{name:'My portfolio',exact:true}).click();
+        await bp.getByRole('link',{name:'Portfolio dashboard',exact:true}).click();
         const b=await balance('borrower'),l=await balance('lender');
         await bp.getByTestId(`repay-${loanId}`).click();
         await expect.poll(async()=>(await client.readContract({address:d.contracts.CreditDesk,abi:CreditDeskAbi,functionName:'getLoan',args:[loanId]})).state).toBe(3);
@@ -89,7 +97,7 @@ test.describe.serial('wallet-signed outcome collateral lifecycle',()=>{
       await op.getByTestId('resolver-observation').selectOption(observationId.toString());await op.getByTestId(`scenario-${scenario}`).click();await expect(op.getByTestId('resolve-observation')).toBeEnabled();await op.getByTestId('resolve-observation').click();
       await expect.poll(async()=>(await client.readContract({address:d.contracts.SharedObservationRegistry,abi:SharedObservationRegistryAbi,functionName:'observation',args:[observationId]})).state).toBe(scenario==='cancelled'?2:1);
       const b=await balance('borrower'),l=await balance('lender');
-      await op.getByRole('link',{name:'Settlement audit',exact:true}).click();await expect(op.getByTestId('settle-loan')).toBeEnabled();await op.getByTestId('settle-loan').click();
+      await op.getByRole('link',{name:'Settlement explorer',exact:true}).click();await expect(op.getByTestId('settle-loan')).toBeEnabled();await op.getByTestId('settle-loan').click();
       await expect(op.getByText('Settlement complete',{exact:true})).toBeVisible();
       const expected=scenario==='inside'?2000000n:1000000n;
       expect(await balance('lender')-l).toBe(780000n);expect(await balance('borrower')-b).toBe(expected-780000n);
@@ -116,7 +124,7 @@ test.describe.serial('wallet-signed outcome collateral lifecycle',()=>{
   });
   test('responsive studio has no document overflow and keyboard controls remain usable',async({page})=>{
     await page.setViewportSize({width:390,height:844});await page.goto('/compose/');
-    await expect(page.getByRole('heading',{name:'Portfolio studio',exact:true})).toBeVisible();
+    await expect(page.getByRole('heading',{name:'Portfolio composer',exact:true})).toBeVisible();
     expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
     await page.getByTestId('lower-units').fill('3');await expect(page.getByTestId('lower-units')).toHaveValue('3');
     await page.screenshot({path:'evidence/screenshots/mobile-studio.png',fullPage:true});
