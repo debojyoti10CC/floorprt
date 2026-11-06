@@ -251,7 +251,7 @@ export function short(value:string|undefined|null){return value?value.slice(0,6)
 
 export function validateManifest(d:Deployment){
 
-  if(d.schema!=='floor-deployment/v1'||![31337,11155111].includes(d.chainId)||typeof d.mockCollateral!=='boolean'||!['TRUSTED_TEST_RESOLVER','CHAINLINK_HISTORICAL'].includes(d.oracleMode))throw new Error('Unsupported Floor deployment manifest.');
+  if(d.schema!=='floor-deployment/v1'||![31337,11155111].includes(d.chainId)||typeof d.mockCollateral!=='boolean'||!['TRUSTED_TEST_RESOLVER','CHAINLINK_HISTORICAL'].includes(d.oracleMode))throw new Error('Unsupported ARQO deployment manifest.');
 
   for(const name of contractNames)if(!isAddress(d.contracts?.[name])||!/^0x[0-9a-fA-F]{64}$/.test(d.codeHashes?.[name]??''))throw new Error(`Invalid ${name} address or code hash`);
   if (d.traderCredit || d.contracts.TraderCreditDesk) {

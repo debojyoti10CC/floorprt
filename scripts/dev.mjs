@@ -37,6 +37,6 @@ try{
   let webUp=false;try{webUp=(await fetch('http://127.0.0.1:3000')).ok}catch{}
   if(!webUp){if(!pnpm)throw new Error('Start with pnpm dev so the pinned package manager is available.');process.env.NEXT_PUBLIC_ENABLE_LOCAL_DEMO_UI='true';process.env.NEXT_PUBLIC_ENABLE_OPERATIONS_UI='true';start(pnpm,['--filter','@floor/web','dev']);}
   await ready('http://127.0.0.1:3000');
-  console.log('\nFloor Protocol is ready: http://127.0.0.1:3000 · API :8787 · Anvil :8545\nTest funds only. Choose a borrower, lender or resolver from Connect wallet.');
+  console.log('\nARQO is ready: http://127.0.0.1:3000 · API :8787 · Anvil :8545\nTest funds only. Choose a borrower, lender or resolver from Connect wallet.');
   setInterval(()=>{},60_000);
 }catch(e){console.error(e.message);shutdown(1)}

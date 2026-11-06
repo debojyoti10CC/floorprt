@@ -1,2 +1,5 @@
-import { Terminal } from '../components/terminal';
-export default function Page(){return <Terminal initialPage="underwriting"/>}
+import { ARQOHome } from '../components/aqra-home';
+
+export default function Page() {
+  return <ARQOHome />;
+}

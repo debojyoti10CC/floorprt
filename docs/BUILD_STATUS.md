@@ -1,55 +1,27 @@
-# AQRA build status
+# ARQO delivery status
 
-**Current product:** a prediction-market performance-metrics-based lending protocol pilot. The earlier seven-screen outcome-token terminal remains in the repository as separate contract/research history; it is not the AQRA app journey.
+The local P0 mechanism is implemented. Final browser validation is in progress; see the current push status in RELEASE_EVIDENCE.md. Evidence and release boundaries are recorded in RELEASE_EVIDENCE.md and FEATURES_AND_LIMITATIONS.md.
 
-## Product mechanism
+- [x] Registry, curated factory and fully funded ERC-1155 claims.
+- [x] Pair verifier, exact custody, borrower-consented credit, full early repayment and terminal settlement.
+- [x] External Sepolia USDC/feed deployment path and pinned-fork integration proof.
+- [x] Foundry adversarial, fuzz and stateful invariant gates.
+- [x] BigInt proof engine and independent Python differential validation.
+- [x] Generated ABIs, runtime-code identities and reproducible local deployment.
+- [x] Overview, Markets, Composer, Proof, Credit, Portfolio, Audit, Operations and Documentation UI.
+- [x] Final Kimia colors, Poppins, rounded shapes, inset/raised depth and semantic design guidance.
+- [x] Chain-backed read API, reorg-aware persistent journal and read-only research feed.
+- [x] Separate borrower/lender/resolver browser lifecycle, keyboard, offline and responsive checks.
+- [x] Six real settlement replay cases with receipts and fresh demo inventory.
+- [x] Startup instructions, dependency licenses and pinned Cumulant/Senthos research.
 
-1. A trader connects one wallet or an ENS-discovered wallet group and reviews dated public Polymarket evidence.
-2. A deterministic policy scores activity, repeat profitability, realized P&L efficiency and drawdown. Meeting the policy gates a borrower request and lender review; it does not set loan pricing or estimate repayment probability.
-3. A borrower who passes can sign a fixed-term request and escrow the bond in the repayment token. Linked wallets must give scoped consent.
-4. An authenticated workflow report binds the score to that exact request (Chainlink CRE when configured; a clearly labelled local forwarder on Anvil). In the lender app, the lender can reload the dated inputs and must see the recomputed evidence digest match the attestation before the funding control enables.
-5. The lender reviews the principal shortfall and decides whether to fund it.
-6. The borrower can repay before maturity. After maturity, the contract can transfer the escrowed bond to the lender and record the remaining principal loss.
+Selected P1 work includes persistent indexing, external discovery, generalized research math and oracle-input guards. These do not expand the vault's supported two-leg collateral grammar.
 
-For the current demo terms, principal is $100, total due is $102, and the bond is $25. That leaves a $75 principal shortfall if the entire bond is recovered. Bond recovery can be impaired by token, contract or operational failure. Future prediction-market P&L cannot be seized and is not collateral.
+The following require separate execution evidence and are not complete:
 
-## Application surfaces
+- [ ] Public Sepolia deployment and public transaction receipts.
+- [ ] Successful CRE CLI simulation and live DON write.
+- [ ] Signed RFQ book and P2 tranche issuance.
+- [ ] Independent security audit and production operations hardening.
 
-- **Data:** committed Polymarket replay, sample coverage, monthly forward outcomes, wallet-level evidence, export, and the separate credit-loss stress engine.
-- **Risk engine:** assumption-driven PD, default dependence, bond recovery, discrete loss distribution, VaR/Expected Shortfall, capital gap and a binding pooled-credit `REJECT` gate.
-- **Borrow:** live evidence lookup, visible policy metrics, ENS primary/wallet-group resolution, controller consent, fixed terms, bond approval and borrower-signed request.
-- **Lend:** direct request discovery, attested metric reload with digest comparison, lender loss acknowledgement, funding, early repayment, matured default and chain receipts.
-
-## Implemented and evidenced
-
-- A reproducible 12-month sampled data collection/replay pipeline with 11 completed walk-forward decision rounds and a checked-in run artifact.
-- Dated Polymarket evidence, UTC month cutoffs, source-block boundary checks, wallet grouping and a request-bound evidence digest.
-- Separate `TraderCreditDesk` contract lifecycle, wallet-authorized funding, borrower bond escrow, repayment and matured-default handling.
-- A local Anvil demo path with explicitly labeled test accounts and test USDC; it performs real local-chain contract calls and never claims production funds.
-- An ENS identity read path, Chainlink CRE workflow source, and Arkiv packet read/write path.
-- The risk engine's pool gate remains closed because no mature AQRA repayment/default labels, calibrated PD, passing out-of-time credit validation or committed pool reserve exist.
-
-## Benchmark snapshot
-
-The checked-in expanded sample schedules 768 BTC/ETH 15-minute markets across November 2025–October 2026; 764 resolved markets are captured. It includes 3,906 wallet histories, 3,647,433 fill rows, 1,025,654 daily P&L observations, 15/15 verified month-boundary blocks and 6,155 candidate wallet-month rows. It is a sample, not a venue-wide census.
-
-| Selection rule | Positive next-month P&L | Evaluated wallet-months |
-|---|---:|---:|
-| Consistency screen | 154 / 220 (70.0%) | 220 |
-| Largest monthly P&L | 162 / 220 (73.6%) | 220 |
-| 10× to below 100× settled buy | 55 / 160 (34.4%) | 160 |
-| At least 100× settled buy | 2 / 4 (50.0%) | 4 |
-| Seeded sample baseline | 61 / 220 (27.7%) | 220 |
-
-The consistency screen is 3.6 percentage points below the strongest simple comparator in this replay. Rows are repeated wallet-month observations; the study reports no causal effect, statistical significance, credit loss or repayment prediction. See [`RISK_ENGINE.md`](RISK_ENGINE.md) and [`AQRA_WHITEPAPER.md`](AQRA_WHITEPAPER.md).
-
-## Not complete / not claimed
-
-- No mature repayment/default dataset, calibrated borrower PD, production credit approval, pooled lending capital, or evidence that a performance score predicts repayment.
-- No public Sepolia loan deployment/receipt, live Chainlink DON write, or successful CRE CLI simulation recorded yet.
-- Arkiv integration code exists, but no current Rabdi write/read receipt is recorded. The existing-project Arkiv prize requires event-new work and Continuity eligibility.
-- No Arc Studio project URL, Arc deployment or confirmed Arc prize eligibility. The user is unsure whether the team joined Continuity; do not claim it.
-- No external Polymarket position custody, venue trade execution, production token collateral, independent security audit or legal clearance.
-- The earlier Floor Protocol outcome-token contracts and seven-screen documentation are not the current AQRA trader-credit UI and must not be presented as its shipped journey.
-
-This file describes source status, not an audit. The last full release-evidence record is in [`RELEASE_EVIDENCE.md`](RELEASE_EVIDENCE.md); any local changes made after that record require fresh validation before they can inherit its claims.
+The hosted terminal uses labeled recorded evidence when its matching local RPC is unavailable. The full wallet-signed monetary journey runs on the local EVM with test collateral.

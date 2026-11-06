@@ -34,7 +34,7 @@ traxis-correlation-deliverables/      model and model-audit artifacts
 scripts/, tests/, migrations/         build/deploy/testing helpers
 ```
 
-**Senthos product facts:** Native Basket, Tranched Pool Tokens, PPN, Lending/Repo and custom Hedge Builder. Tranches attach/detach 0–60%, 60–85%, 85–100% in the product docs; lending LTV tiers for baskets 0.85/0.60/0.40 and senior/mezz/junior 0.88/0.60/0.30 are based on risk tiers and rates. They are **not** formal guaranteed settlement floors. The project's own PRODUCTS.md explicitly says native basket and PPN were onchain, while tranche positions and lending pool state were *client/in-memory sandbox*. ONCHAIN_DESIGN.md states Solana vault holds USDC and outcomes are mirrored by privileged authority, **not native Polymarket outcome tokens**. This distinction is decisive for Floor Protocol architecture.
+**Senthos product facts:** Native Basket, Tranched Pool Tokens, PPN, Lending/Repo and custom Hedge Builder. Tranches attach/detach 0–60%, 60–85%, 85–100% in the product docs; lending LTV tiers for baskets 0.85/0.60/0.40 and senior/mezz/junior 0.88/0.60/0.30 are based on risk tiers and rates. They are **not** formal guaranteed settlement floors. The project's own PRODUCTS.md explicitly says native basket and PPN were onchain, while tranche positions and lending pool state were *client/in-memory sandbox*. ONCHAIN_DESIGN.md states Solana vault holds USDC and outcomes are mirrored by privileged authority, **not native Polymarket outcome tokens**. This distinction is decisive for ARQO architecture.
 
 **Reusable as inspiration:** product navigation and screens, market metadata normalization, correlation as informational layer, curated feed, monitor and tested lifecycle categories. **Not reusable as our proof:** Solana-specific escrow accounts, NLP inference of market equivalence, in-memory lending ledger, authority-set leg status, simulated yield data.
 
@@ -68,18 +68,18 @@ SECURITY.md              self-audit and known production gaps
 
 **Important distinctions and repo discrepancies:**
 
-1. `PredictionMarket.sol` is a parimutuel model; winners share pooled loser deposits. It is **not** a token claim with a fixed $1 winning redemption. For mathematically proved face value, Floor Protocol needs a different market issuer mechanism.
+1. `PredictionMarket.sol` is a parimutuel model; winners share pooled loser deposits. It is **not** a token claim with a fixed $1 winning redemption. For mathematically proved face value, ARQO needs a different market issuer mechanism.
 2. `TrancheVault.sol` on the public source is a real Solidity contract with waterfall math, but the showcase describes its demo experience using note rails and some offchain metadata. Both statements may reflect implementation stages; avoid oversimplifying that *all* tranches were merely offchain.
 3. The repository README reports **70 Foundry tests**, whereas `ARCHITECTURE.md` and `SECURITY.md` still cite **62**; these are documentation snapshots. We did **not** run tests locally, so do not present either number as independently verified.
 4. The live Arc testnet suite uses a **freely mintable mock USDC** in its main demo and a deployer-owned server key for mock faucet, resolver, market-maker quote and payout roles. Correctly label these as test/demo rails, not trustless mainnet behavior.
 5. Their protected note reserves principal 1:1 and funds upside from the issuer—**not the same product** as borrowing against event-claim payout floors.
-6. Their roadmap calls for transferable ERC-1155 product shares, stronger oracle resolution and an event indexer. Floor Protocol treats actual ERC-1155 collateral tokens and indexer readiness as foundational rather than optional cosmetics.
+6. Their roadmap calls for transferable ERC-1155 product shares, stronger oracle resolution and an event indexer. ARQO treats actual ERC-1155 collateral tokens and indexer readiness as foundational rather than optional cosmetics.
 
 **Reusable as inspiration:** contract boundaries, explicit vault accounting, settlement waterfall patterns, Foundry fuzz tests, wallet-signed flows, security review checklists, claim/event indexing. **Not reusable as proof:** parimutuel math, demo role trust, simulated market-maker depth, blanket `ProtectedNote` principal guarantee in a loan product.
 
 ## 2. Comparative design matrix
 
-| Dimension | Senthos | Cumulant | Floor Protocol proposal |
+| Dimension | Senthos | Cumulant | ARQO proposal |
 |---|---|---|---|
 | Origin | Solana hackathon / startup | Arc ETHGlobal winner | EVM-first new app |
 | Main product | Structured baskets/tranches/PPNs and risk pricing | USDC-backed markets, baskets, tranches, notes, distribution quotes | Proof-certified event portfolios + matched USDC term credit |
