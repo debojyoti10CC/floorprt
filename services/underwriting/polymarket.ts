@@ -1,0 +1,156 @@
+import { createPublicClient, http, type Address, type Hex } from 'viem';
+import { polygon } from 'viem/chains';
+import { z } from 'zod';
+import { positionTokenAbi } from '../../packages/shared/src/position-credit.js';
+import { POLYGON_RPC } from './sources.js';
+
+const DATA_API = 'https://data-api.polymarket.com/v2';
+const CTF: Address = '0x4D97DCd97eC945f40cF65F87097ACe5EA0476045';
+const POSITION_MANAGER: Address = '0x006F54F7f9A22e0000CC2AB60031000000ae9fEF';
+const PAGE_LIMIT = 100;
+const MAX_PAGES = 4;
+const tokenId = z.string().regex(/^\d{1,78}$/).refine(value => BigInt(value) < 2n ** 256n);
+const rawPosition = z.object({
+  proxy_wallet: z.string().regex(/^0x[0-9a-f]{40}$/i),
+  token_id: tokenId,
+  opposite_token_id: tokenId.nullish(),
+  condition_id: z.string().regex(/^0x[0-9a-f]{64}$/i),
+  current_size: z.number().nonnegative(),
+  avg_price: z.number().nullish(),
+  current_price: z.number().nullish(),
+  current_value: z.number().nullish(),
+  unrealized_pnl: z.number().nullish(),
+  outcome: z.string().nullish(),
+  title: z.string().nullish(),
+  event_slug: z.string().nullish(),
+  name: z.string().nullish(),
+  redeemable: z.boolean().nullish(),
+  negative_risk: z.boolean().nullish(),
+  mergeable: z.boolean().nullish(),
+});
+const positionPage = z.object({
+  data: z.array(rawPosition).max(PAGE_LIMIT),
+  pagination: z.object({ next_cursor: z.string().max(4096).nullish() }),
+});
+
+export type PolymarketHolding = {
+  id: string;
+  oppositeId: string | null;
+  condition: Hex;
+  title: string;
+  eventSlug: string | null;
+  outcome: string;
+  size: number;
+  average: number | null;
+  mark: number | null;
+  value: number | null;
+  unrealized: number | null;
+  redeemable: boolean;
+  mergeable: boolean;
+  negativeRisk: boolean;
+  onchain: { ledger: 'CTF' | 'POSITION_MANAGER'; units: string } | null;
+};
+
+export type PolymarketPortfolio = {
+  account: Address;
+  label: string | null;
+  sampled: boolean;
+  positions: PolymarketHolding[];
+  matched: { condition: Hex; title: string; units: string }[];
+  capturedAt: string;
+  more: boolean;
+  polygonBlock: string | null;
+  ledgersChecked: number;
+};
+
+async function dataApi(path: string, params: URLSearchParams) {
+  const response = await fetch(DATA_API + path + '?' + params, {
+    signal: AbortSignal.timeout(7_000),
+    headers: { Accept: 'application/json' },
+  });
+  if (!response.ok) throw new Error('Polymarket Data API returned HTTP ' + response.status + '.');
+  return response.json() as Promise<unknown>;
+}
+
+async function readOpenPositions(account: Address) {
+  const params = new URLSearchParams({ user: account, limit: String(PAGE_LIMIT), status: 'OPEN' });
+  const rows = new Map<string, z.infer<typeof rawPosition>>();
+  const seenCursors = new Set<string>();
+  for (let page = 0; page < MAX_PAGES; page++) {
+    const result = positionPage.parse(await dataApi('/positions', params));
+    for (const row of result.data) {
+      if (row.proxy_wallet.toLowerCase() !== account.toLowerCase()) throw new Error('Polymarket returned a different account.');
+      if (row.current_size > 0) rows.set(row.token_id, row);
+    }
+    const cursor = result.pagination.next_cursor;
+    if (!cursor) return { rows: [...rows.values()], more: false };
+    if (seenCursors.has(cursor)) throw new Error('Polymarket repeated a portfolio page.');
+    seenCursors.add(cursor);
+    params.set('cursor', cursor);
+  }
+  return { rows: [...rows.values()], more: true };
+}
+
+async function confirmBalances(account: Address, ids: bigint[]) {
+  if (!ids.length) return null;
+  const client = createPublicClient({
+    chain: polygon,
+    transport: http(process.env.FLOOR_POLYGON_RPC_URL || POLYGON_RPC, { timeout: 5_000, retryCount: 0 }),
+  });
+  try {
+    const [network, block] = await Promise.all([client.getChainId(), client.getBlock({ blockTag: 'finalized' })]);
+    if (network !== polygon.id) return null;
+    const accounts = ids.map(() => account);
+    const checks = await Promise.allSettled([CTF, POSITION_MANAGER].map(address => client.readContract({
+      address, abi: positionTokenAbi, functionName: 'balanceOfBatch', args: [accounts, ids], blockNumber: block.number,
+    })));
+    const [ctf, manager] = checks.map(check => check.status === 'fulfilled' && check.value.length === ids.length ? check.value : null);
+    return { block: block.number.toString(), ctf, manager, checked: Number(!!ctf) + Number(!!manager) };
+  } catch {
+    return null;
+  }
+}
+
+export async function readPolymarketPortfolio(account: Address, sampled = false): Promise<PolymarketPortfolio> {
+  const { rows, more } = await readOpenPositions(account);
+  const capturedAt = new Date().toISOString();
+  const balances = await confirmBalances(account, rows.map(row => BigInt(row.token_id)));
+  const positions: PolymarketHolding[] = rows.map((row, index) => {
+    const ctf = balances?.ctf?.[index] ?? 0n;
+    const manager = balances?.manager?.[index] ?? 0n;
+    let onchain: PolymarketHolding['onchain'] = null;
+    if (ctf > 0n && manager === 0n) onchain = { ledger: 'CTF', units: ctf.toString() };
+    if (manager > 0n && ctf === 0n) onchain = { ledger: 'POSITION_MANAGER', units: manager.toString() };
+    return {
+      id: row.token_id, oppositeId: row.opposite_token_id ?? null, condition: row.condition_id as Hex,
+      title: row.title || 'Unnamed market', eventSlug: row.event_slug ?? null, outcome: row.outcome || 'Outcome',
+      size: row.current_size, average: row.avg_price ?? null, mark: row.current_price ?? null,
+      value: row.current_value ?? null, unrealized: row.unrealized_pnl ?? null,
+      redeemable: row.redeemable === true, negativeRisk: row.negative_risk !== false, mergeable: row.mergeable === true,
+      onchain,
+    };
+  });
+  const byId = new Map(positions.map(row => [row.id, row]));
+  const matched = positions.flatMap(row => {
+    if (!row.oppositeId || row.id >= row.oppositeId || !row.mergeable || row.negativeRisk || !row.onchain) return [];
+    const opposite = byId.get(row.oppositeId);
+    if (opposite?.oppositeId !== row.id || opposite.condition !== row.condition || opposite.negativeRisk
+      || opposite.onchain?.ledger !== row.onchain.ledger || row.redeemable || opposite.redeemable) return [];
+    const amounts = [BigInt(row.onchain.units), BigInt(opposite.onchain.units)];
+    return [{ condition: row.condition, title: row.title, units: (amounts[0] < amounts[1] ? amounts[0] : amounts[1]).toString() }];
+  });
+  return {
+    account, label: rows.find(row => row.name)?.name ?? null, sampled, positions, matched, capturedAt, more,
+    polygonBlock: balances?.checked ? balances.block : null, ledgersChecked: balances?.checked ?? 0,
+  };
+}
+
+export async function readPublicPolymarketSample() {
+  const leaderboard = z.object({ data: z.array(z.object({ user_id: z.string().regex(/^0x[0-9a-f]{40}$/i) })) })
+    .parse(await dataApi('/leaderboard', new URLSearchParams({ limit: '3' })));
+  for (const entry of leaderboard.data) {
+    const portfolio = await readPolymarketPortfolio(entry.user_id.toLowerCase() as Address, true);
+    if (portfolio.positions.length) return portfolio;
+  }
+  throw new Error('The public sample wallets have no open positions. Enter a Polymarket trading wallet.');
+}

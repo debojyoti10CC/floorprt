@@ -4,12 +4,15 @@ import { randomUUID } from 'node:crypto';
 import { mainnet } from 'viem/chains';
 import { namehash, normalize } from 'viem/ens';
 import { z } from 'zod';
-import { TraderCreditDeskAbi, publicClientFor } from '../../../packages/shared/src/index.js';
+import { TraderCreditDeskAbi, positionPledgeHash, publicClientFor, readPositionPledge, type PositionPledge } from '../../../packages/shared/src/index.js';
 import { monthOf, offsetMonth } from '../../../services/underwriting/calendar.js';
 import { lastCompleteMonth, readLiveControllers, readLiveEvidence } from '../../../services/underwriting/live-evidence.js';
 import { localReportMetadata, scoreReport } from '../../../services/underwriting/reports.js';
 import { verifyEvidence } from '../../../services/underwriting/policy.js';
-import { assessmentSha256, readAssessment, swarmConfigured, uploadAssessment, type SwarmAssessment } from '../../../services/underwriting/swarm.js';
+import { readPolymarketPortfolio, readPublicPolymarketSample } from '../../../services/underwriting/polymarket.js';
+import { demoEvidence } from '../../../services/underwriting/demo-evidence.js';
+import { positionDisclosure, type PositionDisclosure } from '../../../services/underwriting/position-assessment.js';
+import { assessmentSha256, readAssessment, swarmConfigured, swarmStorageStatus, uploadAssessment, type SwarmAssessment } from '../../../services/underwriting/swarm.js';
 import type { ApiRuntime } from './deployment.js';
 
 const AddressSchema = z.string().refine(value => isAddress(value, { strict: false })).transform(value => value.toLowerCase() as Address);
@@ -17,15 +20,18 @@ const Wallets = z.array(AddressSchema).min(1).max(4).refine(values => new Set(va
 const Month = z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/);
 const ENS_WALLET_KEY = 'com.aqra.wallets';
 const loanIdSchema = /^[1-9]\d{0,18}$/;
-const signatureSchema = /^0x(?:[a-f0-9]{2}){65}$/i;
+const signatureSchema = /^0x(?:[a-f0-9]{2}){1,512}$/i;
 const assessmentChallenges = new Map<string, {
   message: string;
   expiresAt: number;
   loanId: bigint;
+  desk: Address;
+  chainId: number;
   borrower: Address;
   evidence: ReturnType<typeof verifyEvidence>;
+  position: PositionDisclosure | null;
   reportHash: string;
-  result?: SwarmAssessment;
+  publication?: Promise<SwarmAssessment>;
 }>();
 
 const evidenceCache = new Map<string, { expires: number; promise: ReturnType<typeof readLiveEvidence> }>();
@@ -43,14 +49,44 @@ function cachedEvidence(wallets: Address[], month: string) {
   return promise;
 }
 
+function localPositionDemo(runtime: ApiRuntime) {
+  return runtime.deployment.chainId === 31337 && runtime.deployment.mockCollateral
+    && runtime.deployment.traderCredit?.mode === 'LOCAL_FORWARDER'
+    && !!runtime.deployment.traderCredit.positionCollateral
+    && ['127.0.0.1', 'localhost', '[::1]'].includes(new URL(runtime.rpcUrl).hostname);
+}
+
+async function requestEvidence(
+  runtime: ApiRuntime, loan: { borrower: Address; terms: { asOf: bigint; evidenceDigest: Hex } },
+  wallets: readonly Address[], pledge: PositionPledge | null,
+) {
+  const month = offsetMonth(monthOf(Number(loan.terms.asOf)), -1);
+  const borrower = runtime.deployment.roles.borrower.toLowerCase();
+  if (pledge && localPositionDemo(runtime) && loan.borrower.toLowerCase() === borrower
+    && wallets.length === 1 && wallets[0].toLowerCase() === borrower) {
+    const fixture = demoEvidence(loan.borrower, month);
+    if (fixture.digest === loan.terms.evidenceDigest.toLowerCase()) {
+      return { evidence: fixture, source: 'LOCAL_FIXTURE' as const };
+    }
+  }
+  return { evidence: await cachedEvidence([...wallets], month), source: 'POLYMARKET' as const };
+}
+
 export function createUnderwritingApi() {
   const app = new Hono<{ Variables: { runtime: ApiRuntime } }>();
 
-  app.get('/storage-status', c => c.json({
-    swarmConfigured: swarmConfigured(),
-    publicReports: true,
-    note: 'Configured means Bee URL and postage batch are present; availability is checked during upload and retrieval.',
-  }));
+  app.get('/polymarket/positions', async c => {
+    const sample = c.req.query('sample') === '1';
+    const wallet = AddressSchema.safeParse(c.req.query('wallet'));
+    if (!sample && !wallet.success) return c.json({ error: 'Enter a Polymarket trading wallet address.' }, 400);
+    try {
+      return c.json(sample ? await readPublicPolymarketSample() : await readPolymarketPortfolio(wallet.data!));
+    } catch (error) {
+      return c.json({ error: (error as Error).message }, 502);
+    }
+  });
+
+  app.get('/storage-status', async c => c.json(await swarmStorageStatus()));
 
   app.get('/evidence', async c => {
     const parsed = Wallets.safeParse(c.req.queries('wallet') ?? []);
@@ -58,6 +94,19 @@ export function createUnderwritingApi() {
     if (!parsed.success || !month.success) return c.json({ error: 'Provide one to four wallets and a completed UTC month.' }, 400);
     try {
       return c.json(await cachedEvidence(parsed.data, month.data));
+    } catch (error) {
+      return c.json({ error: (error as Error).message }, 502);
+    }
+  });
+
+  app.get('/demo-position-evidence', async c => {
+    const runtime = c.get('runtime');
+    if (!localPositionDemo(runtime)) return c.json({ error: 'The local position demo is unavailable.' }, 404);
+    try {
+      const client = publicClientFor(runtime.deployment, runtime.rpcUrl);
+      const [chainId, block] = await Promise.all([client.getChainId(), client.getBlock()]);
+      if (chainId !== 31337) return c.json({ error: 'The local chain could not be verified.' }, 409);
+      return c.json(demoEvidence(runtime.deployment.roles.borrower, lastCompleteMonth(Number(block.timestamp))));
     } catch (error) {
       return c.json({ error: (error as Error).message }, 502);
     }
@@ -115,7 +164,8 @@ export function createUnderwritingApi() {
     const rawId = c.req.param('id');
     if (!loanIdSchema.test(rawId)) return c.json({ error: 'Invalid loan ID.' }, 400);
     try {
-      const { deployment, rpcUrl } = c.get('runtime');
+      const runtime = c.get('runtime');
+      const { deployment, rpcUrl } = runtime;
       const desk = deployment.contracts.TraderCreditDesk;
       if (!desk) return c.json({ error: 'Trader credit is unavailable on this deployment.' }, 404);
       const client = publicClientFor(deployment, rpcUrl);
@@ -132,19 +182,23 @@ export function createUnderwritingApi() {
       if (loan.state !== 1 || loan.score < 60 || block.timestamp >= loan.fundBy) {
         return c.json({ error: 'Only an attested request that is still open can publish an assessment.' }, 409);
       }
-      const month = offsetMonth(monthOf(Number(loan.terms.asOf)), -1);
-      const evidence = verifyEvidence(await cachedEvidence([...wallets], month));
+      const pledge = await readPositionPledge(client, deployment, block.number, loanId);
+      const report = await requestEvidence(runtime, loan, wallets, pledge);
+      const evidence = verifyEvidence(report.evidence);
       if (!evidence.decision.qualified || evidence.digest.toLowerCase() !== loan.terms.evidenceDigest.toLowerCase()
         || BigInt(evidence.asOf) !== loan.terms.asOf || evidence.decision.score !== loan.score
         || keccak256(encodeWallets(evidence.wallets as Address[])).toLowerCase() !== loan.walletSetHash.toLowerCase()) {
         return c.json({ error: 'Current evidence does not match the report attested to this request.' }, 409);
       }
-      const reportHash = assessmentSha256(evidence);
+      const position = pledge && positionDisclosure({
+        chainId: deployment.chainId, desk, id: loanId, asset: deployment.contracts.CollateralToken,
+      }, loan, pledge, report.source);
+      const reportHash = assessmentSha256(evidence, position);
       const expiresAt = Math.min(Number(block.timestamp + 600n), Number(loan.fundBy));
       if (expiresAt <= Number(block.timestamp)) return c.json({ error: 'This request is too close to its funding deadline to publish.' }, 409);
       const challengeId = randomUUID();
       const message = [
-        'AQRA PUBLIC ASSESSMENT RELEASE v1',
+        position ? 'AQRA PUBLIC POSITION ASSESSMENT RELEASE v1' : 'AQRA PUBLIC ASSESSMENT RELEASE v1',
         `Chain ID: ${deployment.chainId}`,
         `Desk: ${desk.toLowerCase()}`,
         `Loan ID: ${loanId}`,
@@ -153,12 +207,15 @@ export function createUnderwritingApi() {
         `Report SHA-256: ${reportHash}`,
         `Expires at: ${expiresAt}`,
         `Challenge: ${challengeId}`,
-        'This signature authorizes public Swarm storage and an Arkiv listing for this report only.',
+        ...(position ? ['Position pledge: ' + position.pledgeHash, 'Position units: ' + position.pairs] : []),
+        'This signature authorizes storage and an Arkiv listing for this report only.',
       ].join('\n');
       for (const [key, challenge] of assessmentChallenges) if (challenge.expiresAt <= Number(block.timestamp)) assessmentChallenges.delete(key);
       while (assessmentChallenges.size >= 256) assessmentChallenges.delete(assessmentChallenges.keys().next().value!);
-      assessmentChallenges.set(challengeId, { message, expiresAt, loanId, borrower: loan.borrower, evidence, reportHash });
-      return c.json({ challengeId, message, expiresAt, sha256: reportHash, evidence });
+      assessmentChallenges.set(challengeId, {
+        message, expiresAt, loanId, desk, chainId: deployment.chainId, borrower: loan.borrower, evidence, position, reportHash,
+      });
+      return c.json({ challengeId, message, expiresAt, sha256: reportHash, evidence, position });
     } catch (error) {
       return c.json({ error: (error as Error).message }, 422);
     }
@@ -179,7 +236,9 @@ export function createUnderwritingApi() {
     const { deployment, rpcUrl } = c.get('runtime');
     try {
       const desk = deployment.contracts.TraderCreditDesk;
-      if (!desk) return c.json({ error: 'Trader credit is unavailable on this deployment.' }, 404);
+      if (!desk || desk.toLowerCase() !== challenge.desk.toLowerCase() || deployment.chainId !== challenge.chainId) {
+        return c.json({ error: 'The assessment challenge belongs to a different deployment.' }, 409);
+      }
       const client = publicClientFor(deployment, rpcUrl);
       const [chainId, block, code, loan] = await Promise.all([
         client.getChainId(),
@@ -197,20 +256,29 @@ export function createUnderwritingApi() {
       if (!await client.verifyMessage({ address: challenge.borrower, message: challenge.message, signature: parsed.data.signature as Hex })) {
         return c.json({ error: 'Consent must be signed by the borrower wallet.' }, 403);
       }
-      if (challenge.result) return c.json(challenge.result);
-      const result = await uploadAssessment(challenge.evidence);
+      const pledge = await readPositionPledge(client, deployment, block.number, challenge.loanId);
+      if ((pledge && positionPledgeHash(pledge)) !== (challenge.position?.pledgeHash ?? null) || pledge?.released) {
+        return c.json({ error: 'The position pledge changed after consent was prepared.' }, 409);
+      }
+      const inProgress = !!challenge.publication;
+      challenge.publication ??= uploadAssessment(challenge.evidence, challenge.position).catch(error => {
+        challenge.publication = undefined;
+        throw error;
+      });
+      const result = await challenge.publication;
       if (result.sha256 !== challenge.reportHash) return c.json({ error: 'The published report hash differs from the consented preview.' }, 409);
-      challenge.result = result;
-      return c.json(result, 201);
+      return c.json(result, inProgress ? 200 : 201);
     } catch (error) {
       return c.json({ error: (error as Error).message }, 422);
     }
   });
 
   app.get('/assessment/:reference', async c => {
-    if (!swarmConfigured()) return c.json({ error: 'Swarm evidence storage is not configured on this AQRA API.' }, 503);
     const reference = c.req.param('reference');
     const sha256 = c.req.query('sha256') ?? '';
+    if (!/^[0-9a-f]{64}$/i.test(reference)) return c.json({ error: 'Invalid Swarm report reference.' }, 422);
+    if (!/^[0-9a-f]{64}$/i.test(sha256)) return c.json({ error: 'Invalid Swarm report SHA-256.' }, 422);
+    if (!swarmConfigured()) return c.json({ error: 'Swarm evidence storage is not configured on this AQRA API.' }, 503);
     try {
       const report = await readAssessment(reference, sha256);
       return c.json(report);
@@ -220,7 +288,8 @@ export function createUnderwritingApi() {
   });
 
   app.get('/local-report/:id', async c => {
-    const { deployment, rpcUrl } = c.get('runtime');
+    const runtime = c.get('runtime');
+    const { deployment, rpcUrl } = runtime;
     const desk = deployment.contracts.TraderCreditDesk;
     if (deployment.chainId !== 31337 || deployment.traderCredit?.mode !== 'LOCAL_FORWARDER'
       || !desk || !['127.0.0.1', 'localhost', '[::1]'].includes(new URL(rpcUrl).hostname)) {
@@ -245,13 +314,13 @@ export function createUnderwritingApi() {
       if (loan.state !== 1 || loan.score !== 0 || block.timestamp >= loan.fundBy) {
         return c.json({ error: 'This request is no longer awaiting a report.' }, 409);
       }
-      const month = offsetMonth(monthOf(Number(loan.terms.asOf)), -1);
-      const [evidence] = await Promise.all([cachedEvidence([...wallets], month), readLiveControllers(wallets, controllers)]);
+      const pledge = await readPositionPledge(client, deployment, block.number, BigInt(id));
+      const [{ evidence, source }] = await Promise.all([requestEvidence(runtime, loan, wallets, pledge), readLiveControllers(wallets, controllers)]);
       const report = scoreReport({
         desk, chainId: deployment.chainId, id: BigInt(id), borrower: loan.borrower,
         walletSetHash: loan.walletSetHash, evidenceDigest: loan.terms.evidenceDigest, asOf: loan.terms.asOf,
       }, evidence);
-      return c.json({ metadata: localReportMetadata(workflowId, author), report, evidence, mode: 'LOCAL_FORWARDER' });
+      return c.json({ metadata: localReportMetadata(workflowId, author), report, evidence, source, mode: 'LOCAL_FORWARDER' });
     } catch (error) {
       return c.json({ error: (error as Error).message }, 422);
     }
