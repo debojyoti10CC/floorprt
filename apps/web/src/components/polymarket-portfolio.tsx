@@ -27,6 +27,7 @@ export function PolymarketHoldings({ portfolio }: { portfolio: PolymarketPortfol
       <div className="trader-inline"><strong>{portfolio.label || 'Trading wallet'}</strong><Address value={portfolio.account} /></div>
       <div className="trader-inline">
         {portfolio.sampled && <Badge tone="muted">PUBLIC SAMPLE</Badge>}
+        {portfolio.cached && <Badge tone="amber">CACHED SNAPSHOT</Badge>}
         <Badge tone="blue"><Database size={12} /> POLYMARKET DATA API</Badge>
         <Badge tone={portfolio.polygonBlock ? 'green' : 'muted'}>{portfolio.polygonBlock ? 'POLYGON BLOCK ' + portfolio.polygonBlock : 'INDEXER SNAPSHOT'}</Badge>
       </div>

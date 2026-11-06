@@ -7,8 +7,12 @@ import { POLYGON_RPC } from './sources.js';
 const DATA_API = 'https://data-api.polymarket.com/v2';
 const CTF: Address = '0x4D97DCd97eC945f40cF65F87097ACe5EA0476045';
 const POSITION_MANAGER: Address = '0x006F54F7f9A22e0000CC2AB60031000000ae9fEF';
+const PREVIEW_ACCOUNT: Address = '0x85f031d069de300055900c4055c1baeb6bde3f67';
 const PAGE_LIMIT = 100;
 const MAX_PAGES = 4;
+const SNAPSHOT_TTL_MS = 60_000;
+const MAX_SNAPSHOT_AGE_MS = 15 * 60_000;
+const MAX_SNAPSHOTS = 48;
 const tokenId = z.string().regex(/^\d{1,78}$/).refine(value => BigInt(value) < 2n ** 256n);
 const rawPosition = z.object({
   proxy_wallet: z.string().regex(/^0x[0-9a-f]{40}$/i),
@@ -55,6 +59,7 @@ export type PolymarketPortfolio = {
   account: Address;
   label: string | null;
   sampled: boolean;
+  cached: boolean;
   positions: PolymarketHolding[];
   matched: { condition: Hex; title: string; units: string }[];
   capturedAt: string;
@@ -68,6 +73,7 @@ async function dataApi(path: string, params: URLSearchParams) {
     signal: AbortSignal.timeout(7_000),
     headers: { Accept: 'application/json' },
   });
+  if (response.status === 429) throw new Error('Polymarket is rate limiting portfolio requests. Try again shortly.');
   if (!response.ok) throw new Error('Polymarket Data API returned HTTP ' + response.status + '.');
   return response.json() as Promise<unknown>;
 }
@@ -111,7 +117,7 @@ async function confirmBalances(account: Address, ids: bigint[]) {
   }
 }
 
-export async function readPolymarketPortfolio(account: Address, sampled = false): Promise<PolymarketPortfolio> {
+async function loadPortfolio(account: Address) {
   const { rows, more } = await readOpenPositions(account);
   const capturedAt = new Date().toISOString();
   const balances = await confirmBalances(account, rows.map(row => BigInt(row.token_id)));
@@ -140,17 +146,35 @@ export async function readPolymarketPortfolio(account: Address, sampled = false)
     return [{ condition: row.condition, title: row.title, units: (amounts[0] < amounts[1] ? amounts[0] : amounts[1]).toString() }];
   });
   return {
-    account, label: rows.find(row => row.name)?.name ?? null, sampled, positions, matched, capturedAt, more,
+    account, label: rows.find(row => row.name)?.name ?? null, positions, matched, capturedAt, more,
     polygonBlock: balances?.checked ? balances.block : null, ledgersChecked: balances?.checked ?? 0,
   };
 }
 
-export async function readPublicPolymarketSample() {
-  const leaderboard = z.object({ data: z.array(z.object({ user_id: z.string().regex(/^0x[0-9a-f]{40}$/i) })) })
-    .parse(await dataApi('/leaderboard', new URLSearchParams({ limit: '3' })));
-  for (const entry of leaderboard.data) {
-    const portfolio = await readPolymarketPortfolio(entry.user_id.toLowerCase() as Address, true);
-    if (portfolio.positions.length) return portfolio;
+type Snapshot = Awaited<ReturnType<typeof loadPortfolio>>;
+type SnapshotEntry = { snapshot?: Snapshot; refreshAfter: number; pending?: Promise<Snapshot> };
+const portfolioSnapshots = new Map<Address, SnapshotEntry>();
+
+export async function readPolymarketPortfolio(account: Address, sampled = false): Promise<PolymarketPortfolio> {
+  const key = account.toLowerCase() as Address;
+  const entry: SnapshotEntry = portfolioSnapshots.get(key) ?? { refreshAfter: 0 };
+  if (!portfolioSnapshots.has(key)) {
+    if (portfolioSnapshots.size >= MAX_SNAPSHOTS) portfolioSnapshots.delete(portfolioSnapshots.keys().next().value!);
+    portfolioSnapshots.set(key, entry);
   }
-  throw new Error('The public sample wallets have no open positions. Enter a Polymarket trading wallet.');
+  if (entry.snapshot && Date.now() < entry.refreshAfter) return { ...entry.snapshot, sampled, cached: true };
+  entry.pending ??= loadPortfolio(key).then(snapshot => {
+    entry.snapshot = snapshot;
+    entry.refreshAfter = Date.now() + SNAPSHOT_TTL_MS;
+    return snapshot;
+  }).finally(() => { entry.pending = undefined; });
+  try {
+    return { ...await entry.pending, sampled, cached: false };
+  } catch (error) {
+    if (!entry.snapshot || Date.now() - Date.parse(entry.snapshot.capturedAt) >= MAX_SNAPSHOT_AGE_MS) throw error;
+    entry.refreshAfter = Math.min(Date.now() + SNAPSHOT_TTL_MS, Date.parse(entry.snapshot.capturedAt) + MAX_SNAPSHOT_AGE_MS);
+    return { ...entry.snapshot, sampled, cached: true };
+  }
 }
+
+export const readPublicPolymarketSample = () => readPolymarketPortfolio(PREVIEW_ACCOUNT, true);
