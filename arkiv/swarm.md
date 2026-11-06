@@ -43,6 +43,12 @@ If Bee or postage is unavailable, the borrower cannot finish report publication 
 
 The Arkiv packet expires 90 days after the contract funding deadline. The contract remains authoritative after that expiry. AQRA does not yet run an entity-extension worker or publish Swarm settlement reports; no retention beyond the entity lifetime is promised.
 
+## Where Arkiv appears in the application
+
+Choose **Lender** in the credit-desk mode chooser or use the **Lend** sidebar item. The Lend panel is titled **Arkiv reports & lending book**. On entry it queries Rabdi and displays query status, the number of report-backed listings verified against the lending contract, whether a Rabdi query key is configured, whether Swarm is configured, and a link to the Arkiv explorer. **Discover on Arkiv** retries the listing query; **Find request** can look up an onchain loan ID even when it has no Arkiv report.
+
+An empty result is shown as zero verified listings; it does not create sample requests. If the public endpoint is unavailable, the panel reports the query failure and continues to show requests read from the lending chain. In the current checkout the public read returned zero entities, the Rabdi key is unset, and Swarm is unconfigured. No test listing or mocked Arkiv receipt is displayed as live data.
+
 ## Reproducible live proof
 
 No Bee URL, postage batch, Rabdi writer, entity key, transaction receipt or Swarm reference is configured in this repository checkout. Therefore there is no honest live entity/reference pair to list yet. After a borrower completes the flow, append the writer address, Arkiv entity key and transaction hash, Swarm reference, SHA-256, Bee node/provenance and a second-wallet query result here and in `README.md`. Do not substitute local test accounts or fabricated references for a public testnet receipt.

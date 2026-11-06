@@ -28,6 +28,7 @@ The metrics are the protocol's underwriting input, but they have only been bench
 
 ### Lend
 
+- The credit desk opens with a Borrower/Lender mode chooser on first visit, and retains a visible mode switch. Lend queries Arkiv on entry and surfaces query status, verified listing count, Rabdi key status, Swarm configuration and the Arkiv explorer link.
 - Reads requests from the lending contract and discovers report-backed listings through Arkiv. It fetches the exact Swarm file and requires SHA-256, Swarm reference, wallet set, cutoff, score and evidence-digest checks against the attestation and contract before the app enables funding.
 - Supports full repayment before maturity and matured default settlement from the escrowed bond. Transaction status is read from chain state and receipts.
 - A lender can lose up to $75 of principal at the $100/$25 terms if the bond transfers in full; lower bond recovery or token/contract failures can increase the loss.
@@ -37,6 +38,7 @@ The metrics are the protocol's underwriting input, but they have only been bench
 - **Local Anvil:** test USDC and named borrower/lender/curator accounts. The pending-request helper impersonates a sampled wallet only on loopback Anvil and stops before report release/funding; it is not a real borrower's consent or production credit decision.
 - **Chainlink CRE:** workflow source is present. A successful `cre workflow simulate` output or a live CRE deployment is not yet recorded; do not call a report CRE-attested until that evidence exists.
 - **Arkiv and Swarm:** borrower-signed public report release, Bee upload/read-back, SHA-256 + report recomputation, immutable report hash/reference on the loan, expiring Arkiv v2 listing, and lender retrieval are implemented. This checkout has no Bee URL, postage batch, Rabdi writer, public receipt or second-wallet proof. These artifacts are not collateral or payment.
+- **Multi-market data:** source access was researched for OPINION, Predict.fun, Limitless, Kalshi, Gemini Predictions and Manifold. The benchmark still contains Polymarket only; no cross-venue row is implied by the source study. See [`MULTI_MARKET_DATA.md`](MULTI_MARKET_DATA.md).
 - **ENS:** helps discover linked addresses. It does not prove common beneficial ownership or replace controller signatures.
 - **Arc:** no Arc Studio artifact, Arc deployment or Arc transaction exists in this repo's evidence.
 
