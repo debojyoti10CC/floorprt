@@ -82,7 +82,8 @@ export function ProtocolProvider({children}:{children:React.ReactNode}){
 
     if(await client.getChainId()!==deployment.chainId)throw new Error('ERR_CHAIN_MISMATCH');
 
-    await Promise.all(([...contractNames,...(deployment.contracts.ChainlinkObservationResolver?['ChainlinkObservationResolver' as const]:[])]).map(async name=>{const code=await client.getCode({address:deployment.contracts[name]!});if(!code||keccak256(code)!==deployment.codeHashes[name])throw new Error(`ERR_CONTRACT_CODE_MISMATCH: ${name}. Redeploy and refresh the manifest.`);}));
+    const optional = (['ChainlinkObservationResolver', 'TraderCreditDesk'] as const).filter(name => deployment.contracts[name]);
+    await Promise.all([...contractNames, ...optional].map(async name=>{const code=await client.getCode({address:deployment.contracts[name]!});if(!code||keccak256(code)!==deployment.codeHashes[name])throw new Error(`ERR_CONTRACT_CODE_MISMATCH: ${name}. Redeploy and refresh the manifest.`);}));
 
   },[deployment,rpcUrl]);
 
@@ -253,6 +254,13 @@ export function validateManifest(d:Deployment){
   if(d.schema!=='floor-deployment/v1'||![31337,11155111].includes(d.chainId)||typeof d.mockCollateral!=='boolean'||!['TRUSTED_TEST_RESOLVER','CHAINLINK_HISTORICAL'].includes(d.oracleMode))throw new Error('Unsupported Floor deployment manifest.');
 
   for(const name of contractNames)if(!isAddress(d.contracts?.[name])||!/^0x[0-9a-fA-F]{64}$/.test(d.codeHashes?.[name]??''))throw new Error(`Invalid ${name} address or code hash`);
+  if (d.traderCredit || d.contracts.TraderCreditDesk) {
+    const mode = d.chainId === 31337 ? 'LOCAL_FORWARDER' : 'CHAINLINK_CRE';
+    if (d.traderCredit?.mode !== mode || !/^\d+$/.test(d.traderCredit.deploymentBlock)
+      || !isAddress(d.contracts.TraderCreditDesk ?? '') || !/^0x[0-9a-fA-F]{64}$/.test(d.codeHashes.TraderCreditDesk ?? '')) {
+      throw new Error('Invalid trader credit deployment.');
+    }
+  }
 
   if(d.chainId===11155111&&(d.mockCollateral||d.oracleMode!=='CHAINLINK_HISTORICAL'||!d.oracle||!isAddress(d.contracts.ChainlinkObservationResolver??'')))throw new Error('Sepolia requires external collateral and the feed resolver.');
   for(const role of ['curator','resolver','borrower','lender'] as const)if(!isAddress(d.roles?.[role]))throw new Error('Invalid or missing role address');

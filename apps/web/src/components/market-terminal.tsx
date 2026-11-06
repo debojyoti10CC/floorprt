@@ -4,7 +4,7 @@ import Link from 'next/link';
 import {useEffect,useMemo,useState} from 'react';
 import {ArrowRight,ArrowUpRight,ExternalLink,FileCheck2,Plus,RefreshCw,Search,Wallet} from 'lucide-react';
 import {formatAmount,MAX_UNITS,parseAmount,parseUnits,UNIT} from '@floor/proof-engine';
-import {latestEligiblePair,type MarketRow} from '@floor/shared';
+import {eligibleMarkets,latestEligiblePair,type MarketRow} from '@floor/shared';
 import {useProtocol,short} from '../lib/protocol';
 import {assetLabel} from '../lib/labels';
 import {estimateMarketRisk,type AskLevel} from '../lib/market-risk';
@@ -89,7 +89,9 @@ export function MarketTerminal(){
   const [selectedPredictionId,setSelectedPredictionId]=useState<string|null>(null),[stake,setStake]=useState('1.00'),[outcomeIndex,setOutcomeIndex]=useState(0),[marketSearch,setMarketSearch]=useState('');
   const research=feed?.markets??[];
   const selectedResearch=research.find(m=>m.externalId===selectedPredictionId)??research[0]??null;
-  const selectedMarket=p.data?.markets.find(m=>m.id===selectedId)??p.data?.markets[0];
+  const openMarkets=p.data?eligibleMarkets(p.data):[];
+  const defaultMarket=openMarkets.find(m=>m.id===p.deployment?.defaultPair?.lower)??openMarkets.at(-1);
+  const selectedMarket=p.data?.markets.find(m=>m.id===selectedId)??defaultMarket??p.data?.markets[0];
   const selectedObservation=p.data?.observations.find(o=>o.id===selectedMarket?.observationId);
   const chainMarkets=p.data?.markets??[];
   const directory=useMemo(()=>chainMarkets.filter(m=>{const obs=p.data?.observations.find(o=>o.id===m.observationId);return (observationFilter==='all'||m.observationId===observationFilter)&&`${assetLabel(obs)} ${formatAmount(m.strike,8,0)} ${m.id} ${m.yesTokenId} ${m.noTokenId}`.toLowerCase().includes(search.toLowerCase())}),[chainMarkets,observationFilter,p.data?.observations,search]);
@@ -123,7 +125,7 @@ export function MarketTerminal(){
 
   useEffect(()=>{if(!selectedObservation||tab!=='aqra')return;const candidate=priceSymbol(assetLabel(selectedObservation));setSymbol(current=>current===candidate?current:candidate)},[selectedObservation?.id,tab]);
 
-  const selectedOpen=!!selectedObservation&&selectedObservation.state===0&&BigInt(selectedObservation.observationTime)>BigInt(p.data?.timestamp??0)&&!!selectedMarket?.enabledForNewCollateral;
+  const selectedOpen=openMarkets.some(m=>m.id===selectedMarket?.id);
   const validUnits=/^[1-9]\d*$/.test(units)&&BigInt(units)<=MAX_UNITS;
   const requestedUnits=validUnits?BigInt(units):0n;
   const mintCost=requestedUnits*UNIT;
@@ -171,6 +173,7 @@ export function MarketTerminal(){
               <div className="ticket-cost"><span>Mint cost</span><strong>{validUnits?`$${units}.00`:'—'} <small>test USDC</small></strong></div>
               <Button data-testid="mint-complete-set" className="full" disabled={!p.address||!p.online||!p.walletReady||!selectedOpen||action.busy||!validUnits||!sufficientBalance} onClick={mintSet}><Plus size={15}/>{action.busy?'Confirming transaction…':'Mint complete set'}<ArrowRight size={14}/></Button>
               {!p.address&&<p className="ticket-hint"><Wallet size={13}/>Connect a wallet to mint the registered YES and NO claims.</p>}{p.address&&!p.online&&<p className="ticket-hint">Live devnet connection is required for wallet transactions.</p>}{p.address&&p.online&&!p.walletReady&&<p className="ticket-hint">Reading the connected wallet balance…</p>}{p.walletReady&&validUnits&&!sufficientBalance&&<p className="ticket-hint">Insufficient test USDC.</p>}{p.address&&p.online&&!selectedOpen&&<p className="ticket-hint">This observation is not open for new collateral.</p>}
+              {!selectedOpen&&defaultMarket&&<Button variant="secondary" className="full" onClick={()=>selectMarket(defaultMarket)}>Select open market</Button>}
               {action.error&&<div className="error-box" role="alert">{action.error}</div>}
               <Link href="/outcomes/" className="button secondary full"><FileCheck2 size={14}/>Check outcome compatibility</Link>
               {compatiblePair&&<Link href="/compose/" className="text-link ticket-compose" onClick={()=>p.setDraft(draft=>({...draft,...compatiblePair}))}>Compose compatible pair<ArrowUpRight size={13}/></Link>}

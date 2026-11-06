@@ -1,2 +1,2 @@
 import { Terminal } from '../components/terminal';
-export default function Page(){return <Terminal initialPage="markets"/>}
+export default function Page(){return <Terminal initialPage="underwriting"/>}

@@ -4,6 +4,7 @@ import './terminal.css';
 import './kimia.css';
 import './trading-terminal.css';
 import './arkiv.css';
+import './trader-credit.css';
 import { ProtocolProvider } from '../lib/protocol';
-export const metadata:Metadata={title:'AQRA · Outcome collateral terminal',description:'Compose compatible outcome claims, inspect exact payout floors, and borrow against onchain collateral. Testnet research terminal.',icons:{icon:'/favicon.svg'}};
+export const metadata:Metadata={title:'AQRA · Trader credit',description:'Prediction-market trader data, evidence-backed credit requests and lender outcomes.',icons:{icon:'/favicon.svg'}};
 export default function RootLayout({children}:{children:React.ReactNode}){return <html lang="en"><body><ProtocolProvider>{children}</ProtocolProvider></body></html>}
