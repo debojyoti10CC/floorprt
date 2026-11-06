@@ -1,0 +1,55 @@
+---
+title: "Multi-market trader data study"
+description: "Source availability, consent, licensing and comparability gates for prediction-market performance evidence."
+---
+
+**Research date: 6 November 2026**
+
+AQRA's active backtest is Polymarket-only. It currently covers 3,906 wallet histories, 3,647,433 fill rows, 1,025,654 daily P&L observations, 15/15 scheduled month-boundary block checks, 6,155 candidate wallet-month rows and 11 completed forward rounds. No other venue rows have been added to those counts.
+
+Other venues can add breadth, but raw trader rows must not be pooled until their currency, account identity, cash flows, settlement history, fees, timestamps and data-use rights are comparable. A larger but mismatched sample makes the credit claim weaker.
+
+## Venue access and role
+
+| Venue | Trader history | Access requirements | AQRA treatment |
+|---|---|---|---|
+| Polymarket | Public wallet P&L, positions, activity and trades | Address may be a proxy or deposit wallet | Current benchmark and borrower evidence source |
+| OPINION | Filled wallet trades include fee, quote token and USD value; positions expose open holdings | API key; wallet lookup; paginated history | Priority cash-market adapter; validate fees, settlement and cutoff coverage |
+| Predict.fun | Address-level fill matches, positions, account activity; BNB trade, resolution and settlement events | API key; smart-account mapping; third-party indexed archive starts 22 Oct 2026 | Priority short-window cash cohort; do not claim a 12-month history |
+| Limitless | Account positions, trades and portfolio history | Owner-authenticated HMAC API | Opt-in account connection, not a public trader census |
+| Kalshi | Public markets; private member portfolio and trades | Signed member key; account-specific data and use restrictions | Member-consented data only; no anonymous population query |
+| Gemini Predictions | Public events and aggregate volume; account positions and history are private | Authenticated API/OAuth | Opt-in account adapter after history and settlement completeness review |
+| Manifold | Public bets, accounts and portfolio history | M$ virtual currency; free bulk data is non-commercial and updated only through July 2024 | Separate behavioral cohort; never cash credit evidence |
+| Prediction.com | Matched events, market prices and price history across venues | API key; market-data API, not account trade histories | Market discovery/matching only; not a new trader cohort |
+| Bitquery | Decoded on-chain fills, resolutions and settlements for supported chains | Provider API; Predict.fun BNB data has no archive before 22 Oct 2026 | Independent reconciliation; deduplicate against venue APIs |
+
+## Why the data stay separated
+
+The Polymarket score uses completed monthly activity, realized market P&L, turnover, trade count and drawdown. Other venues may expose live marks, virtual currency, incomplete deposits, incentive income, distinct quote tokens, or only the requesting account's history. Those are not equivalent observations.
+
+The collection contract for each adapter requires a stable consented account identifier, trade/fill timestamps, outcome and side, cash-denominated costs and fees, settlement state, current open-position marks, deposits/withdrawals, raw source references and a reproducible as-of cutoff. The analysis must preserve raw source units and evaluate each venue separately using temporal splits and trader-clustered uncertainty.
+
+## Collection order
+
+1. Preserve the existing Polymarket manifest and benchmark.
+2. Capture a short-window Predict.fun cohort and an OPINION cohort as separate datasets. Obtain each API key, paginate fully, retain raw responses, and reconcile a sample of fills, fees and outcomes to the chain.
+3. Add borrower-initiated Limitless, Kalshi and Gemini account history only with scoped authorization; never request a password or expose a private API key in browser code.
+4. Use Manifold for a separately labeled virtual-currency behavioral check. Obtain a commercial license before product use.
+5. Use Prediction.com for event matching and market histories and Bitquery for chain-level reconciliation, not as additional independent trader populations.
+
+## Arkiv check from this checkout
+
+The Lend page queries the `aqra.trader.credit.v2` entity schema on Rabdi and reconciles matches to the EVM loan. On 6 November 2026, the public query returned zero AQRA entities. The SDK warned that no access key is configured and the public endpoint is rate-limited. No borrower entity write receipt or second-wallet read proof exists. Swarm is also unconfigured, so a fresh report-backed loan cannot be funded from this checkout.
+
+See [Arkiv and Swarm operation](/operations/evidence) and the [source study](https://github.com/debojyoti10CC/floorprt/blob/main/docs/MULTI_MARKET_DATA.md).
+
+## Primary sources
+
+- [Polymarket P&L API](https://docs.polymarket.com/api-reference/wallet/get-a-users-pnl-series)
+- OPINION [trades](https://docs.opinion.trade/developer-guide/opinion-open-api/trade), [positions](https://docs.opinion.trade/developer-guide/opinion-open-api/position), [API overview](https://docs.opinion.trade/developer-guide/opinion-open-api/overview)
+- Predict.fun [address activity](https://dev.predict.fun/api/account/get-account-activity-by-address), [wallet fill matches](https://dev.predict.fun/api/orders/get-order-match-events), [API overview](https://dev.predict.fun/api); Bitquery [unified prediction-market API](https://docs.bitquery.io/docs/examples/prediction-market/prediction-market-api/) and [Predict.fun coverage](https://docs.bitquery.io/docs/examples/prediction-market/predict-fun-api/)
+- [Limitless portfolio API](https://academy.limitless.exchange/academies/api_academy/06_Positions.html)
+- Kalshi [API keys](https://docs.kalshi.com/getting_started/api_keys), [Developer Agreement](https://kalshi-public-docs.s3.amazonaws.com/Kalshi-Developer-Agreement.pdf), [Data Terms](https://kalshi-public-docs.s3.amazonaws.com/kalshi-data-terms-of-service.pdf)
+- Gemini [prediction-market API](https://developer.gemini.com/prediction-markets-spec), [positions and order-history recovery](https://developer.gemini.com/rest-api/prediction-markets)
+- Manifold [API](https://docs.manifold.markets/api), [data and licensing](https://docs.manifold.markets/data)
+- Prediction.com [market-data API](https://prediction.com/api/docs)

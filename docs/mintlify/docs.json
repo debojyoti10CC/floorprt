@@ -14,7 +14,7 @@
       {"tab": "AQRA", "groups": [
         {"group": "Start here", "pages": ["index", "quickstart", "status", "whitepaper"]},
         {"group": "Borrow and lend", "pages": ["concepts/credit", "concepts/risks", "guides/borrow", "guides/lend", "guides/settle-and-repay", "guides/terminal"]},
-        {"group": "Research and submission", "pages": ["specifications/risk-engine", "specifications/TRADER_CREDIT", "specifications/ETHGLOBAL_SUBMISSION", "specifications/INTEGRATIONS_AND_PRIZES"]}
+        {"group": "Research and submission", "pages": ["research/multi-market-data", "specifications/risk-engine", "specifications/TRADER_CREDIT", "specifications/ETHGLOBAL_SUBMISSION", "specifications/INTEGRATIONS_AND_PRIZES"]}
       ]},
       {"tab": "Developers", "groups": [
         {"group": "AQRA contract", "pages": ["contracts/TraderCreditDesk", "developers/chain-and-wallets"]},
