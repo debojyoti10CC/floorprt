@@ -610,8 +610,8 @@
     "/research/markets": {
       "get": {
         "operationId": "research",
-        "summary": "Read research metadata",
-        "description": "Fetches up to 12 active Gamma market rows, caches for 60 seconds and deduplicates concurrent fetches. External request timeout is 8 seconds. All rows are research-only and not collateral eligible. Source failures return 502; no stale-on-error success response is implemented.",
+        "summary": "Read external market books",
+        "description": "Fetches up to 12 active Gamma markets and batches their outcome IDs into the Polymarket CLOB books endpoint. Markets use token IDs for v1 and position IDs for v2. Ask levels are sorted from the best buy price upward. Successful results cache per process for 10 seconds; each upstream request retries once with an 8-second timeout. On upstream failure, a cached result no older than 5 minutes returns with stale=true. Gamma failures without a usable cache return 502. A failed CLOB request leaves discovery metadata available with empty books. External rows are never collateral eligible.",
         "parameters": [],
         "responses": {
           "200": {
@@ -1206,8 +1206,7 @@
           "source": {
             "type": "string",
             "enum": [
-              "DIRECT_CHAIN",
-              "RECORDED_CHAIN"
+              "DIRECT_CHAIN"
             ]
           },
           "fetchedAt": {
@@ -1400,76 +1399,133 @@
           "authority"
         ]
       },
+      "AskLevel": {
+        "type": "object",
+        "properties": {
+          "price": {
+            "type": "string"
+          },
+          "size": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "price",
+          "size"
+        ]
+      },
+      "ResearchMarket": {
+        "type": "object",
+        "properties": {
+          "externalId": {
+            "type": "string"
+          },
+          "question": {
+            "type": "string"
+          },
+          "outcomes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "buyBooks": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/AskLevel"
+              }
+            }
+          },
+          "minimumOrderSizes": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "nullable": true
+            }
+          },
+          "conditionId": {
+            "type": "string",
+            "nullable": true
+          },
+          "endDate": {
+            "type": "string",
+            "nullable": true
+          },
+          "resolutionSource": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "OPEN",
+              "CLOSED",
+              "INACTIVE"
+            ]
+          },
+          "volume": {
+            "type": "number",
+            "nullable": true
+          },
+          "volume24h": {
+            "type": "number",
+            "nullable": true
+          },
+          "liquidity": {
+            "type": "number",
+            "nullable": true
+          },
+          "sourceUri": {
+            "type": "string"
+          },
+          "venue": {
+            "type": "string",
+            "enum": [
+              "POLYMARKET"
+            ]
+          },
+          "collateralEligible": {
+            "type": "boolean",
+            "enum": [
+              false
+            ]
+          }
+        },
+        "required": [
+          "externalId",
+          "question",
+          "outcomes",
+          "buyBooks",
+          "minimumOrderSizes",
+          "conditionId",
+          "endDate",
+          "resolutionSource",
+          "status",
+          "volume",
+          "volume24h",
+          "liquidity",
+          "sourceUri",
+          "venue",
+          "collateralEligible"
+        ]
+      },
       "Research": {
         "type": "object",
         "properties": {
           "markets": {
             "type": "array",
             "items": {
-              "type": "object",
-              "properties": {
-                "externalId": {
-                  "type": "string"
-                },
-                "question": {
-                  "type": "string"
-                },
-                "outcomes": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                "conditionId": {
-                  "type": "string",
-                  "nullable": true
-                },
-                "endDate": {
-                  "type": "string",
-                  "nullable": true
-                },
-                "resolutionSource": {
-                  "type": "string",
-                  "nullable": true
-                },
-                "sourceUri": {
-                  "type": "string"
-                },
-                "venue": {
-                  "type": "string",
-                  "enum": [
-                    "POLYMARKET"
-                  ]
-                },
-                "eligibility": {
-                  "type": "string",
-                  "enum": [
-                    "RESEARCH_ONLY"
-                  ]
-                },
-                "collateralEligible": {
-                  "type": "boolean",
-                  "enum": [
-                    false
-                  ]
-                }
-              },
-              "required": [
-                "externalId",
-                "question",
-                "outcomes",
-                "conditionId",
-                "endDate",
-                "resolutionSource",
-                "sourceUri",
-                "venue",
-                "eligibility",
-                "collateralEligible"
-              ]
+              "$ref": "#/components/schemas/ResearchMarket"
             }
           },
           "fetchedAt": {
             "type": "string"
+          },
+          "bookFetchedAt": {
+            "type": "string",
+            "nullable": true
           },
           "stale": {
             "type": "boolean"
@@ -1478,6 +1534,7 @@
         "required": [
           "markets",
           "fetchedAt",
+          "bookFetchedAt",
           "stale"
         ]
       }

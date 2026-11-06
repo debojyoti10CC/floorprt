@@ -1,11 +1,11 @@
 ---
-title: "Read research metadata"
-description: "GET /api/v1/research/markets — Fetches up to 12 active Gamma market rows, caches for 60 seconds and deduplicates concurrent fetches. External request timeout is 8 seconds."
+title: "Read external market books"
+description: "GET /api/v1/research/markets — Fetches up to 12 active Gamma markets and batches their outcome IDs into the Polymarket CLOB books endpoint. Markets use token IDs for v1 an"
 ---
 
 `GET /api/v1/research/markets`
 
-Fetches up to 12 active Gamma market rows, caches for 60 seconds and deduplicates concurrent fetches. External request timeout is 8 seconds. All rows are research-only and not collateral eligible. Source failures return 502; no stale-on-error success response is implemented.
+Fetches up to 12 active Gamma markets and batches their outcome IDs into the Polymarket CLOB books endpoint. Markets use token IDs for v1 and position IDs for v2. Ask levels are sorted from the best buy price upward. Successful results cache per process for 10 seconds; each upstream request retries once with an 8-second timeout. On upstream failure, a cached result no older than 5 minutes returns with stale=true. Gamma failures without a usable cache return 502. A failed CLOB request leaves discovery metadata available with empty books. External rows are never collateral eligible.
 
 ## Request
 

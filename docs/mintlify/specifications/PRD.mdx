@@ -9,11 +9,12 @@ Preserved source document. Status, interface examples and proposals are historic
 
 [Original Markdown source](https://github.com/debojyoti10CC/floorprt/blob/main/docs/PRD.md) · [Current documentation scope](/maintenance/source-audit)
 
+# Product Requirements Document (PRD)
 
-**Product:** Floor Protocol<br />
-**Release target:** v0 hackathon demonstrator; v1 testnet pilot<br />
-**Date:** 2026-11-05<br />
-**Decision owners:** product lead + protocol lead (to be assigned)<br />
+**Product:** Floor Protocol  
+**Release target:** v0 hackathon demonstrator; v1 testnet pilot  
+**Date:** 2026-11-05  
+**Decision owners:** product lead + protocol lead (to be assigned)  
 **Status:** Proposed, unimplemented
 
 ## 1. Executive summary and thesis
@@ -69,7 +70,7 @@ A user holds multiple prediction-market outcome claims. To raise stablecoin liqu
 
 ### P0 — must ship
 
-**F-001 Markets:** curator can register an observation with immutable `assetId`, `observationTime`, canonical precision, collateral token, settlement policy and expiry/grace configuration; register two markets using the **same** observation, `GEQ` threshold predicate, and distinct strikes.
+**F-001 Markets:** curator can register an observation with immutable `assetId`, `observationTime`, canonical precision, collateral token, settlement policy and expiry/grace configuration; register two markets using the **same** observation, `GEQ` threshold predicate, and distinct strikes. 
 
 **F-002 Fully funded complete sets:** any testnet user may escrow `units × 1e6` test USDC for each binary market; contract issues `units` YES and `units` NO ERC-1155 claims. One full YES/NO set can be merged before settlement for its initial 1 USDC; after settlement outcomes can be redeemed at 1, 0 or (on common cancellation) 0.5 USDC per unit. Token IDs are immutable and deterministic.
 

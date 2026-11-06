@@ -1,6 +1,15 @@
 # Integration Strategy, Sponsor Qualification and Research Boundaries
 
-**Checked:** 5 November 2026. Recheck live official rule pages before submission; prize rules and supported networks can change. This is *eligibility planning*, not a guarantee of prizes.
+**Checked:** 6 November 2026. Recheck live official rule pages before submission; prize rules and supported networks can change. This is *eligibility planning*, not a guarantee of prizes.
+
+## 0. Current implementation evidence
+
+- **AQRA core:** local Anvil lifecycle is implemented and tested; public Sepolia support has a separate deployment script and pinned-feed adapter. See `README.md` and `docs/RELEASE_EVIDENCE.md` for the exact evidence boundary.
+- **Arkiv:** the composer now has an SDK-backed Rabdi query/write/delete path for public 30-day portfolio recipes. It rechecks in AQRA before lock and only loads recipes from the configured AQRA chain, registry and vault. **No public Rabdi write/read receipt or writer wallet is recorded yet**, so this is an implementation path, not a qualified track claim. Arkiv criterion notes are in `arkiv/`.
+- **Chainlink CRE:** no CRE workflow, CLI simulation or DON execution is present. The local test resolver and the Sepolia historical Chainlink feed resolver are not CRE.
+- **Arc:** no Arc contract deployment or Arc Studio project URL is present. Current Mumbai Arc prizes require Arc Studio as the starting point; a plain deployment from this repository does not qualify.
+
+Research about prior winners and recommendations for the seven current screens is in `docs/HACKATHON_WINNER_RESEARCH.md`. No current Mumbai winner is described as a winner in that research; it references completed prior events.
 
 ## 1. Base chain strategy
 
@@ -12,7 +21,7 @@ The phrase 'Ethereum-native' means EVM-compatible contracts and Ethereum wallet 
 
 Official pages: [CRE docs](https://docs.chain.link/cre/overview), [ETHGlobal Mumbai prizes](https://ethglobal.com/events/mumbai/prizes).
 
-**Proposed meaningful workflow:** after observation timestamp, CRE fetches or accepts a named external ETH/USD observation and its timestamp, validates canonical decimal precision and reporting window, reads observation status on the target chain, produces a bounded transaction to call a configured authorized oracle adapter / registry finalizer, and records the execution and verification trail. It should block stale, future-dated or mismatched source data. The workflow must not be used as a blind arbitrary-price signer.
+**Recommended meaningful workflow:** after observation timestamp, CRE reads a named external ETH/USD feed and its timestamp, validates canonical decimal precision and reporting window, reads observation status on the target chain, produces a bounded transaction through a configured authenticated receiver, and records the execution and verification trail. It must block stale, future-dated or mismatched source data. It must not be used as a blind arbitrary-price signer. This workflow is not yet implemented in this repository.
 
 ```mermaid
 flowchart LR
@@ -64,6 +73,7 @@ ETHGlobal [event rules](https://ethglobal.com/rules): the Classic “From Scratc
 |---|---|---|
 | Own outcome markets | verified contract addresses + transaction for complete-set mint | Mandatory |
 | Vault/lending | funded loan + onchain settlement tx and events | Mandatory |
+| Arkiv Rabdi | SDK-backed public recipe query/write/delete code; actual entity key, wallet-signed create transaction and second read-back in README | Code path exists; public receipt pending |
 | Chainlink CRE | workflow code + CRE CLI simulation output + genuine external API → EVM connection | High sponsor priority |
 | Arc Studio | shareable Studio URL and video; show full stack in Studio | Only if pursuing Arc |
 | Dynamic embedded wallet | real login + wallet-signed transactions | Optional, only if integrated |

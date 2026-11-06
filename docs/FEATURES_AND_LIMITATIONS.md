@@ -9,8 +9,8 @@
 - Canonical external Sepolia USDC deployment path and a source-bound historical Chainlink resolver.
 - Command center with an interactive 3D payout model, state matrix, exact scenario controls and canonical event activity.
 - Draggable outcome nodes and outcome selection, payoff studio, proof inspector, credit, wallet portfolio, audit and resolver operations.
-- Direct reads pinned to one block, receipt recovery, pending-send guard, runtime-code identity checks and explicit offline recorded evidence.
-- Read-only API, 60-second provenance-tagged research cache, persistent reorg-aware journal and independent Python differential model.
+- Direct reads pinned to one block, receipt recovery, pending-send guard, runtime-code identity checks and explicit offline state with no saved-snapshot substitution.
+- Read-only API, 10-second market-feed cache with a labeled five-minute stale fallback, persistent reorg-aware journal and independent Python differential model.
 - Separate-browser-wallet tests; no frontend monetary reducer and no server spending route.
 
 # Boundaries

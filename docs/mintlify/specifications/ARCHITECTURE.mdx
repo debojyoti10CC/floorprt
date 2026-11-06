@@ -9,6 +9,7 @@ Preserved source document. Status, interface examples and proposals are historic
 
 [Original Markdown source](https://github.com/debojyoti10CC/floorprt/blob/main/docs/ARCHITECTURE.md) · [Current documentation scope](/maintenance/source-audit)
 
+# Technical Architecture — Floor Protocol
 
 **State:** proposed; no code deployed. **Baseline:** single EVM chain, local Anvil then one public testnet; custody is smart-contract-controlled, not server-key-controlled.
 
@@ -257,12 +258,12 @@ floor-protocol/
 
 ## 11. Architecture decisions (ADRs to record)
 
-`ADR-001` use native fully collateralized ERC-1155 token pairs instead of Cumulant's parimutuel engine for certifiable fixed payouts.<br />
-`ADR-002` all eligible markets share one immutable observation ID/policy, not just similar English descriptions.<br />
-`ADR-003` whole integer units in P0 avoid 50/50 cancellation rounding breaking minimum payouts.<br />
-`ADR-004` fixed due amount and one lender in P0; no floating-rate lending pool.<br />
-`ADR-005` only testnet/local market positions eligible; venue adapters read-only until actual custody/semantic bridge verified.<br />
-`ADR-006` chain source of truth, read indexer secondary; borrow-side proof fully recomputed inside contract.<br />
+`ADR-001` use native fully collateralized ERC-1155 token pairs instead of Cumulant's parimutuel engine for certifiable fixed payouts.  
+`ADR-002` all eligible markets share one immutable observation ID/policy, not just similar English descriptions.  
+`ADR-003` whole integer units in P0 avoid 50/50 cancellation rounding breaking minimum payouts.  
+`ADR-004` fixed due amount and one lender in P0; no floating-rate lending pool.  
+`ADR-005` only testnet/local market positions eligible; venue adapters read-only until actual custody/semantic bridge verified.  
+`ADR-006` chain source of truth, read indexer secondary; borrow-side proof fully recomputed inside contract.  
 `ADR-007` structuring/tranches as later module with hard mutual exclusion from loan liens.
 
 ## 12. Dependencies and ownership

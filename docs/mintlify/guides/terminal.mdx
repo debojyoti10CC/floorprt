@@ -1,27 +1,27 @@
 ---
 title: 'Terminal screens and interaction modes'
-description: 'Navigate the application without confusing payoff models, recorded evidence and chain state.'
+description: 'Navigate the application while distinguishing live chain state, research feeds and payoff views.'
 ---
 
 | Route | Screen | Purpose |
 | --- | --- | --- |
-| `/`, `/terminal/` | Overview | Bounded chain metrics, exact scenario surface, confirmed activity/capital flows |
-| `/markets/` | Market explorer | Approved issuer directory and separately labeled research feed |
+| `/`, `/terminal/`, `/markets/` | Market terminal | External market risk estimates and AQRA-issued collateral markets |
+| `/outcomes/` | Outcome graph | Markets grouped by shared onchain observation |
 | `/compose/` | Portfolio studio | Select/drag claims, edit whole units, inspect payout and lock |
 | `/proof/` | Proof inspector | Finite state table, live verifier result and canonical metadata |
 | `/credit/` | Credit desk | Borrower requests and distinct-lender funding |
 | `/portfolio/` | My portfolio | Wallet claims, vault positions, borrower/lender ledger and repayment |
 | `/settlements/` | Settlement audit | Loan selection, realized waterfall and transaction evidence |
-| `/ops/` | Operations | Curator setup, resolver/feed controls, RPC/manifest settings |
+| `/ops/` | Operations | Local test setup or opt-in Chainlink historical-feed resolution |
 | `/docs/` | Embedded protocol explanation | Compact application documentation, separate from this Mintlify site |
 
 ## Exact models versus financial state
 
-The overview 3D surface/state matrix evaluates price and 1–6× portfolio scale. It is not a probability distribution, price feed, wallet balance or transaction. Changing a scenario only recomputes a deterministic payoff. Capital-flow diagrams instead aggregate confirmed protocol events in the bounded read window.
+The composer payoff surface evaluates settlement scenarios. It is not a probability distribution, price feed, wallet balance or transaction. Changing a scenario only recomputes a deterministic payoff. Portfolio cashflows aggregate confirmed protocol events in the bounded read window.
 
 ## Offline behavior
 
-When the configured RPC is unavailable, matching recorded local evidence may load with `RECORDED_CHAIN` provenance. Historical data and mathematical tools remain inspectable; **wallet writes are disabled**. Hosted static HTML does not make a local devnet public.
+When the configured RPC is unavailable, chain-powered views show offline state and **wallet writes are disabled**. The app does not substitute a saved chain snapshot or balances. External market research requires its configured read API. Hosted static HTML does not make a local devnet public.
 
 ## Accessibility and design
 
