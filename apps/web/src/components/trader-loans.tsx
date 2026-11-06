@@ -87,7 +87,7 @@ function LoanCard({ row, now, active, demoRequestId, onChange }: { row: Row; now
 
   const attest = () => void action.run(async () => {
     const report = await underwritingApi<{ metadata: Hex; report: Hex }>('/local-report/' + id.toString());
-    await p.transact('Attest score with local forwarder', 'TraderCreditDesk', 'onReport', [report.metadata, report.report]);
+    await p.transact('Approve performance report', 'TraderCreditDesk', 'onReport', [report.metadata, report.report]);
     onChange();
   });
   const publish = () => void action.run(async () => {
@@ -106,7 +106,7 @@ function LoanCard({ row, now, active, demoRequestId, onChange }: { row: Row; now
     <div className="trader-inline">
       <span className="trader-note">Borrower</span><Address value={loan.borrower} />
       {loan.lender !== '0x0000000000000000000000000000000000000000' && <><span className="trader-note">Lender</span><Address value={loan.lender} /></>}
-      {attested && <Badge tone="blue">Performance policy {loan.score}/100 · {local ? 'Local forwarder' : 'Chainlink CRE'}</Badge>}
+      {attested && <Badge tone="blue">Performance report verified · {loan.score}/100</Badge>}
       {packet && <Badge tone="blue">Arkiv packet matched</Badge>}
     </div>
     <dl className="trader-metrics">
@@ -143,13 +143,13 @@ function LoanCard({ row, now, active, demoRequestId, onChange }: { row: Row; now
       I accept a principal shortfall of up to {usd(loss)}, assuming full bond recovery.
     </label>}
     <div className="trader-inline">
-      {requested && canAttest && <Button variant="secondary" disabled={!canAct} onClick={attest}>Submit local report</Button>}
+      {requested && canAttest && <Button variant="secondary" disabled={!canAct} onClick={attest}>Approve performance report</Button>}
       {canReviewFunding && <Button disabled={!canAct || !acknowledged || !performanceEvidence} onClick={() => transact('Fund trader loan', 'fundLoan', loan.terms.principal)}>Fund {usd(loan.terms.principal)}</Button>}
       {requested && (borrower || expired) && <Button variant="secondary" disabled={!canAct} onClick={() => transact('Cancel request and return bond', 'cancelRequest')}>Cancel and return bond</Button>}
       {requested && attested && !expired && borrower && p.mode === 'injected' && !packet && !published && <Button variant="secondary" disabled={!canAct} onClick={publish}><Radio size={14} /> Publish on Arkiv</Button>}
       {funded && borrower && !mature && <Button disabled={!canAct} onClick={() => transact('Repay trader loan', 'repay', loan.terms.due)}>Repay {usd(loan.terms.due)}</Button>}
       {canRepayDemo && <Button variant="secondary" disabled={!p.online || action.busy}
-        onClick={() => void action.run(async () => { await repaySeededLocalDemo(p, id); onChange(); })}>Repay from local demo borrower</Button>}
+        onClick={() => void action.run(async () => { await repaySeededLocalDemo(p, id); onChange(); })}>Repay from demo borrower account</Button>}
       {mature && <Button variant="danger" disabled={!canAct} onClick={() => transact('Settle default and release bond', 'settleDefault')}>Settle default</Button>}
     </div>
     {published && <div className="trader-inline trader-note">

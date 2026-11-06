@@ -38,7 +38,7 @@ function LocalDemoPanel({ requestId, status, onOpen, onRefresh, loading }: {
   const activeRequest = status?.state === 1 || status?.state === 2;
   const nextRole = status?.state === 1 ? status.score >= 60 ? 'lender' as const : 'resolver' as const
     : status?.state === 2 ? 'borrower' as const : null;
-  const statusText = status?.state === 1 ? status.score >= 60 ? 'Attested · waiting for lender' : 'Awaiting curator report'
+  const statusText = status?.state === 1 ? status.score >= 60 ? 'Report approved · waiting for lender' : 'Awaiting report approval'
     : status?.state === 2 ? 'Funded · repayment open'
       : status?.state === 3 ? 'Repaid'
         : status?.state === 4 ? 'Defaulted'
@@ -73,30 +73,30 @@ function LocalDemoPanel({ requestId, status, onOpen, onRefresh, loading }: {
     }
   };
 
-  return <Panel title="Run the contract demo" eyebrow="ANVIL · TEST USDC" action={<Badge tone="amber"><FlaskConical size={12} /> LOCAL ONLY</Badge>}>
+  return <Panel title="Try a sample loan" eyebrow="LOCAL DEMO" action={<Badge tone="amber"><FlaskConical size={12} /> TEST FUNDS</Badge>}>
     <div className="trader-panel-body trader-demo-body">
-      <p className="trader-note">Create a test-USDC request on local Anvil using a sampled wallet that passes the research screen. Local impersonation exercises the contracts; no production wallet signs and trading history is not collateral.</p>
+      <p className="trader-note">See the loan flow with sample trading history and test funds. You can review the performance report, fund the request, and complete repayment without using real money.</p>
       <div className="trader-demo-status">
         <span>{status ? <>Request #{status.id} · {statusText}</> : loading ? 'Checking for a seeded request…' : 'No seeded request found'}</span>
         <Button variant="ghost" disabled={!online || loading} onClick={onRefresh} aria-label="Refresh local demo status"><RefreshCw size={14} /></Button>
       </div>
       {nextRole && <div className="trader-inline">
         <Button variant="secondary" disabled={!online || roleBusy} onClick={() => void connectNextRole()}>
-          {roleBusy ? 'Connecting local account…' : `Connect local ${nextRole === 'resolver' ? 'curator' : nextRole}`}
+          {roleBusy ? 'Connecting demo account…' : `Connect demo ${nextRole === 'resolver' ? 'reviewer' : nextRole}`}
         </Button>
-        <span className="trader-note">Then use the request card below to {nextRole === 'resolver' ? 'submit its report' : nextRole === 'lender' ? 'review and fund it' : 'repay it'}.</span>
+        <span className="trader-note">Then use the request below to {nextRole === 'resolver' ? 'approve the report' : nextRole === 'lender' ? 'review and fund it' : 'repay the loan'}.</span>
       </div>}
       <ol className="trader-demo-steps">
-        <li>Use the local curator account to submit the report.</li>
-        <li>Use the separate local lender account to accept the risk and fund.</li>
-        <li>Repay with the labeled local demo borrower action on the funded request.</li>
+        <li>Approve the borrower’s performance report.</li>
+        <li>Review the loan terms, then fund it as the lender.</li>
+        <li>Repay the loan from the demo borrower account.</li>
       </ol>
       <label className="trader-demo-confirm"><input type="checkbox" checked={accepted} onChange={event => setAccepted(event.target.checked)} />
-        I understand this uses test USDC and a controller impersonation on local Anvil only.
+        I understand this is a demo that uses sample history and test funds only.
       </label>
       <div className="trader-inline">
         <Button variant="secondary" disabled={!online || !accepted || busy || activeRequest} onClick={() => void createRequest()}>
-          {busy ? 'Creating on local chain…' : activeRequest ? 'Finish the open demo request first' : 'Create local test request'}
+          {busy ? 'Creating demo loan…' : activeRequest ? 'Finish the open demo loan first' : 'Create demo loan'}
         </Button>
         {requestId && <Button variant="ghost" disabled={!online} onClick={() => onOpen(requestId)}>
           Open request #{requestId.toString()} <ArrowRight size={14} />
@@ -145,7 +145,7 @@ export function TraderCredit({ activeTab = 'Data', focusRiskSignal = 0, onTabCha
   return <div className="trader-workspace">
     <div className="page-heading trader-card-head">
       <div><span className="eyebrow">AQRA / {activeTab === 'Data' ? 'PERFORMANCE UNDERWRITING' : activeTab === 'Borrow' ? 'BORROW DESK' : 'LENDER DESK'}</span><h1>{activeTab === 'Data' ? 'Performance-based lending' : activeTab}</h1>{activeTab === 'Data' && <p className="trader-note">Prediction-market performance metrics determine pilot eligibility; lenders choose whether to fund each bonded request.</p>}</div>
-      {deployment?.traderCredit && <Badge tone="amber">{deployment.traderCredit.mode === 'LOCAL_FORWARDER' ? 'LOCAL TEST FUNDS' : 'SEPOLIA TESTNET'}</Badge>}
+      {deployment?.traderCredit && <Badge tone="amber">TEST NETWORK</Badge>}
     </div>
     {activeTab !== 'Data' && <LocalDemoPanel requestId={demoRequestId} status={demoStatus} loading={demoStatusLoading} onRefresh={() => void refreshDemoStatus()} onOpen={openDemoRequest} />}
     <section aria-label={`${activeTab} section`}>
