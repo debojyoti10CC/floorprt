@@ -6,7 +6,7 @@ import type { Address as EvmAddress, Hex } from 'viem';
 import { walletSetHash } from '../../../../services/underwriting/reports';
 import { message, useProtocol } from '../lib/protocol';
 import { approveTraderCredit, repaySeededLocalDemo, sameWallet, traderDesk, underwritingApi, type TraderLoan } from '../lib/trader-credit';
-import { arkivExplorer, packetMatches, publishPacket, readPackets, type ArkivPacket } from '../lib/underwriting-packets';
+import { arkivAccessKeyConfigured, arkivExplorer, packetMatches, publishPacket, readPackets, type ArkivPacket } from '../lib/underwriting-packets';
 import { prepareAssessmentRelease, requestBorrowerSignature, retrieveAssessment, uploadConsentedAssessment, type AssessmentChallenge, type PublicAssessment } from '../lib/assessment-evidence';
 import { useAction } from './actions';
 import { usd } from './trader-replay';
@@ -252,8 +252,9 @@ export function TraderLoans({ mine = false, selectedId, demoRequestId }: { mine?
   const [lookup, setLookup] = useState('');
   const [id, setId] = useState<bigint>();
   const [revision, setRevision] = useState(0);
-  const [discover, setDiscover] = useState(false);
+  const [discover, setDiscover] = useState(!mine);
   const [packetStatus, setPacketStatus] = useState('');
+  const [packetCount, setPacketCount] = useState<number | null>(null);
   const [swarmReady, setSwarmReady] = useState<boolean | null>(null);
   const deskAddress = deployment?.contracts.TraderCreditDesk;
   const block = p.data?.blockNumber;
@@ -284,6 +285,8 @@ export function TraderLoans({ mine = false, selectedId, demoRequestId }: { mine?
       const matched = new Map<bigint, ArkivPacket>();
       let status = '';
       if (discover && deployment) {
+        setPacketStatus('Querying Arkiv Rabdi for report-backed requests…');
+        setPacketCount(null);
         try {
           const packets = await readPackets(deployment.chainId, live.address);
           const checked = await Promise.all(packets.filter(packet => packet.loanId.value > 0n && packet.loanId.value <= count)
@@ -304,8 +307,10 @@ export function TraderLoans({ mine = false, selectedId, demoRequestId }: { mine?
             }
           }
           status = matched.size ? matched.size + ' open, report-backed Arkiv listings verified against the lending chain.' : 'No current report-backed Arkiv listings for this desk.';
+          setPacketCount(matched.size);
         } catch {
           status = 'Arkiv query unavailable. Onchain requests are still available.';
+          setPacketCount(null);
         }
       }
       const nextRows = await Promise.all([...ids].map(async id => ({ id, loan: await live.loan(id), packet: matched.get(id) })));
@@ -320,18 +325,27 @@ export function TraderLoans({ mine = false, selectedId, demoRequestId }: { mine?
     return () => { stale = true; };
   }, [address, block, confirmed, deployment, deskAddress, discover, id, mine, online, revision, rpcUrl, selectedId]);
 
-  return <Panel title={mine ? 'Your request' : 'Lending book'} eyebrow={mine ? 'ONCHAIN STATUS' : 'ONCHAIN REQUESTS'}
+  return <Panel title={mine ? 'Your request' : 'Arkiv reports & lending book'} eyebrow={mine ? 'ONCHAIN STATUS' : 'RABDI DISCOVERY · ONCHAIN FUNDING'}
     action={<Button variant="ghost" onClick={refresh} disabled={!online || !deskAddress} aria-label="Refresh credit requests"><RefreshCw size={15} className={loading && online && deskAddress ? 'spin' : ''} /></Button>}>
     <div className="trader-panel-body">
+      {!mine && <div className="arkiv-credit-status" role="status" aria-live="polite">
+        <div className="arkiv-credit-status-copy"><span className="eyebrow">ARKIV / RABDI</span><strong>{packetStatus || (loading ? 'Reading the lending desk and Arkiv…' : 'Arkiv discovery is ready')}</strong>
+          <p>Arkiv publishes borrower-approved report pointers. Loan principal, bond and funding remain on the lending chain.</p></div>
+        <div className="arkiv-credit-status-meta">
+          <Badge tone={packetCount && packetCount > 0 ? 'green' : packetCount === 0 ? 'muted' : 'amber'}>{packetCount === null ? discover ? loading ? 'QUERYING' : 'NOT VERIFIED' : 'NOT QUERIED' : `${packetCount} LISTING${packetCount === 1 ? '' : 'S'}`}</Badge>
+          <Badge tone={arkivAccessKeyConfigured ? 'green' : 'amber'}>{arkivAccessKeyConfigured ? 'RABDI KEY SET' : 'PUBLIC RPC · RATE LIMITED'}</Badge>
+          <Badge tone={swarmReady ? 'green' : swarmReady === false ? 'amber' : 'muted'}>{swarmReady ? 'SWARM CONFIGURED' : swarmReady === false ? 'SWARM NOT CONFIGURED' : 'CHECKING SWARM'}</Badge>
+          <a href={arkivExplorer} target="_blank" rel="noreferrer" className="text-link">Arkiv explorer <ArrowUpRight size={12} /></a>
+        </div>
+      </div>}
       {!mine && <div className="trader-inline trader-discovery">
         <form className="trader-inline" onSubmit={event => { event.preventDefault(); if (validId.test(lookup)) { setId(BigInt(lookup)); refresh(); } }}>
           <input aria-label="Request ID" placeholder="Request ID" inputMode="numeric" maxLength={19} value={lookup} onChange={event => setLookup(event.target.value)} />
           <Button variant="secondary" type="submit" disabled={!validId.test(lookup) || !deskAddress || !online}>Find request</Button>
           {id !== undefined && <Button variant="ghost" type="button" onClick={() => { setLookup(''); setId(undefined); }}>Recent requests</Button>}
         </form>
-        <Button variant="secondary" disabled={!deskAddress || !online} onClick={() => { setDiscover(true); refresh(); }}><Radio size={14} /> Discover on Arkiv</Button>
+        <Button variant="secondary" disabled={!deskAddress || !online || loading} onClick={() => { setDiscover(true); refresh(); }}><Radio size={14} /> {packetCount === null ? 'Discover on Arkiv' : 'Refresh Arkiv listings'}</Button>
       </div>}
-      {packetStatus && <div className="trader-note" role="status">{packetStatus}</div>}
       {!deployment && <div className="trader-note" role="status">Waiting for the deployment.</div>}
       {deployment && !deskAddress && <div className="trader-note" role="status">Trader credit is unavailable on this deployment.</div>}
       {deskAddress && !online && <div className="trader-note" role="status">Waiting for the lending chain.</div>}

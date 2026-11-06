@@ -22,6 +22,7 @@ const packets = defineSchema(tag, {
 const rabdiChain = rabdi({ accessKey: process.env.NEXT_PUBLIC_ARKIV_ACCESS_KEY ?? '' });
 const RECORD_RETENTION_SECONDS = 90 * 24 * 60 * 60;
 export const arkivExplorer = rabdiChain.blockExplorers.default.url;
+export const arkivAccessKeyConfigured = Boolean(process.env.NEXT_PUBLIC_ARKIV_ACCESS_KEY?.trim());
 
 export async function readPackets(chainId: number, desk: Address) {
   const client = createPublicClient({ chain: rabdiChain, transport: http(undefined, { timeout: 6000, retryCount: 0 }) });
