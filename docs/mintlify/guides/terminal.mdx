@@ -1,36 +1,19 @@
 ---
-title: 'Terminal screens and interaction modes'
-description: 'Navigate the application while distinguishing live chain state, research feeds and payoff views.'
+title: 'AQRA trader-credit screens'
+description: 'The four current product destinations and what each one reads or writes.'
 ---
 
-| Route | Screen | Purpose |
+| Destination | Purpose | State and actions |
 | --- | --- | --- |
-| `/`, `/terminal/`, `/markets/` | Market terminal | External market risk estimates and AQRA-issued collateral markets |
-| `/outcomes/` | Outcome graph | Markets grouped by shared onchain observation |
-| `/compose/` | Portfolio studio | Select/drag claims, edit whole units, inspect payout and lock |
-| `/proof/` | Proof inspector | Finite state table, live verifier result and canonical metadata |
-| `/credit/` | Credit desk | Borrower requests and distinct-lender funding |
-| `/portfolio/` | My portfolio | Wallet claims, vault positions, borrower/lender ledger and repayment |
-| `/settlements/` | Settlement audit | Loan selection, realized waterfall and transaction evidence |
-| `/ops/` | Operations | Local test setup or opt-in Chainlink historical-feed resolution |
-| `/docs/` | Embedded protocol explanation | Compact application documentation, separate from this Mintlify site |
+| **Data** | Review the Polymarket sample, forward trader outcomes, dated wallet evidence and benchmark export. | Reads the checked-in replay. It does not estimate repayment probability or lender return. |
+| **Risk engine** | Stress explicit default, correlation and bond-recovery assumptions. | Shows model output and keeps pooled credit at `REJECT` until loan labels, validation and committed capital exist. |
+| **Borrow** | Resolve a wallet or ENS group, review the as-of evidence, choose fixed terms and request credit. | Linked wallet controllers consent; the borrower wallet approves and escrows the bond. |
+| **Lend** | Review an attested request and fund or wait. | A distinct lender acknowledges the uncovered principal shortfall before funding. Repayment and matured default are contract state. |
 
-## Exact models versus financial state
+## Current demo terms
 
-The composer payoff surface evaluates settlement scenarios. It is not a probability distribution, price feed, wallet balance or transaction. Changing a scenario only recomputes a deterministic payoff. Portfolio cashflows aggregate confirmed protocol events in the bounded read window.
+The local Anvil demo uses $100 test-USDC principal, $102 due and a $25 bond. Assuming full bond recovery, the lender still has $75 of principal exposed to loss. If the bond token or contract cannot deliver, the loss can be greater. Trader performance is not collateral.
 
-## Offline behavior
+## Earlier product direction
 
-When the configured RPC is unavailable, chain-powered views show offline state and **wallet writes are disabled**. The app does not substitute a saved chain snapshot or balances. External market research requires its configured read API. Hosted static HTML does not make a local devnet public.
-
-## Accessibility and design
-
-The final terminal uses Poppins, JetBrains Mono numeric roles, black/charcoal surfaces, pale periwinkle accents and semantic Kimia-inspired tokens in `apps/web/src/app/kimia.css`. No reference branding or trading figures are copied.
-
-- Claim chips support native click/keyboard selection as well as drag/drop.
-- The payoff surface supports Left/Right arrows and Home when focused.
-- Exact state tables supplement graphics.
-- Wallet dialog supports focus containment, Escape and focus return.
-- Reduced-motion and 390px responsive checks exist in Playwright.
-
-These focused checks are not an independent WCAG certification. See [design specification](/specifications/DESIGN_SYSTEM).
+The original Floor Protocol terminal described markets, an outcome graph, portfolio composer, proof inspector, credit desk, dashboard and settlement explorer. Those seven screens are not the current AQRA application. The related contract specifications remain available under [Specifications](/specifications/index) for historical and protocol-engineering context.

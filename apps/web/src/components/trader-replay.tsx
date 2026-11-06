@@ -145,15 +145,25 @@ export function TraderReplay({ focusRiskSignal = 0 }: { focusRiskSignal?: number
   if (!run) return <Panel title="Loading evidence"><div className="trader-panel-body" role="status">Reading the captured replay…</div></Panel>;
 
   const chosenMonth = run.coverage.decisionMonths.find(row => row.month === month);
+  const overall = (key: Cohort) => run.summary.find(row => row.cohort === key);
+  const consistency = overall('score');
+  const pnlRank = overall('pnl');
+  const baseline = overall('baseline');
+  const hitRate = (row: typeof consistency) => row?.evaluated
+    ? `${row.forwardProfitable}/${row.evaluated} · ${(row.forwardProfitable / row.evaluated * 100).toFixed(1)}%`
+    : 'no forward observations';
+  const leadPp = consistency?.evaluated && pnlRank?.evaluated
+    ? (consistency.forwardProfitable / consistency.evaluated - pnlRank.forwardProfitable / pnlRank.evaluated) * 100
+    : null;
   return <>
     <div className="stats-grid three">
       <Stat label="Wallet histories" value={`${number.format(run.coverage.pnlCaptured)} / ${number.format(run.coverage.pnlWallets)}`} detail={number.format(run.coverage.pnlDays) + ' daily observations'} icon={<Wallet size={15} />} />
       <Stat label="Walk-forward rounds" value={run.rounds.length} detail={run.first + ' → ' + run.last + ' UTC · ' + run.sampleProfile} icon={<BarChart3 size={15} />} />
       <Stat label="Polymarket fills" value={number.format(run.coverage.polyFills)} detail={`${run.coverage.polyMarkets} / ${run.coverage.polyPlanned} resolved sample markets`} icon={<Fingerprint size={15} />} />
     </div>
-    <Panel title="Forward trader outcomes" eyebrow="WALK-FORWARD · NEXT-MONTH OBSERVATIONS" action={<a className="button secondary" href="/underwriting/run.json" download="aqra-underwriting-run.json"><Download size={14} /> Export data</a>}>
+    <Panel title="Forward trader outcomes" eyebrow="WALLET-MONTHS · NEXT-MONTH P&amp;L" action={<a className="button secondary" href="/underwriting/run.json" download="aqra-underwriting-run.json"><Download size={14} /> Export data</a>}>
       <div className="trader-panel-body">
-        <p className="trader-note">Each cutoff selects wallets using only prior data; the chart measures whether those wallets had positive realized P&amp;L in the following month. These observations do not measure loan repayment.</p>
+        <p className="trader-note">Consistency screen: {hitRate(consistency)} positive next month. Monthly P&amp;L rank: {hitRate(pnlRank)}; seeded sample: {hitRate(baseline)}. {leadPp !== null && `The consistency screen was ${Math.abs(leadPp).toFixed(1)} percentage points ${leadPp < 0 ? 'below' : 'above'} monthly P&L rank. `}These are repeated wallet-month performance observations, not loan repayment outcomes.</p>
         <div className="trader-replay-layout">
         <ReplayTrajectory run={run} />
         <div className="trader-bars" aria-label="Following-month positive realized P&L rate by policy">

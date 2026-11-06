@@ -22,6 +22,18 @@ The local/testnet demonstration uses $100 principal, $102 due and a $25 bond. Th
 
 The benchmark samples resolved BTC and ETH 15-minute Polymarket markets and wallet histories. At each monthly cutoff, candidate policies use only information available through that cutoff; the following month measures trader P&L, activity and frequency of positive realized P&L. It compares selection policies against a deterministic sample baseline.
 
+The expanded checked-in run contains 3,906 wallet histories, 3,647,433 fill rows, 1,025,654 daily observations, 15/15 audited UTC month-boundary blocks, 6,155 candidate wallet-month rows and 11 completed forward rounds. Of 768 pre-scheduled BTC/ETH 15-minute market sessions, 764 resolved markets were captured. Exact artifact and capture limitations are in `apps/web/public/underwriting/run.json` and the source manifest.
+
+| Selection rule | Positive following-month P&L | Evaluated events |
+|---|---:|---:|
+| Consistency screen | 154/220 (70.0%) | 220 wallet-months |
+| Largest monthly P&L | 162/220 (73.6%) | 220 wallet-months |
+| 10× to below 100× settled buy | 55/160 (34.4%) | 160 wallet-months |
+| At least 100× settled buy | 2/4 (50.0%) | 4 wallet-months |
+| Seeded sample baseline | 61/220 (27.7%) | 220 wallet-months |
+
+The consistency cohort is 42.3 percentage points above the seeded sample baseline and 3.6 points below the strongest simple comparator, largest-monthly-P&L ranking. Repeated wallet-month selection means these are not independent borrower counts. No confidence interval, significance, causal effect, or credit performance is claimed.
+
 The sample is not a venue-wide census. Public daily wallet P&L is not return on equity because complete holdings and opening bankroll are unavailable. Candidate discovery and market sampling introduce selection and survivorship bias. A large winning trade is exploratory evidence, not proof of persistent skill. The benchmark never derives lender return, default probability, recovery or collateral from future trader P&L.
 
 Dataset coverage, sample gaps, source-block checks and exact policy outcomes are committed in `apps/web/public/underwriting/run.json`; the reproducible source and CSV artifacts are under `work/underwriting`. See [`TRADER_CREDIT.md`](TRADER_CREDIT.md) for reproduction commands.
@@ -36,7 +48,7 @@ The UI exposes these calculations as assumptions and results, without suggesting
 
 - **Polymarket:** public wallet P&L, trades and resolved outcomes support historical performance research.
 - **ENS:** primary-name resolution and a wallet-group text record help discover addresses; each linked controller still has to consent.
-- **Chainlink CRE:** workflow code recomputes evidence and can submit an authenticated report. Local simulation is not a public DON execution receipt.
+- **Chainlink CRE:** workflow source recomputes evidence for a request-bound report. No successful official CLI simulation or live CRE deployment is recorded yet; simulation would still not be a public DON execution receipt.
 - **Arkiv:** optional expiring public underwriting packets can be checked against the onchain request. Packet publication does not transfer funds or create collateral.
 
 ## Limitations and next study

@@ -1,39 +1,41 @@
 ---
-title: 'Implementation status'
-description: 'What is implemented, what has public-chain evidence, and what is not delivered.'
+title: 'Current implementation status'
+description: 'What works in AQRA now and what the evidence still does not support.'
 ---
 
-## Delivered in source
+## Current product
 
-| Area | Implementation |
-| --- | --- |
-| Claims | Fully backed complete sets, pre-maturity merge, fixed 1/0 and common 0.5/0.5 redemption |
-| Proof and custody | Restricted shared-observation pair verifier, exact ERC-1155 batch custody, one lien |
-| Credit | Borrower consent, exact principal, distinct lender, fixed fee-inclusive due, upward-rounded reserve |
-| Exits | Permissionless terminal settlement and borrower-only full fixed-due repayment |
-| Terminal | Markets, composer, proof, credit, portfolio, settlement, operations and recorded read-only mode |
-| Read services | Hono API, bounded direct snapshots, persistent reorg-aware JSON journal, research feed |
-| External feed | Sepolia deployment path and phase-bound historical Chainlink resolver |
-| Research | Exact 2–8-leg offchain sweep; no generalized onchain collateral verification |
+The active app is a four-destination trader-credit pilot: **Data**, **Risk engine**, **Borrow** and **Lend**. The earlier outcome-token terminal is a separate historical direction.
 
-## Evidence boundaries
+## Working local flow
 
-| Mode | Meaning | Does not prove |
-| --- | --- | --- |
-| Local Anvil | Real EVM state transitions using valueless test tokens | Public deployment or real-value safety |
-| Recorded snapshot | Historical local-chain receipts and reads | Current balances or transaction authorization |
-| Public Sepolia reads | RPC inspection of canonical USDC/feed | Protocol deployment or user transactions |
-| Pinned Sepolia fork | Full mechanism against external bytecode with test-provisioned balances | Public receipts |
-| Oracle report preparation | Tested validation and unsigned calldata | CRE CLI simulation, DON attestation or live workflow |
+The app reads the committed walk-forward sample and live public wallet evidence. On local Anvil 31337, the borrower request, bond escrow, report, separate lender funding, repayment and matured-default state all use deployed contracts and show chain receipts. The local seeded-wallet path is explicitly labeled and uses test-only Anvil impersonation.
 
-The checked-in release record reports 19 unit tests, 75 offline Solidity tests, 12 Chromium cases and independent differential comparisons. These are **historical recorded results**, not a claim that this documentation change reran the protocol suite. See [evidence](/operations/evidence).
+The current example is $100 principal, $102 due and $25 bond. If the full bond is recovered, the lender still has up to $75 principal shortfall. This is a direct lender's accepted risk; it is not principal protection.
 
-## Not delivered
+## Benchmark snapshot
 
-- Public Sepolia protocol deployment receipts.
-- Successful CRE CLI simulation or live DON write.
-- EIP-712 RFQ book, tranche issuance or transferable vault certificates.
-- Live Polymarket/CTF custody, bridging, cross-chain collateral or generalized multi-leg loans.
-- Production-scale pagination, database projections, independent audit, legal clearance or mainnet support.
+| Capture or outcome | Result |
+| --- | ---: |
+| Scheduled / resolved sample markets | 768 / 764 |
+| Wallet histories | 3,906 |
+| Fill rows | 3,647,433 |
+| Daily P&L observations | 1,025,654 |
+| Verified UTC boundary blocks | 15 / 15 |
+| Candidate wallet-month rows | 6,155 |
+| Completed forward rounds | 11 |
+| Consistency screen, positive next month | 154 / 220 · 70.0% |
+| Largest monthly P&L, positive next month | 162 / 220 · 73.6% |
+| Seeded sample baseline, positive next month | 61 / 220 · 27.7% |
 
-Some terminal labels still assume local mock collateral/test resolver even when discussing the optional Sepolia path. Contract/manifest checks, not those labels, establish actual identity. See [source discrepancies](/maintenance/source-audit).
+The largest-monthly-P&L comparator is 3.6 percentage points above the consistency screen. These are repeated wallet-month P&L events, not repayment observations or independent borrower counts.
+
+## Sponsor and production evidence
+
+- Chainlink CRE workflow source exists, but a successful official CLI simulation or live workflow deployment is not recorded yet.
+- Arkiv packet write/read source exists, but no public Rabdi receipt or event-new-work record is saved. The existing-project prize requires Continuity eligibility; the team is unsure whether it is registered.
+- There is no Arc Studio project URL or Arc transaction. Current Arc rules require an Arc Studio starting project; Continuity eligibility is also unknown.
+- The risk engine keeps pooled underwriting rejected: no mature AQRA repayment/default labels, calibrated PD, out-of-time credit validation or committed pool reserve.
+- No production lending pool, external Polymarket collateral, audit, legal clearance, mainnet deployment or real-value collateral is claimed.
+
+The earlier full-release verification record applies to commit `a63d033`, not the newer working tree. See [release evidence](/operations/evidence) for that exact boundary.

@@ -1,31 +1,28 @@
 ---
-title: 'Risks and trust assumptions'
-description: 'What the mathematical bound cannot guarantee about real execution or finance.'
+title: 'Credit, data and contract risks'
+description: 'Limits of the trader screen and the direct-loan demo.'
 ---
 
 <Warning>
-This is an unaudited local/testnet prototype. Mainnet is not enabled. Do not deposit real-value assets or describe the system as audited, risk-free, insured or legally cleared.
+AQRA is a research prototype. Do not use it to make real lending decisions or deposit real-value assets. The trader score is not a probability of default, and the contracts have not been audited.
 </Warning>
 
-| Assumption / risk | Why it matters |
-| --- | --- |
-| Full issuer backing | A payout formula cannot create missing collateral |
-| Correct exact custody | The certified tokens must actually secure the loan and cannot be pledged twice |
-| Contract correctness | Bugs, reentrancy, misconfiguration or unexpected token behavior can defeat enforcement |
-| Oracle fairness | A shared numeric price preserves the restricted theorem, but a bad price changes upside allocation |
-| Oracle liveness | Terminal support is not immediate liquidity; longstop recovery still requires chain access and gas |
-| Stablecoin behavior | Peg, transferability, freezes/blacklists and proxy upgrades remain external risks |
-| Chain/RPC integrity | Wrong chain, stale manifests, reorgs and unavailable infrastructure affect safe execution |
-| Lender availability | A verified floor does not guarantee a counterparty will advance capital |
-| Acquisition economics | Buying or minting claims may cost more than the pledged floor |
-| Legal/regulatory status | Prediction claims, lending and structured products may be restricted by jurisdiction |
+## Credit and loss
 
-## Deliberate boundaries
+The benchmark measures historical trader activity and next-month realized P&L. It contains no borrower repayment or default labels. A wallet passing the research screen can still fail to repay, and the score does not establish income, assets, identity, or ability to pay.
 
-Only claims from the bound approved issuer enter the vault. Gamma/Polymarket data is research-only. There is no bridge, external CTF custody, probabilistic collateral uplift, generalized loan solver or transferable lien certificate.
+Loans are direct and bond-backed. At the demo terms of $100 principal, $102 due and a $25 bond, a lender can lose up to $75 of principal even if the full bond is recovered. Bond transfer failure, token loss, contract defects or other execution problems can make recovery lower. No shared pool or funded loss reserve exists.
 
-Pausing new locks or funding is separate from exits: settlement, full repayment and unfunded release remain available subject to their own state and token-transfer conditions. There is no admin ability to seize pledged inventory.
+## Data and identity
 
-## Incident behavior
+Public market records can be incomplete, delayed, revised or incorrectly attributed. A linked ENS name is a discovery hint, not proof that one person controls every address. Wallet consent must be current and scoped to the request. Public wallet histories may reveal sensitive behavior even when addresses are pseudonymous.
 
-A short redemption, code identity mismatch, failed transfer or inconsistent custody is an error to investigate, not something to hide behind a cache fallback. Recorded snapshots cannot authorize writes. Follow [incident response](/operations/incidents) and retain exact transaction/block evidence.
+## Execution and infrastructure
+
+The local walkthrough uses Anvil impersonation and test USDC. It demonstrates contract state transitions, not borrower authorization or public-chain settlement. On a configured network, verify chain ID, token, contract addresses, transaction status and event data before relying on a result. RPC or API outages can interrupt evidence retrieval and transaction submission.
+
+The Chainlink CRE workflow and Arkiv data path are integration code, not evidence of a successful live workflow or public write. Sponsor eligibility and product readiness must be judged from verifiable execution artifacts.
+
+## Product boundary
+
+AQRA does not custody prediction-market positions, enforce future trading profits, guarantee repayment, insure lenders, or provide a calibrated credit rating. The benchmark supports research into candidate-selection policies only. See the [whitepaper](/whitepaper) and [submission brief](/specifications/ETHGLOBAL_SUBMISSION) for methods and current evidence limits.

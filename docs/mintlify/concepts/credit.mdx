@@ -1,55 +1,26 @@
 ---
-title: 'Fixed debt and the settlement waterfall'
-description: 'Borrower consent, conservative debt limits and lender-first distributions.'
+title: 'Performance-informed, bond-backed credit'
+description: 'How AQRA separates trading evidence, posted collateral and lender risk.'
 ---
 
-A borrower publishes the **exact principal**, maximum total due and request expiry for an OPEN position. A distinct lender funds all of that principal or nothing; partial funding is not supported. Lender identity must differ from owner, beneficiary and vault.
+AQRA's active product is a direct lender and borrower flow. Public settled prediction-market history is an experimental screen. A borrower posts the escrowed bond; a distinct lender decides whether to advance the principal and accepts the uncovered shortfall.
 
-## Debt cap
+## What is enforceable
 
-```text
-D = principal + fixed lender fee
-reserve = ceil(F × bufferBps / 10000)
-maximumDue = F − reserve
-D ≤ borrowerMaximumDue
-D ≤ maximumDue
-```
+- The request binds the borrower, evidence digest, fixed terms and linked-wallet consent.
+- The bond is held in the repayment token until repayment, cancellation or matured default.
+- One distinct lender funds the fixed principal. Funding is not pooled or automatic.
+- Full repayment before the deadline returns the bond and pays the fixed due.
+- A matured unpaid loan can transfer the bond to the lender and record the principal shortfall.
 
-The deployed script selects `bufferBps = 2000` (20%). The constructor makes this immutable and permits values from 0 through 10,000; integrations must read the deployment's actual value rather than assuming a UI label.
+## Current demonstration terms
 
-For `F = 1000000`, reserve is `200000`, maximum due `800000`, sample principal `750000` and sample due `780000`. The fee is `30000`. The reserve is **headroom in the payout**, not escrowed insurance or a protocol-owned reserve pool.
+| Principal | Total due | Bond | Shortfall after full bond recovery |
+|---:|---:|---:|---:|
+| $100 | $102 | $25 | $75 |
 
-Request expiry must be in the future and no later than observation time. At expiry itself funding is rejected. New requests/funding also require unresolved observation strictly before its timestamp.
+If the bond token loses value or a token/contract/operational failure prevents recovery, the shortfall can be greater. Trading P&L is not pledged, seized or promised to the lender.
 
-## Funding
+## Separate from credit proof
 
-In one transaction, `CreditDesk` checks consent, state, deadline, exact principal and due; deactivates the request; records the loan; encumbers the position; and transfers principal directly from lender to owner. A failed transfer rolls all changes back. Due does not accrue with time.
-
-## Settlement
-
-After common finalization or cancellation, anyone may call `settle(loanId)`:
-
-1. Mark the funded loan settled.
-2. Redeem the vault's exact lower YES and upper NO claims.
-3. Require exact cash delta, redeemed amount at least certified floor, and redeemed amount at least due.
-4. Transfer fixed due to lender.
-5. Transfer residual to the immutable position beneficiary.
-
-```text
-lenderPaid = D
-beneficiaryPaid = redeemed − D
-```
-
-A shortfall **reverts**, rather than reporting a successful partial repayment. State updates and transfers are atomic.
-
-| Scenario | Redeemed | Lender | Beneficiary |
-| --- | --- | --- | --- |
-| Inside, including lower equality | 2.00 | 0.78 | 1.22 |
-| Outside, including upper equality | 1.00 | 0.78 | 0.22 |
-| Common cancellation | 1.00 | 0.78 | 0.22 |
-
-## Repayment alternative
-
-The borrower may pay **all fixed due**, including the full fee, and receive the exact pledged claims back. No partial repayment, time discount or fee prorating exists. Repayment remains available after maturity while funded. Whichever of settlement or repayment succeeds first prevents the other.
-
-No mark-to-market margin calls or liquidation engine exists in P0. Oracle delays still create liquidity/time risk.
+The performance score is not a probability of default, repayment forecast, loan approval or collateral. PD and default-dependence inputs on the Risk engine page are assumptions. AQRA's pooled-credit gate stays rejected until matured loan outcomes, validated PD and committed capital exist.

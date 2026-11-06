@@ -1,3 +1,7 @@
+# Historical implementation plan — Floor Protocol
+
+> **Superseded for the current AQRA app.** This plan describes the earlier seven-screen outcome-token product and is retained for implementation history. Current delivery status and the four-screen trader-credit scope are in [`BUILD_STATUS.md`](BUILD_STATUS.md). Its agent assignments are not active instructions.
+
 # Codex Implementation Plan, Parallel Agents and Definition of Done
 
 **Goal:** convert this design package into a new functioning Floor Protocol repository. The provided package is *not* source code or a proof that Codex has run anything.

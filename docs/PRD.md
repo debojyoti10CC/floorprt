@@ -1,3 +1,7 @@
+# Historical product requirements — Floor Protocol
+
+> **Superseded for the current AQRA app.** This 5 November 2026 document describes the earlier outcome-token collateral product. The active scope is the four-screen trader-credit pilot in [`BUILD_STATUS.md`](BUILD_STATUS.md), with the pivot recorded in ADR-019. Keep this PRD as design history; do not use it as the current demo script or product claim.
+
 # Product Requirements Document (PRD)
 
 **Product:** Floor Protocol  

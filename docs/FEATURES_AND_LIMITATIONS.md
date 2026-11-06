@@ -1,24 +1,52 @@
-# Demonstrated implementation
+# AQRA features and limitations
 
-- Eight independently authored Solidity contracts, real local deployment and pinned code identities.
-- Fully funded complete sets, merge, holder-only redemption, exact cancellation payouts and nontransferable vault positions.
-- Shared observation verification, reason-coded rejection, atomic batch custody and protection against unsolicited deposits.
-- Borrower consent, exact principal, fixed fee-inclusive debt, distinct lender, expiring request, 20% reserve and one lien.
-- Permissionless terminal settlement, lender-first cashflows, real residual, duplicate-settlement rejection and pause-safe exits.
-- Atomic full fixed-due repayment with exact claim release; paid loans cannot settle again.
-- Canonical external Sepolia USDC deployment path and a source-bound historical Chainlink resolver.
-- Command center with an interactive 3D payout model, state matrix, exact scenario controls and canonical event activity.
-- Draggable outcome nodes and outcome selection, payoff studio, proof inspector, credit, wallet portfolio, audit and resolver operations.
-- Direct reads pinned to one block, receipt recovery, pending-send guard, runtime-code identity checks and explicit offline state with no saved-snapshot substitution.
-- Read-only API, 10-second market-feed cache with a labeled five-minute stale fallback, persistent reorg-aware journal and independent Python differential model.
-- Separate-browser-wallet tests; no frontend monetary reducer and no server spending route.
+## The product in one sentence
 
-# Boundaries
+AQRA lets a prediction-market trader present dated public trading history and a cash bond to an independent lender deciding whether to fund a small fixed-term loan.
 
-- Only Anvil 31337 and optionally configured Sepolia 11155111 are supported. No public testnet receipt was produced in this session.
-- Mock USDC has no market value. Local price resolution uses a trusted test role; local clock advancement is visible and deliberate.
-- The external historical-feed adapter is tested against actual Sepolia feed/token bytecode on a pinned fork. This is not a public deployment receipt. The separate CRE preparation module is not a successful CRE CLI simulation or DON deployment.
-- Generalized 2–8-leg math is research only; the collateral vault accepts the restricted two-leg grammar.
-- No tranches, signed RFQ book, live external CTF custody, bridges, estimated correlations or price probabilities are claimed.
-- The UI's bounded direct read window is suitable for the local prototype; full-scale pagination/projections and operations require later hardening.
-- No independent audit or legal/regulatory clearance. Mainnet use is not supported.
+Performance is an experimental screening signal. The escrowed bond is the only recovery source the contract can deliver to a lender after default. The loan is undercollateralized at the demo terms; the lender accepts the residual loss directly.
+
+## Working surfaces
+
+### Data
+
+- Reads the checked-in walk-forward replay and exposes monthly policy comparisons, sample counts, wallet evidence and export.
+- The last completed benchmark has 154/220 consistency-screen wallet-months positive next month (70.0%). Largest-monthly-P&L ranking has 162/220 (73.6%); the seeded sample baseline has 61/220 (27.7%).
+- Those are trader P&L outcomes. They do not measure repayment, credit loss or return on equity. Wallet-month rows can repeat an address.
+
+### Risk engine
+
+- Computes expected loss, a beta-binomial default-count stress, VaR, Expected Shortfall, capital gap and scenario margin from explicit user assumptions.
+- Displays the assumptions separately from the results. Slider values are not observations and cannot open the pooled credit gate.
+- Pooled underwriting returns `REJECT` until mature loan outcomes, calibrated PD, temporal validation and committed loss capital exist.
+
+### Borrow
+
+- Resolves ENS primary names and the optional `com.aqra.wallets` group; linked controllers must provide request-scoped consent.
+- Loads dated Polymarket evidence, submits a fixed-term request and escrows a borrower bond through the connected wallet.
+- At default demo values, borrower requests $100, owes $102 and escrows $25. The performance screen does not guarantee repayment or approve funding.
+
+### Lend
+
+- Reads requests from the lending contract, requires a distinct lender, presents the bond-adjusted principal shortfall and records the lender's acknowledgement before funding.
+- Supports full repayment before maturity and matured default settlement from the escrowed bond. Transaction status is read from chain state and receipts.
+- A lender can lose up to $75 of principal at the $100/$25 terms if the bond transfers in full; lower bond recovery or token/contract failures can increase the loss.
+
+## Demo and integrations
+
+- **Local Anvil:** test USDC and named borrower/lender/curator accounts. The local walkthrough impersonates a sampled wallet only on loopback Anvil; it is a contract demo, not a real borrower's consent or production credit decision.
+- **Chainlink CRE:** workflow source is present. A successful `cre workflow simulate` output or a live CRE deployment is not yet recorded; do not call a report CRE-attested until that evidence exists.
+- **Arkiv:** wallet-owned, expiring request packets can be written and queried on Rabdi. No public transaction receipt or writer address is currently recorded. A packet is not a credit report, collateral or payment.
+- **ENS:** helps discover linked addresses. It does not prove common beneficial ownership or replace controller signatures.
+- **Arc:** no Arc Studio artifact, Arc deployment or Arc transaction exists in this repo's evidence.
+
+## Boundaries
+
+- The data is a sampled Polymarket research set, not a venue-wide census. Market selection, wallet discovery, source coverage and survivorship can bias it.
+- Daily realized P&L is not ROI without opening equity, full holdings and bankroll. A single 10× or 100× fill does not establish persistent skill.
+- No historical AQRA repayment/default or recovery labels exist. PD, default correlation, recovery haircuts, cost and scenario capital are uncalibrated assumptions.
+- The workflow does not custody prediction-market positions, execute trades, pledge future income or automatically collect trading profits.
+- The local test token has no market value. No public lending liquidity, production deployment, audit or regulatory clearance is claimed.
+- The legacy outcome-token protocol remains in code and technical documentation. It is not part of the AQRA app's four-screen trader-credit flow.
+
+See [`TRADER_CREDIT.md`](TRADER_CREDIT.md) for operation, [`RISK_ENGINE.md`](RISK_ENGINE.md) for formulas and calibration requirements, and [`ETHGLOBAL_SUBMISSION.md`](ETHGLOBAL_SUBMISSION.md) for the current sponsor-track evidence checklist.

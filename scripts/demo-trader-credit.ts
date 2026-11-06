@@ -88,7 +88,11 @@ try {
   const loan = await readLoan(id);
   assert.equal(loan.score, 0);
   assert.equal(await balance(borrower), borrowerBefore - bond);
-  await writeFile('services/trader-cre/workflow/config.local.json', JSON.stringify({ desk, chainId: 31337 }, null, 2) + '\n');
+  try {
+    await writeFile('services/trader-cre/workflow/config.local.json', JSON.stringify({ desk, chainId: 31337 }, null, 2) + '\n', { flag: 'wx' });
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== 'EEXIST') throw error;
+  }
   if (process.argv.includes('--pending')) {
     await writeResult({ ...provenance, state: 'Requested' });
   } else {

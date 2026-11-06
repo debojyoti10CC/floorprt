@@ -33,6 +33,18 @@ The score allocates up to 40 points to consistency, 35 to realized efficiency an
 
 The Data page uses monthly walk-forward rounds. At each decision cutoff, candidate selection uses only earlier observations. Outcomes are evaluated in the following month and show realized trader P&L and activity. They are not loan returns.
 
+The expanded sample schedules 768 BTC/ETH 15-minute market sessions across November 2025–October 2026; 764 resolved markets were captured. It includes 3,906 wallet histories, 3,647,433 fill rows, 1,025,654 daily P&L observations, 15/15 audited month-boundary blocks, 6,155 candidate wallet-month rows and 11 completed forward rounds.
+
+| Selection policy | Positive next-month P&L | Evaluated wallet-months |
+|---|---:|---:|
+| Consistency screen | 154/220 · 70.0% | 220 |
+| Largest monthly P&L | 162/220 · 73.6% | 220 |
+| 10× to below 100× settled buy | 55/160 · 34.4% | 160 |
+| At least 100× settled buy | 2/4 · 50.0% | 4 |
+| Seeded sample baseline | 61/220 · 27.7% | 220 |
+
+The consistency screen is 42.3 percentage points above the seeded baseline and 3.6 points below the largest-monthly-P&L comparator. Wallet-month events may repeat addresses and are not independent borrower observations. No statistical significance or causal effect is claimed.
+
 The contract demo advances $100 with $102 due and a $25 bond. This is a test term, not a performance result. The contract supports voluntary repayment and bond-only recovery at default; it cannot collect future trading P&L. Mature repayment/default labels are unavailable.
 
 Polymarket daily P&L is realized market P&L, not account ROI; starting bankroll and full account equity are unavailable. High-multiple settled buys are exploratory cohorts and do not prove repeatable performance.
@@ -41,13 +53,13 @@ Polymarket daily P&L is realized market P&L, not account ROI; starting bankroll 
 
 The separate risk engine reports principal loss after the bond, expected loss, a correlated loss distribution, VaR, Expected Shortfall, reserve gap and scenario margin. PD, correlation, bond recovery and cost inputs are assumptions. The app keeps pooled approval rejected until repayment outcomes, out-of-time validation and committed capital exist. See [Risk engine specification](/specifications/risk-engine) for formulas and calibration requirements.
 
-Coverage, policy comparisons, wallet-level evidence and the current dataset commitment are shown in the app’s Data tab.
+Coverage, policy comparisons, wallet-level evidence and the current dataset commitment are shown in the app’s Data tab. The sample is not a venue-wide census; missing account equity, bankroll and open-position history prevent ROI claims.
 
 ## Data and integrations
 
 - **Polymarket** public P&L and trade sources provide wallet-level observations. Boundary blocks are recorded so a decision has a verifiable as-of point.
 - **ENS** names and text records help discover wallet groups. A name alone does not prove control; linked wallets sign scoped consent.
-- **Chainlink CRE** is designed to recompute evidence and submit an authenticated report. Local demo reports are explicitly labeled local. No public DON execution is claimed.
+- **Chainlink CRE** source can recompute evidence for an authenticated report. A successful official CLI simulation or live workflow deployment is not yet recorded. Local demo reports are explicitly labeled local; neither is a public DON execution claim.
 - **Arkiv** can hold an expiring packet so lenders can discover a request and verify its claims against the loan record. Publishing requires the borrower’s wallet and network fees.
 
 ## Risk and limits

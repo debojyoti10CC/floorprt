@@ -1,15 +1,15 @@
 # AQRA
 
-AQRA studies whether public prediction-market trading history can support a safer small-loan screening process. It combines a walk-forward Polymarket data benchmark, an assumption-driven credit-loss stress engine, borrower-consented requests and separate lender funding.
+AQRA is a **performance-informed, bond-backed direct-lending pilot for prediction-market traders**. Public trading history is an experimental screening signal; the borrower posts USDC collateral and a separate lender chooses whether to fund. Trading P&L is never collateral or a repayment guarantee.
 
 The working interface has four navigation destinations:
 
 - **Data** — observed monthly wallet outcomes, cohort comparisons and dated wallet evidence.
 - **Risk engine** — expected loss, portfolio loss distribution, VaR, Expected Shortfall, reserve gap and a binding credit gate. Default probability and default correlation are explicit stress assumptions, not inferred from P&L.
-- **Borrow** — ENS/wallet discovery, evidence review and wallet-signed bonded credit requests.
-- **Lend** — onchain requests, principal-loss acknowledgement, funding, repayment/default state and transaction receipts.
+- **Borrow** — ENS/wallet discovery, evidence review and wallet-signed bonded credit requests. Passing the performance screen does not approve a loan.
+- **Lend** — onchain requests, explicit bond-adjusted principal shortfall, lender risk acknowledgement, funding, repayment/default state and transaction receipts.
 
-Full model definitions, assumptions and implementation limits are in [`docs/RISK_ENGINE.md`](docs/RISK_ENGINE.md). The current app is local/testnet software. It has no live lending pool or calibrated probability of default. A lender can lose principal beyond the bond; the trader’s future P&L is not collateral.
+The current $100 demo advance has $102 due and a $25 bond: up to $75 of principal remains uncovered assuming full bond recovery. Full bond recovery is not guaranteed if token, contract or operational failures occur. AQRA has no mature loan outcomes, calibrated probability of default, or live lending pool; pool underwriting stays rejected. Full limits are in [`docs/RISK_ENGINE.md`](docs/RISK_ENGINE.md) and [`docs/FEATURES_AND_LIMITATIONS.md`](docs/FEATURES_AND_LIMITATIONS.md).
 
 ## Run the demo
 

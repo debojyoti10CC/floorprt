@@ -145,7 +145,7 @@ export function TraderBorrow({ onRequest }: { onRequest: (id: bigint) => void })
         </form>
         {identity && <div className="trader-inline"><Badge tone="blue">{identity.name}</Badge><Address value={identity.primary} /><span className="trader-note">ENS block {identity.block}</span></div>}
         {evidence && <>
-          <div className="trader-inline"><Badge tone={evidence.decision.qualified ? 'green' : 'amber'}>{evidence.decision.qualified ? 'Eligible' : 'Held'}</Badge>
+          <div className="trader-inline"><Badge tone={evidence.decision.qualified ? 'green' : 'amber'}>{evidence.decision.qualified ? 'Passes pilot screen' : 'Below pilot screen'}</Badge>
             <strong className="mono">{evidence.decision.score}/100</strong><span className="trader-note">{evidence.decision.reason}</span></div>
           <div className="trader-inline">{evidence.wallets.map(address => <Address value={address} key={address} />)}</div>
           <dl className="trader-metrics">
@@ -153,6 +153,7 @@ export function TraderBorrow({ onRequest }: { onRequest: (id: bigint) => void })
             <div><dt>Active months</dt><dd>{evidence.decision.activeMonths}/3</dd></div>
             <div><dt>Wallets in group</dt><dd>{evidence.wallets.length}</dd></div>
           </dl>
+          <p className="trader-note">This performance screen is not a repayment forecast or loan approval. A separate lender decides whether to fund.</p>
           {wallet && identity && !sameWallet(identity.primary, wallet) && <p className="trader-note" role="status">Connect {short(identity.primary)} to borrow under this name.</p>}
           {evidence.decision.qualified && <details className="trader-method">
             <summary>Trading proxy controllers</summary>
@@ -192,7 +193,7 @@ export function TraderBorrow({ onRequest }: { onRequest: (id: bigint) => void })
         </div>
         <dl className="trader-metrics">
           <div><dt>Repayment</dt><dd>{usd(terms?.due)}</dd></div>
-          <div><dt>Max principal loss</dt><dd className="trader-loss">{usd(terms ? terms.principal > terms.bond ? terms.principal - terms.bond : 0n : null)}</dd></div>
+          <div><dt>Shortfall after full bond recovery</dt><dd className="trader-loss">{usd(terms ? terms.principal > terms.bond ? terms.principal - terms.bond : 0n : null)}</dd></div>
         </dl>
         {!terms && <p className="trader-note">Enter up to 100 USDC, a bond of 25% to 102% of principal, and a term of 1 to 30 days.</p>}
         {!wallet && <p className="trader-note">Connect the borrower wallet to sign.</p>}

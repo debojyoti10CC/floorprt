@@ -2,33 +2,27 @@
   "$schema": "https://mintlify.com/docs.json",
   "theme": "maple",
   "name": "AQRA · Trader Credit",
-  "description": "Prediction-market trader data, underwriting and fixed-term credit.",
+  "description": "Prediction-market trader data and bond-backed direct lending.",
   "colors": {"primary": "#B7B9F4", "light": "#B7B9F4", "dark": "#777AC5"},
   "appearance": {"default": "dark", "strict": false},
   "logo": {"light": "/logo/light.svg", "dark": "/logo/dark.svg"},
   "favicon": "/favicon.svg",
-  "api": {"openapi": "api/openapi.json", "playground": {"display": "none"}},
-  "navbar": {"links": [{"label": "Source code", "href": "https://github.com/debojyoti10CC/floorprt"}]},
+  "navbar": {"links": [{"label": "Source repository", "href": "https://github.com/debojyoti10CC/floorprt"}]},
   "footer": {"socials": {"github": "https://github.com/debojyoti10CC/floorprt"}},
   "navigation": {
     "tabs": [
-      {"tab": "Documentation", "groups": [
-        {"group": "Start here", "pages": ["index", "quickstart", "status", "whitepaper", "concepts/glossary"]},
-        {"group": "Mechanism", "pages": ["concepts/payout-floor", "concepts/backing", "concepts/credit", "concepts/observations", "concepts/risks"]},
-        {"group": "User guides", "pages": ["guides/borrow", "guides/lend", "guides/settle-and-repay", "guides/terminal"]}
+      {"tab": "AQRA", "groups": [
+        {"group": "Start here", "pages": ["index", "quickstart", "status", "whitepaper"]},
+        {"group": "Borrow and lend", "pages": ["concepts/credit", "concepts/risks", "guides/borrow", "guides/lend", "guides/settle-and-repay", "guides/terminal"]},
+        {"group": "Research and submission", "pages": ["specifications/risk-engine", "specifications/TRADER_CREDIT", "specifications/ETHGLOBAL_SUBMISSION", "specifications/INTEGRATIONS_AND_PRIZES"]}
       ]},
       {"tab": "Developers", "groups": [
-        {"group": "Architecture", "pages": ["developers/architecture", "developers/proof-engine", "developers/chain-and-wallets", "developers/indexer", "developers/oracles"]},
-        {"group": "Contract reference", "pages": ["contracts/overview", "contracts/SharedObservationRegistry", "contracts/OutcomeMarketFactory", "contracts/OutcomeTokens", "contracts/FloorVerifier", "contracts/FloorVault", "contracts/CreditDesk", "contracts/TraderCreditDesk", "contracts/ChainlinkObservationResolver", "contracts/MockUSDC"]},
-        {"group": "HTTP API", "pages": ["api/overview", "api/config", "api/health", "api/snapshot", "api/observations", "api/markets", "api/market", "api/vault", "api/loans", "api/loan", "api/activity", "api/metrics", "api/research", "api/preview"]}
+        {"group": "AQRA contract", "pages": ["contracts/TraderCreditDesk", "developers/chain-and-wallets"]},
+        {"group": "Operations", "pages": ["operations/configuration", "operations/deployment", "operations/evidence", "operations/troubleshooting", "maintenance/documentation"]}
       ]},
-      {"tab": "Operations", "groups": [
-        {"group": "Run and verify", "pages": ["operations/configuration", "operations/deployment", "operations/testing", "operations/evidence", "operations/troubleshooting", "operations/incidents"]},
-        {"group": "Maintain the project", "pages": ["maintenance/documentation", "maintenance/source-audit", "maintenance/provenance"]}
-      ]},
-      {"tab": "Specifications", "groups": [
-        {"group": "Historical blueprint", "pages": ["specifications/index", "specifications/PRD", "specifications/ARCHITECTURE", "specifications/MECHANISM_AND_PROOFS", "specifications/CONTRACT_SPEC", "specifications/DATA_AND_API", "specifications/SECURITY_AND_QA", "specifications/FRONTEND_UX", "specifications/DESIGN_SYSTEM", "specifications/BUILD_PLAN_CODEX", "specifications/INTEGRATIONS_AND_PRIZES"]},
-        {"group": "Decisions, research and release records", "pages": ["specifications/risk-engine", "specifications/IMPLEMENTATION_DECISIONS", "specifications/REFERENCE_RESEARCH", "specifications/SOURCE_AUDIT", "specifications/BUILD_STATUS", "specifications/FEATURES_AND_LIMITATIONS", "specifications/EXTERNAL_DEPLOYMENT", "specifications/RELEASE_EVIDENCE"]}
+      {"tab": "Legacy Floor Protocol", "groups": [
+        {"group": "Outcome collateral reference", "pages": ["concepts/payout-floor", "concepts/backing", "concepts/observations", "contracts/overview", "contracts/SharedObservationRegistry", "contracts/OutcomeMarketFactory", "contracts/OutcomeTokens", "contracts/FloorVerifier", "contracts/FloorVault", "contracts/CreditDesk", "contracts/ChainlinkObservationResolver"]},
+        {"group": "Historical specifications", "pages": ["specifications/index", "specifications/PRD", "specifications/ARCHITECTURE", "specifications/MECHANISM_AND_PROOFS", "specifications/CONTRACT_SPEC", "specifications/DATA_AND_API", "specifications/SECURITY_AND_QA", "specifications/FRONTEND_UX", "specifications/DESIGN_SYSTEM", "specifications/BUILD_PLAN_CODEX", "specifications/IMPLEMENTATION_DECISIONS", "specifications/REFERENCE_RESEARCH", "specifications/SOURCE_AUDIT", "specifications/BUILD_STATUS", "specifications/FEATURES_AND_LIMITATIONS", "specifications/EXTERNAL_DEPLOYMENT", "specifications/RELEASE_EVIDENCE"]}
       ]}
     ]
   }

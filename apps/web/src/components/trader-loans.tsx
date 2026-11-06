@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { ArrowUpRight, Radio, RefreshCw } from 'lucide-react';
 import type { Address as EvmAddress, Hex } from 'viem';
 import { message, useProtocol } from '../lib/protocol';
-import { approveTraderCredit, sameWallet, traderDesk, underwritingApi, type TraderLoan } from '../lib/trader-credit';
+import { approveTraderCredit, repaySeededLocalDemo, sameWallet, traderDesk, underwritingApi, type TraderLoan } from '../lib/trader-credit';
 import { arkivExplorer, packetMatches, publishPacket, readPackets } from '../lib/underwriting-packets';
 import { useAction } from './actions';
 import { usd } from './trader-replay';
@@ -19,7 +19,7 @@ const eventNames: Record<string, string> = {
 const date = (seconds: bigint) => new Date(Number(seconds) * 1000).toISOString().slice(0, 16).replace('T', ' ') + ' UTC';
 const validId = /^[1-9]\d{0,18}$/;
 
-function LoanCard({ row, now, active, onChange }: { row: Row; now: bigint; active: bigint; onChange: () => void }) {
+function LoanCard({ row, now, active, demoRequestId, onChange }: { row: Row; now: bigint; active: bigint; demoRequestId?: bigint; onChange: () => void }) {
   const p = useProtocol();
   const action = useAction();
   const [acceptedBy, setAcceptedBy] = useState<EvmAddress | null>(null);
@@ -36,6 +36,7 @@ function LoanCard({ row, now, active, onChange }: { row: Row; now: bigint; activ
   const canAct = p.walletReady && !action.busy;
   const canAttest = local && sameWallet(p.address, p.deployment?.roles.curator) && !expired && !attested;
   const canReviewFunding = requested && attested && !expired && !borrower && active !== id;
+  const canRepayDemo = local && demoRequestId === id && funded;
   const acknowledged = sameWallet(acceptedBy, p.address);
   const loss = loan.terms.principal > loan.terms.bond ? loan.terms.principal - loan.terms.bond : 0n;
   const history = p.data?.activity.filter(event => event.address.toLowerCase() === desk?.toLowerCase()
@@ -77,14 +78,14 @@ function LoanCard({ row, now, active, onChange }: { row: Row; now: bigint; activ
     <div className="trader-inline">
       <span className="trader-note">Borrower</span><Address value={loan.borrower} />
       {loan.lender !== '0x0000000000000000000000000000000000000000' && <><span className="trader-note">Lender</span><Address value={loan.lender} /></>}
-      {attested && <Badge tone="blue">{loan.score}/100 · {local ? 'Local forwarder' : 'Chainlink CRE'}</Badge>}
+      {attested && <Badge tone="blue">Performance screen {loan.score}/100 · {local ? 'Local forwarder' : 'Chainlink CRE'}</Badge>}
       {packet && <Badge tone="blue">Arkiv packet matched</Badge>}
     </div>
     <dl className="trader-metrics">
       <div><dt>Principal</dt><dd>{usd(loan.terms.principal)}</dd></div>
       <div><dt>Repayment</dt><dd>{usd(loan.terms.due)}</dd></div>
       <div><dt>Bond</dt><dd>{usd(loan.terms.bond)}</dd></div>
-      <div><dt>Principal at risk</dt><dd className="trader-loss">{usd(loss)}</dd></div>
+      <div><dt>Shortfall after full bond recovery</dt><dd className="trader-loss">{usd(loss)}</dd></div>
     </dl>
     <div className="trader-inline trader-note">
       <span>{requested ? 'Fund by ' + date(loan.fundBy) : loan.maturity > 0n ? 'Maturity ' + date(loan.maturity) : ''}</span>
@@ -93,7 +94,7 @@ function LoanCard({ row, now, active, onChange }: { row: Row; now: bigint; activ
     </div>
     {canReviewFunding && <label className="trader-inline trader-risk">
       <input type="checkbox" checked={acknowledged} disabled={!p.address} onChange={event => setAcceptedBy(event.target.checked ? p.address : null)} />
-      I accept a principal loss of up to {usd(loss)}.
+      I accept a principal shortfall of up to {usd(loss)}, assuming full bond recovery.
     </label>}
     <div className="trader-inline">
       {requested && canAttest && <Button variant="secondary" disabled={!canAct} onClick={attest}>Submit local report</Button>}
@@ -101,6 +102,8 @@ function LoanCard({ row, now, active, onChange }: { row: Row; now: bigint; activ
       {requested && (borrower || expired) && <Button variant="secondary" disabled={!canAct} onClick={() => transact('Cancel request and return bond', 'cancelRequest')}>Cancel and return bond</Button>}
       {requested && attested && !expired && borrower && p.mode === 'injected' && !packet && !published && <Button variant="secondary" disabled={!canAct} onClick={publish}><Radio size={14} /> Publish on Arkiv</Button>}
       {funded && borrower && !mature && <Button disabled={!canAct} onClick={() => transact('Repay trader loan', 'repay', loan.terms.due)}>Repay {usd(loan.terms.due)}</Button>}
+      {canRepayDemo && <Button variant="secondary" disabled={!p.online || action.busy}
+        onClick={() => void action.run(async () => { await repaySeededLocalDemo(p, id); onChange(); })}>Repay from local demo borrower</Button>}
       {mature && <Button variant="danger" disabled={!canAct} onClick={() => transact('Settle default and release bond', 'settleDefault')}>Settle default</Button>}
     </div>
     {published && <div className="trader-inline trader-note">
@@ -111,7 +114,7 @@ function LoanCard({ row, now, active, onChange }: { row: Row; now: bigint; activ
   </article>;
 }
 
-export function TraderLoans({ mine = false, selectedId }: { mine?: boolean; selectedId?: bigint }) {
+export function TraderLoans({ mine = false, selectedId, demoRequestId }: { mine?: boolean; selectedId?: bigint; demoRequestId?: bigint }) {
   const p = useProtocol();
   const { deployment, rpcUrl, address, online } = p;
   const [rows, setRows] = useState<Row[]>([]);
@@ -192,7 +195,7 @@ export function TraderLoans({ mine = false, selectedId }: { mine?: boolean; sele
       {error && <div className="error-box" role="alert">{error}</div>}
       {deskAddress && online && (!mine || address) && !rows.length && !error && <p className="trader-note" role="status">{loading ? 'Reading the desk…' : 'No credit requests.'}</p>}
       {deskAddress && online && <div className="trader-loan-list">{rows.filter(row => !mine || sameWallet(row.loan.borrower, address)).map(row =>
-        <LoanCard key={deskAddress + ':' + row.id} row={row} now={now} active={active} onChange={refresh} />)}</div>}
+        <LoanCard key={deskAddress + ':' + row.id} row={row} now={now} active={active} demoRequestId={demoRequestId} onChange={refresh} />)}</div>}
     </div>
   </Panel>;
 }

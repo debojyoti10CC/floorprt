@@ -1,6 +1,6 @@
 ---
 title: 'Local demo quickstart'
-description: 'Run AQRA with a local EVM and wallet-authorized test-fund loans.'
+description: 'Start the local EVM and exercise the AQRA bonded-credit lifecycle.'
 ---
 
 ## Start the local stack
@@ -18,23 +18,24 @@ pnpm dev
 | Read API | `http://127.0.0.1:8787/api/v1/health` |
 | Anvil RPC | `http://127.0.0.1:8545`, chain 31337 |
 
-The runner compiles and deploys contracts, seeds the local chain and starts the API and app. Keep Anvil on loopback. Local accounts and test USDC are development-only.
+The runner builds and deploys contracts, seeds local test-USDC and starts the API and app. Keep Anvil on loopback. Local roles and faucet funds are developer tools, not customer accounts or real-value USDC.
 
-## Walk through the credit desk
+## Run the interactive lifecycle
 
-1. Open the **Data** tab to inspect the historical replay and cohort results.
-2. Open **Borrow**, connect the local borrower, enter a `.eth` name or one to four wallets, then load the public history.
-3. Review the dated evidence, bond and fixed repayment. Submit the wallet-signed request.
-4. Use the local curator account to submit a clearly labeled local report for the request.
-5. Switch to a separate local lender, acknowledge the maximum loss and fund the exact request.
-6. Repay before maturity, or advance the local clock and settle the default to inspect the bond recovery and shortfall.
+1. Open **Borrow** and expand **Run the contract demo**.
+2. Read the local-only notice and confirm that this uses a sampled wallet impersonated only by Anvil.
+3. Choose **Create local test request**. The borrower bond is escrowed in a local-chain transaction.
+4. Choose **Connect local curator**. In the request card, choose **Submit local report**.
+5. Choose **Connect local lender**. Review principal, due, bond and the shortfall. Check the loss acknowledgement, then choose **Fund**.
+6. Choose **Connect local borrower**. On the funded request, choose **Repay from local demo borrower**. The test action impersonates that borrower only on loopback Anvil.
+7. Review each confirmed transaction and the updated request state. A matured request can be settled as default instead of repaid; do not advance the clock unless you want to demonstrate that alternative.
 
-For a seeded request using a historically qualifying wallet, run `pnpm underwriting:demo --pending` in a second terminal. The command records test-chain transaction details under `work/underwriting`.
+The interactive path uses a test account selected from the captured sample and does not represent real borrower consent. To try the wallet-signed borrower path, connect a local browser wallet, load its own ENS name or wallet evidence, and sign its request directly.
 
 ## Reproduce the wider replay
 
 ```bash
-pnpm underwriting:benchmark
+pnpm underwriting:replay --benchmark
 ```
 
-This collects the predeclared 12-month sample, audits source boundary blocks and writes a reproducible replay. See [Trader credit](/specifications/REFERENCE_RESEARCH) and the [whitepaper](/whitepaper) for the exact assumptions and limitations.
+This replays captured source data without making new collection requests. To collect missing captures and replay the fixed sample, run `pnpm underwriting:benchmark`. The sample measures following-month trader P&L; it is not credit repayment evidence. See [Trader credit](/specifications/TRADER_CREDIT), [risk model](/specifications/risk-engine) and the [whitepaper](/whitepaper).

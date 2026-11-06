@@ -15,6 +15,10 @@ export function monthOf(timestamp: number) {
   return new Date(timestamp * 1000).toISOString().slice(0, 7);
 }
 
+export function lastCompleteMonth(now = Math.floor(Date.now() / 1000)) {
+  return offsetMonth(monthOf(now), -1);
+}
+
 export function monthsBetween(first: string, last: string): string[] {
   const count = (Number(last.slice(0, 4)) - Number(first.slice(0, 4))) * 12
     + Number(last.slice(5)) - Number(first.slice(5)) + 1;

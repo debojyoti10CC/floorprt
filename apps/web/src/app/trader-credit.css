@@ -184,6 +184,11 @@
 .whitepaper-fact strong { font-family: var(--mono); font-size: var(--font-size-lg); font-variant-numeric: tabular-nums; }
 .whitepaper-links { display: flex; flex-wrap: wrap; gap: var(--space-5); }
 .whitepaper-links a { display: inline-flex; align-items: center; gap: var(--space-2); color: var(--color-accent); }
+.trader-demo-body { gap: var(--space-5); }
+.trader-demo-steps { display: grid; gap: var(--space-3); margin: 0; padding-left: 22px; color: var(--color-text-secondary); font-size: var(--font-size-sm); }
+.trader-demo-status { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); padding: var(--space-3) var(--space-4); border: 1px solid var(--color-border-default); border-radius: var(--radius-xs); background: var(--color-surface-muted); color: var(--color-text-primary); font-family: var(--mono); font-size: var(--font-size-xs); }
+.trader-demo-confirm { display: flex; align-items: flex-start; gap: var(--space-3); padding: var(--space-4); border: 1px solid var(--color-border-default); border-radius: var(--radius-xs); background: var(--color-surface-muted); color: var(--color-text-secondary); font-size: var(--font-size-xs); line-height: 1.5; }
+.trader-demo-confirm input { flex: none; margin-top: 2px; accent-color: var(--color-accent); }
 @media(max-width: 900px) {
   .trader-loan-layout, .trader-replay-layout, .trader-risk-chart-layout { grid-template-columns: minmax(0, 1fr); }
   .trader-risk-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }

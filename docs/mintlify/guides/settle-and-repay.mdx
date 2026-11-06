@@ -1,33 +1,16 @@
 ---
-title: 'Settle or repay a funded loan'
-description: 'Compare terminal redemption with borrower-funded full repayment and exact collateral release.'
+title: 'Repay or settle a trader-credit loan'
+description: 'Follow the fixed-due repayment and matured bond recovery paths.'
 ---
 
-## Terminal settlement
+## Borrower repayment
 
-1. In Operations, inspect the common observation. Local test resolution requires the configured resolver and timestamp; cancellation is permissionless only at the longstop.
-2. On Anvil, **Advance local clock & finalize** explicitly mines a future block. This may mature other observations. A scenario slider in the studio does not write oracle state.
-3. Open **Settlement audit** (`/settlements/`), select a funded loan with terminal observation and call **Settle loan** from any connected wallet.
-4. Inspect `LoanSettled(redeemed, lenderPaid, borrowerPaid)` and transaction/block/log identity. The residual recipient is the immutable beneficiary, not necessarily the caller or borrower owner.
-5. Refresh and reproduce settled state from the chain.
+Before maturity, connect the borrower wallet and choose **Repay** on the funded request. The borrower pays the full fixed due; the escrowed bond returns to the borrower. No installment, discount or partial repayment is supported. Verify the confirmed transaction and `Repaid` state.
 
-With one-unit canonical collateral, the inside state redeems 2 test USDC and pays 0.78 / 1.22. Outside/upper equality/shared cancellation redeems 1 and pays 0.78 / 0.22.
+## Matured default
 
-Shortfall, unresolved observation, already-paid loan or failed transfers revert. Do not retry a pending transaction as a new send before checking its receipt.
+After maturity, an unpaid loan becomes eligible for **Settle default** from any connected wallet. The contract transfers the escrowed bond to the lender and records principal loss beyond the bond. This is bond recovery, not liquidation of a prediction-market position. The lender may still lose principal.
 
-## Full fixed-due repayment
+## Local demonstration
 
-Connect the borrower, open **My portfolio** (`/portfolio/`) and select **Repay** on a funded borrower loan. The flow approves the full due if needed, then calls `CreditDesk.repay`.
-
-- All agreed principal and fee remain due; no prorating or early-payment discount.
-- Payment goes directly from borrower to lender.
-- The exact original claims return to the **position owner**.
-- Loan becomes REPAID and position becomes RELEASED.
-- Repayment may occur after maturity or oracle finalization while the loan is still FUNDED.
-- New-funding pauses do not block repayment.
-
-Settlement and repayment are mutually exclusive: the first successful transaction prevents the other. Failed ERC-20 transfer or receiver callback rolls the entire operation back.
-
-## Unfunded inventory
-
-An OPEN position has no loan to settle or repay. The owner may release it, including after observation maturity, then redeem eligible wallet claims after finalization/cancellation. Whole wallet complete sets can only merge before observation time.
+The local seeded-wallet walkthrough adds a labeled **Repay from local demo borrower** action after the separate lender funds. It impersonates only on loopback Anvil and pays with test USDC. A locally advanced clock is an explicit test operation; it changes state in the local chain and is not part of the production path.

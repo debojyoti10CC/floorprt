@@ -1,17 +1,17 @@
 # AQRA trader credit
 
-AQRA studies settled prediction-market trader history as an input to small-loan screening. The replay compares trader outcomes under fixed historical cutoffs. The desk escrows a first-loss bond and requires an authenticated report before a lender can fund. A performance score is not probability of default.
+AQRA is a performance-informed, bond-backed direct-lending pilot for prediction-market traders. The replay compares trader outcomes under fixed historical cutoffs. The desk escrows a first-loss bond and requires an authenticated report before a separate lender can decide whether to fund. A performance score is not probability of default, loan approval, collateral or a repayment forecast.
 
 ## Run the pilot
 
 Run `pnpm install --frozen-lockfile` and `pnpm dev` from the repository root. Open [AQRA](http://127.0.0.1:3000/).
 
-- **Data** compares completed walk-forward rounds. Change the month, filter the selection policy and select a wallet for dated evidence and its largest sampled settled buy. Download the replay JSON from the panel.
+- **Data** compares completed walk-forward rounds. The current expanded run has 11 completed rounds; 70.0% of consistency-screen wallet-months and 73.6% of largest-monthly-P&L wallet-months are positive next month. The simpler monthly-P&L comparator is 3.6 percentage points higher; neither result measures loan repayment. Change the month, filter the selection policy and select a wallet for dated evidence. Download the replay JSON from the panel.
 - **Risk engine** exposes assumption-driven credit loss, dependence and reserve stresses. It does not infer PD from P&L and it keeps pooled lending rejected until real credit outcomes, validation and committed capital exist. See [`RISK_ENGINE.md`](RISK_ENGINE.md) for the full model.
 - **Borrow** accepts one to four addresses or an ENS name. Check the latest closed month's history, review terms, verify the controllers, and sign the collateral allowance and request. The request appears in **Your request**. Cancel it before funding or repay by maturity.
 - **Lend** reads recent onchain requests and accepts an exact request ID. An attested request shows its bond, total due, deadline, maximum principal loss and receipts. Connect a distinct lender and acknowledge the loss to fund. After maturity any connected account can settle an unpaid loan.
 
-The local desk uses a curator-only forwarder and test collateral. It labels attestation receipts **Local forwarder**. Run `pnpm underwriting:demo` to exercise the contract with a qualifying historical address. The script uses explicitly labeled localhost impersonation, fetches real history and checks confirmed balances. Run `pnpm underwriting:demo --pending` to prepare a fresh request for the local curator or CRE simulation. Use `--controller <address>` to verify a supported Polygon proxy/controller pair and impersonate the controller on Anvil. The script records the request event index and hashes in `work/underwriting/local-credit-demo.json`.
+The local desk uses a curator-only forwarder and test collateral. It labels attestation receipts **Local forwarder**. Run `pnpm underwriting:demo` to exercise the contract with a wallet that passes the current performance screen. The script uses explicitly labeled localhost impersonation, fetches real history and checks confirmed balances. Run `pnpm underwriting:demo --pending` to prepare a fresh request for the local curator or CRE simulation. Use `--controller <address>` to verify a supported Polygon proxy/controller pair and impersonate the controller on Anvil. The script records the request event index and hashes in `work/underwriting/local-credit-demo.json`.
 
 ## Replay evidence
 
@@ -33,9 +33,9 @@ Polymarket's legacy proxy and single-signature Safe routes support a controller 
 
 ## Chainlink CRE
 
-The workflow in `services/trader-cre/workflow` triggers on a finalized `TraderCreditRequested` log. It reads the terms and linked wallets from the request block, verifies Polygon controllers, fetches Polymarket P&L with node consensus, checks the source boundary blocks, and recomputes the policy and evidence digest. For an eligible, matching request it writes a report through the CRE forwarder. The receiver pins the sender, workflow ID and owner and checks the chain, desk, request, borrower, wallet set, cutoff, policy, score and expiry. A missing or rejected report leaves the bond cancellable. [Chainlink EVM writes](https://docs.chain.link/cre/capabilities/evm-read-write)
+The workflow source in `services/trader-cre/workflow` triggers on a finalized `TraderCreditRequested` log. It reads the terms and linked wallets from the request block, verifies Polygon controllers, fetches Polymarket P&L with node consensus, checks the source boundary blocks, and recomputes the policy and evidence digest. For an eligible, matching request it writes a report through the CRE forwarder. The receiver pins the sender, workflow ID and owner and checks the chain, desk, request, borrower, wallet set, cutoff, policy, score and expiry. A missing or rejected report leaves the bond cancellable. **No successful CRE CLI simulation or live CRE deployment is recorded yet.** [Chainlink EVM writes](https://docs.chain.link/cre/capabilities/evm-read-write)
 
-Install the official CRE CLI and Bun, then sign in to CRE. Run this command from the repository root with the receipt and index from a pending local request. The local target uses loopback Anvil and public Polygon. It returns the encoded report for comparison with the local curator's input. The Sepolia target signs and sends the report through CRE's configured EVM capability.
+Install the official CRE CLI and Bun, then sign in to CRE. Run this command from the repository root with the receipt and index from a pending local request. The local target uses loopback Anvil and public Polygon. A successful CLI simulation returns the encoded report for comparison with the local curator's input; this is the next CRE evidence gate. The Sepolia target signs and sends the report through CRE's configured EVM capability.
 
 ~~~text
 cre workflow simulate ./services/trader-cre/workflow --project-root ./services/trader-cre --target local-simulation --non-interactive --trigger-index 0 --evm-tx-hash <request-transaction> --evm-event-index <receipt-event-index>
