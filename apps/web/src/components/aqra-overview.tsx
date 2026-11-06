@@ -60,7 +60,6 @@ export function ARQOOverview(){
       {markets.length===0?<div className="aqra-empty"><Layers3 size={22}/><b>{p.loading?'Loading approved markets':'No onchain markets available'}</b><span>{p.online?'Create an observation and markets in Operations & devnet.':'Connect the local devnet for current market metadata.'}</span><Link href="/app/ops/">Open operations <ArrowRight size={13}/></Link></div>:filtered.length===0?<div className="aqra-empty"><Search size={22}/><b>No markets match</b><span>Change your search or asset filter.</span></div>:<div className="aqra-market-grid">{filtered.slice(0,12).map(m=><MarketCard key={m.id} market={m} p={p} onAdd={()=>{if(choosePair(m))router.push('/app/compose/')}} eligible={eligible.some(x=>x.id===m.id)}/>)}</div>}
       <div className="aqra-market-note"><ShieldCheck size={14}/><span>Only approved, fully backed onchain claims can enter the collateral vault. External venue data is not used as collateral.</span><Link href="/app/markets/">Full directory <ArrowUpRight size={12}/></Link></div>
     </section>
-    {p.data?.source==='RECORDED_CHAIN'&&<div className="aqra-recorded">Recorded data is read only. Connect the configured chain before any wallet transaction.</div>}
   </div>;
 }
 

@@ -8,6 +8,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@arkiv-network/sdk": "1.0.1",
     "@floor/proof-engine": "workspace:*",
     "@floor/shared": "workspace:*",
     "@xyflow/react": "12.12.1",
