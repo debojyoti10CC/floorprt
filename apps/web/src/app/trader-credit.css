@@ -189,6 +189,23 @@
 .whitepaper-fact strong { font-family: var(--mono); font-size: var(--font-size-lg); font-variant-numeric: tabular-nums; }
 .whitepaper-links { display: flex; flex-wrap: wrap; gap: var(--space-5); }
 .whitepaper-links a { display: inline-flex; align-items: center; gap: var(--space-2); color: var(--color-accent); }
+.whitepaper-head-actions { display: flex; flex-wrap: wrap; gap: var(--space-3); }
+.whitepaper-authors { margin-top: var(--space-4); color: var(--color-text-secondary); font-size: var(--font-size-sm); line-height: 1.65; }
+.whitepaper-table-wrap { max-width: 100%; margin-top: var(--space-6); overflow-x: auto; border: 1px solid var(--color-border-default); border-radius: var(--radius-xs); }
+.whitepaper-table { width: 100%; min-width: 740px; border-collapse: collapse; }
+.whitepaper-table th,.whitepaper-table td { padding: var(--space-4) var(--space-5); border-bottom: 1px solid var(--color-border-default); text-align: left; vertical-align: top; font-size: var(--font-size-xs); line-height: 1.55; }
+.whitepaper-table th { color: var(--color-text-secondary); font-weight: 500; background: var(--color-surface-muted); }
+.whitepaper-table td { color: var(--color-text-secondary); white-space: normal; }
+.whitepaper-table td:first-child { min-width: 150px; color: var(--color-text-primary); }
+.whitepaper-chart { display: grid; gap: var(--space-4); margin-top: var(--space-6); padding: var(--space-6); border: 1px solid var(--color-border-default); border-radius: var(--radius-xs); background: var(--color-surface-muted); box-shadow: var(--shadow-inset); }
+.whitepaper-chart-row { display: grid; grid-template-columns: minmax(150px,1fr) minmax(100px,2fr) 52px; align-items: center; gap: var(--space-4); }
+.whitepaper-chart-row>span { display: grid; gap: var(--space-1); color: var(--color-text-primary); font-size: var(--font-size-xs); }
+.whitepaper-chart-row small { color: var(--color-text-secondary); font-size: 10px; line-height: 1.4; }
+.whitepaper-chart-row strong { color: var(--color-text-primary); font-family: var(--mono); font-size: var(--font-size-xs); text-align: right; }
+.whitepaper-chart-track { height: 10px; overflow: hidden; border-radius: var(--radius-pill); background: var(--color-surface-raised); box-shadow: var(--shadow-inset); }
+.whitepaper-chart-track i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg,var(--color-accent-active),var(--color-accent)); }
+.whitepaper-chart-axis { display: flex; justify-content: space-between; grid-column: 2 / 3; color: var(--color-text-secondary); font: 10px var(--mono); }
+.whitepaper-footnote { margin-top: var(--space-5); font-size: var(--font-size-xs) !important; }
 .trader-demo-body { gap: var(--space-5); }
 .trader-demo-steps { display: grid; gap: var(--space-3); margin: 0; padding-left: 22px; color: var(--color-text-secondary); font-size: var(--font-size-sm); }
 .trader-demo-status { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); padding: var(--space-3) var(--space-4); border: 1px solid var(--color-border-default); border-radius: var(--radius-xs); background: var(--color-surface-muted); color: var(--color-text-primary); font-family: var(--mono); font-size: var(--font-size-xs); }
@@ -203,9 +220,44 @@
   .app-footer-links { gap: var(--space-3); flex-wrap: wrap; }
   .whitepaper-section { padding: var(--space-5); }
   .whitepaper-grid { grid-template-columns: minmax(0, 1fr); }
+  .whitepaper-chart { padding: var(--space-5); }
+  .whitepaper-chart-row { grid-template-columns: minmax(0,1fr) 52px; gap: var(--space-2) var(--space-4); }
+  .whitepaper-chart-row>span { grid-column: 1; grid-row: 1; }
+  .whitepaper-chart-track { grid-column: 1; grid-row: 2; }
+  .whitepaper-chart-row strong { grid-column: 2; grid-row: 1 / span 2; }
+  .whitepaper-chart-axis { grid-column: 1 / 2; }
   .trader-risk-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .trader-risk-gate { grid-template-columns: 1fr; }
   .trader-bar-row { grid-template-columns: minmax(0, 1fr) 82px; }
   .trader-bar-row b { grid-column: 2; grid-row: 1; }
   .trader-bar-track { grid-column: 1 / -1; }
 }
+
+.credit-mode-gateway { display: grid; gap: var(--space-8); max-width: 1120px; margin: min(8vh, 72px) auto; }
+.credit-mode-intro { display: grid; gap: var(--space-4); max-width: 730px; }
+.credit-mode-intro h1 { margin: 0; font-size: clamp(30px, 5vw, 48px); font-weight: 400; letter-spacing: -.04em; }
+.credit-mode-intro p { margin: 0; max-width: 680px; color: var(--color-text-secondary); font-size: var(--font-size-lg); line-height: 1.7; }
+.credit-mode-options { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: var(--space-7); }
+.credit-mode-card { display: grid; justify-items: start; align-content: start; gap: var(--space-5); min-height: 270px; padding: clamp(20px,3vw,32px); border: 1px solid var(--color-border-default); border-radius: var(--radius-sm); background: var(--control-background); box-shadow: var(--shadow-raised); color: var(--color-text-primary); text-align: left; cursor: pointer; transition: border-color var(--duration-fast),transform var(--duration-fast),background var(--duration-fast); }
+.credit-mode-card:hover { border-color: var(--color-accent); background: var(--color-surface-muted); transform: translateY(-2px); }
+.credit-mode-card:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 3px; }
+.credit-mode-icon { display: grid; place-items: center; width: 44px; height: 44px; border: 1px solid var(--color-border-default); border-radius: var(--radius-xs); background: var(--color-surface-muted); color: var(--color-accent); box-shadow: var(--shadow-inset); }
+.credit-mode-card>.eyebrow { color: var(--color-text-secondary); font-size: var(--font-size-xs); letter-spacing: .12em; }
+.credit-mode-card strong { font-size: clamp(18px,2vw,23px); font-weight: 500; }
+.credit-mode-card>span:nth-of-type(3) { max-width: 470px; color: var(--color-text-secondary); font-size: var(--font-size-md); line-height: 1.7; }
+.credit-mode-card i { display: inline-flex; align-items: center; gap: var(--space-3); margin-top: auto; color: var(--color-accent); font-size: var(--font-size-md); font-style: normal; }
+.credit-mode-switch { display: flex; align-items: center; gap: var(--space-3); width: fit-content; max-width: 100%; margin-bottom: calc(var(--space-7) * -1); padding: var(--space-2); border: 1px solid var(--color-border-default); border-radius: var(--radius-pill); background: var(--color-surface-raised); box-shadow: var(--shadow-inset); }
+.credit-mode-switch>.eyebrow { margin: 0 var(--space-3); color: var(--color-text-secondary); font-size: var(--font-size-xs); }
+.credit-mode-switch button { display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); min-height: 38px; padding: 0 var(--space-5); border: 1px solid transparent; border-radius: var(--radius-pill); background: transparent; color: var(--color-text-secondary); font: inherit; font-size: var(--font-size-sm); cursor: pointer; }
+.credit-mode-switch button:hover,.credit-mode-switch button.selected { border-color: var(--color-border-default); background: var(--control-background); box-shadow: var(--shadow-raised); color: var(--color-text-primary); }
+.credit-mode-switch button:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+.arkiv-credit-status { display: grid; grid-template-columns: minmax(0,1.1fr) minmax(0,1fr); gap: var(--space-6); padding: var(--space-6); border: 1px solid var(--color-border-default); border-radius: var(--radius-sm); background: var(--color-surface-muted); box-shadow: var(--shadow-inset); }
+.arkiv-credit-status-copy { display: grid; align-content: start; gap: var(--space-3); }
+.arkiv-credit-status-copy>.eyebrow { color: var(--color-text-secondary); }
+.arkiv-credit-status-copy>strong { font-size: var(--font-size-lg); font-weight: 500; }
+.arkiv-credit-status-copy>p { max-width: 600px; margin: 0; color: var(--color-text-secondary); font-size: var(--font-size-sm); line-height: 1.6; }
+.arkiv-credit-status-meta { display: flex; align-content: start; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: var(--space-3); }
+.arkiv-credit-status-meta .badge { white-space: normal; }
+.arkiv-credit-status-meta .text-link { display: inline-flex; align-items: center; gap: var(--space-2); color: var(--color-accent); font-size: var(--font-size-xs); }
+@media(max-width:760px) { .credit-mode-options,.arkiv-credit-status { grid-template-columns: minmax(0,1fr); } .credit-mode-card { min-height: 230px; } .arkiv-credit-status-meta { justify-content: flex-start; } }
+@media(max-width:460px) { .credit-mode-switch { width: 100%; justify-content: space-between; } .credit-mode-switch>.eyebrow { display: none; } .credit-mode-switch button { flex: 1; padding: 0 var(--space-3); font-size: var(--font-size-xs); } }

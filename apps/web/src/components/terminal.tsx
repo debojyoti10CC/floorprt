@@ -22,16 +22,25 @@ export function Terminal({initialPage}:{initialPage:string}){
 
   const p=useProtocol();const [walletOpen,setWalletOpen]=useState(false),[mobileOpen,setMobileOpen]=useState(false),[walletError,setWalletError]=useState<string|null>(null);
   const [section,setSection]=useState<'Data'|'Risk'|TraderCreditSection>('Data');
+  const [creditMode,setCreditMode]=useState<'Borrow'|'Lend'|null>(null);
+  const [modeLoaded,setModeLoaded]=useState(false);
   const [focusRiskSignal,setFocusRiskSignal]=useState(0);
 
   const dialogRef=useRef<HTMLElement>(null);
 
   useEffect(()=>{if(!walletOpen)return;const opener=document.activeElement as HTMLElement|null;const dialog=dialogRef.current;const items=()=>Array.from(dialog?.querySelectorAll<HTMLElement>('button:not(:disabled),a[href],input:not(:disabled),select:not(:disabled),textarea:not(:disabled),[tabindex="0"]')??[]);items()[0]?.focus();const key=(e:KeyboardEvent)=>{if(e.key==='Escape'){setWalletOpen(false);return}if(e.key!=='Tab')return;const all=items(),first=all[0],last=all.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last?.focus()}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first?.focus()}};document.addEventListener('keydown',key);return()=>{document.removeEventListener('keydown',key);opener?.focus()};},[walletOpen]);
 
+  useEffect(()=>{
+    const saved=window.localStorage.getItem('aqra-credit-mode');
+    if(saved==='Borrow'||saved==='Lend'){setCreditMode(saved);setSection(saved)}
+    setModeLoaded(true);
+  },[]);
+
   const screen=initialPage==='terminal'?'markets':initialPage;
-  const current=screen==='whitepaper'?'Whitepaper':section==='Risk'?'Risk engine':section==='Borrow'?'Borrow':section==='Lend'?'Lend':'Data';
+  const current=screen==='whitepaper'?'Whitepaper':screen==='underwriting'&&modeLoaded&&!creditMode?'Choose mode':section==='Risk'?'Risk engine':section==='Borrow'?'Borrow':section==='Lend'?'Lend':'Data';
 
   const connect=async(fn:()=>Promise<void>)=>{setWalletError(null);try{await fn();setWalletOpen(false)}catch(e){setWalletError(message(e))}};
+  const chooseMode=(next:'Borrow'|'Lend')=>{setCreditMode(next);setSection(next);window.localStorage.setItem('aqra-credit-mode',next);setMobileOpen(false)};
 
   const role=p.address&&p.deployment?Object.entries(p.deployment.roles).find(([,v])=>v.toLowerCase()===p.address!.toLowerCase())?.[0]:null;
 
@@ -53,8 +62,8 @@ export function Terminal({initialPage}:{initialPage:string}){
         </nav>
         <div className="nav-label nav-group-spaced">CREDIT DESK</div>
         <nav aria-label="Credit desk navigation">
-          <button type="button" title="Borrow" aria-current={section==='Borrow'?'page':undefined} onClick={()=>{setSection('Borrow');setMobileOpen(false)}} className={`nav-item ${section==='Borrow'?'selected':''}`}><HandCoins size={18}/><span>Borrow</span>{section==='Borrow'&&<i/>}</button>
-          <button type="button" title="Lend" aria-current={section==='Lend'?'page':undefined} onClick={()=>{setSection('Lend');setMobileOpen(false)}} className={`nav-item ${section==='Lend'?'selected':''}`}><Landmark size={18}/><span>Lend</span>{section==='Lend'&&<i/>}</button>
+          <button type="button" title="Borrow" aria-current={section==='Borrow'?'page':undefined} onClick={()=>chooseMode('Borrow')} className={`nav-item ${section==='Borrow'?'selected':''}`}><HandCoins size={18}/><span>Borrow</span>{section==='Borrow'&&<i/>}</button>
+          <button type="button" title="Lend" aria-current={section==='Lend'?'page':undefined} onClick={()=>chooseMode('Lend')} className={`nav-item ${section==='Lend'?'selected':''}`}><Landmark size={18}/><span>Lend</span>{section==='Lend'&&<i/>}</button>
         </nav>
       </>}
 
@@ -73,7 +82,25 @@ export function Terminal({initialPage}:{initialPage:string}){
 
       <main id="main-content">
 
-        {screen==='underwriting'&&<TraderCredit activeTab={section==='Borrow'||section==='Lend'?section:'Data'} onTabChange={setSection} focusRiskSignal={focusRiskSignal} />}{screen==='whitepaper'&&<Whitepaper/>}
+        {screen==='underwriting'&&modeLoaded&&!creditMode&&<section className="credit-mode-gateway" aria-labelledby="credit-mode-title">
+          <div className="credit-mode-intro"><span className="eyebrow">AQRA / CREDIT DESK</span><h1 id="credit-mode-title">Choose your mode</h1><p>Start with the workflow you need. Borrowers review Polymarket history and request a bonded loan. Lenders review requests and verify the borrower report before funding.</p></div>
+          <div className="credit-mode-options">
+            <button type="button" className="credit-mode-card" onClick={()=>chooseMode('Borrow')}>
+              <span className="credit-mode-icon"><HandCoins size={20}/></span><span className="eyebrow">BORROWER</span><strong>Review your trading history</strong><span>Check dated Polymarket performance, choose loan terms, and submit a wallet-signed request with a USDC bond.</span><i>Open borrower desk <ArrowRight size={15}/></i>
+            </button>
+            <button type="button" className="credit-mode-card" onClick={()=>chooseMode('Lend')}>
+              <span className="credit-mode-icon"><Landmark size={20}/></span><span className="eyebrow">LENDER</span><strong>Review requests before funding</strong><span>Discover report-backed requests through Arkiv, verify the Swarm report against the loan, and inspect the bond and shortfall.</span><i>Open lender desk <ArrowRight size={15}/></i>
+            </button>
+          </div>
+        </section>}
+        {screen==='underwriting'&&modeLoaded&&creditMode&&<>
+          <div className="credit-mode-switch" role="group" aria-label="Choose borrower or lender mode">
+            <span className="eyebrow">MODE</span>
+            <button type="button" aria-pressed={creditMode==='Borrow'} className={creditMode==='Borrow'?'selected':''} onClick={()=>chooseMode('Borrow')}><HandCoins size={14}/>Borrower</button>
+            <button type="button" aria-pressed={creditMode==='Lend'} className={creditMode==='Lend'?'selected':''} onClick={()=>chooseMode('Lend')}><Landmark size={14}/>Lender</button>
+          </div>
+          <TraderCredit activeTab={section==='Borrow'||section==='Lend'?section:'Data'} onTabChange={setSection} focusRiskSignal={focusRiskSignal} />
+        </>}{screen==='whitepaper'&&<Whitepaper/>}
 
       </main>
 
