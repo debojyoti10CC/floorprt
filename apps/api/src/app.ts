@@ -5,6 +5,7 @@ import {isAddress} from 'viem';
 import {readSnapshot,publicClientFor,FloorVerifierAbi,REASONS,ASSUMPTIONS,jsonSafe} from '../../../packages/shared/src/index';
 import {scenarios} from '../../../packages/proof-engine/src/index';
 import {researchMarkets} from './research';
+import {createUnderwritingApi} from './underwriting';
 import type {ApiRuntime} from './deployment';
 
 const collection=<T>(items:T[],query:string|undefined)=>{const limit=Math.min(Math.max(Number(query)||50,1),100);return {items:items.slice(-limit),total:items.length,limit,authority:'DIRECT_CHAIN'};};
@@ -18,10 +19,11 @@ export function createReadApi(loadRuntime:()=>Promise<ApiRuntime>){
   app.use('/api/*',cors({origin:origin=>/^https?:\/\/(127\.0\.0\.1|localhost)(:\d+)?$/.test(origin)||configuredOrigins.has(origin)?origin:undefined}));
   app.use('/api/*',async(c,next)=>{c.set('runtime',await loadRuntime());await next();});
   app.onError((error,c)=>c.json({error:error.message,authority:'READ_ONLY_API'},500));
+  app.route('/api/v1/underwriting',createUnderwritingApi());
   app.get('/api/v1/config',c=>c.json(c.get('runtime').deployment));
   app.get('/api/v1/health',async c=>{
     const {deployment,rpcUrl,journal}=c.get('runtime');
-    const identity={deploymentBlock:deployment.deploymentBlock,registry:deployment.contracts.SharedObservationRegistry,creditDesk:deployment.contracts.CreditDesk,buildFingerprint:deployment.buildFingerprint};
+    const identity={deploymentBlock:deployment.deploymentBlock,registry:deployment.contracts.SharedObservationRegistry,creditDesk:deployment.contracts.CreditDesk,traderDesk:deployment.contracts.TraderCreditDesk,buildFingerprint:deployment.buildFingerprint};
     try{
       const client=publicClientFor(deployment,rpcUrl);const [chainId,block]=await Promise.all([client.getChainId(),client.getBlockNumber()]);
       return c.json({apiVersion:'floor-api/v2',status:chainId===deployment.chainId?'ok':'chain_mismatch',chainId,expectedChainId:deployment.chainId,block:block.toString(),deployment:identity,indexer:journal.overview(),oracleMode:deployment.oracleMode,signingKeys:'NONE'},chainId===deployment.chainId?200:503);
