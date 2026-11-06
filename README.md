@@ -31,7 +31,7 @@ Choose **Connect wallet → Borrower**, **Lender**, or **Curator / test resolver
 
 ## A complete interactive journey
 
-1. Open **Operations & devnet**, connect the curator/resolver, and create a fresh shared observation if the current one has matured.
+1. In the local runner, open **Local test tools → Resolver setup**, connect the curator/resolver, and create a fresh shared observation if the current one has matured.
 2. Connect the borrower. Open **Portfolio studio**, choose YES at the lower strike and NO at the upper strike, and mint fully backed complete sets if needed. Claim chips support dragging and keyboard/click selection.
 3. Inspect the exact payoff chart and **Proof inspector**. Approve the ERC-1155 operator and **Lock pair in vault**. The vault recomputes the proof onchain.
 4. In **Credit desk → Borrow**, select the new vault position. Publish a `0.75` principal / `0.78` maximum total-due request for a one-USDC floor.
@@ -81,17 +81,21 @@ Amounts are test USDC. Full transaction hashes, block numbers and exact base uni
 | `e2e`, `scripts`, `.github/workflows` | Browser verification, independent Python model, deployment, replay and CI |
 | `docs` | Original blueprint, implementation decisions, source research and runbooks |
 
-The direct read snapshot is bounded to the newest 200 observations/markets/positions/loans and 5,000 blocks of events. This is a local P0 terminal, not a global institutional analytics index. The persistent event journal is secondary; it never authorizes spending or overrides contract state.
+The direct read snapshot is bounded to the newest 200 observations/markets/positions/loans and 5,000 blocks of events. This is a local P0 terminal, not a global institutional analytics index. The persistent event journal is secondary; it never authorizes spending or overrides contract state. Portfolio studio also has an Arkiv Rabdi strategy library: wallet-signed, public presets expire after 30 days and are rechecked by AQRA before use. Public Rabdi reads and writes require a working RPC; writes also require the connected wallet to have test tGLM. This code path has not yet been evidenced by a public Arkiv transaction receipt.
 
 ## External integrations and deployment boundaries
 
-This release demonstrates the local P0 lifecycle and selected P1 components: persistent indexing, read-only external discovery, generalized research math, and oracle-input guards. **Public testnet transaction receipts, a CRE CLI simulation/live DON write, EIP-712 RFQs and tranche issuance are not demonstrated.** Full repayment and an external Chainlink feed adapter are implemented and tested. The canonical Sepolia USDC/feed integration passes on a pinned fork; fork balance provisioning is explicitly test-only. External CTF custody and cross-chain assets are excluded. These are explicit later-release items in the original PRD, not simulated buttons.
+This release demonstrates the local P0 lifecycle and selected P1 components: persistent indexing, read-only external discovery, generalized research math, oracle-input guards, and an Arkiv strategy-library code path. **Public testnet transaction receipts (including Arkiv), a CRE CLI simulation/live DON write, EIP-712 RFQs and tranche issuance are not demonstrated.** Full repayment and an external Chainlink feed adapter are implemented and tested. The canonical Sepolia USDC/feed integration passes on a pinned fork; fork balance provisioning is explicitly test-only. External CTF custody and cross-chain assets are excluded. These are explicit later-release items in the original PRD, not simulated buttons.
 
-The website can be privately hosted as a static terminal. When no matching RPC is reachable it loads clearly labeled **recorded local-chain evidence**, disables writes, and retains the interactive mathematical studio. A static web deployment does not turn Anvil into a public blockchain. For the working monetary journey, run the local stack or configure a genuine supported testnet deployment.
+The website can be privately hosted as a static terminal. If no matching RPC is reachable, chain-powered screens show the connection state and disable writes; the app does not substitute saved or invented balances. A static web deployment does not turn Anvil into a public blockchain. For the working monetary journey, run the local stack or configure a genuine supported testnet deployment. The external prediction-market feed requires a reachable read API and remains separate from AQRA collateral.
 
 The composer chooses an open shared-observation pair on initial load and offers a recovery action for closed observations. Pending reads preserve user edits. Local startup provisions an open pair when necessary; it never bypasses maturity guards. Account avatars are generated deterministically from addresses. The capital-flow chart aggregates confirmed funding, repayment and settlement events.
 
-For Sepolia, supply a funded deployer wallet and `FLOOR_RPC_URL` as process environment variables, then run `pnpm deploy:sepolia`. It uses Circle's canonical external Sepolia USDC and deploys a permissionless historical-feed resolver; it never deploys MockUSDC on Sepolia. See `docs/EXTERNAL_DEPLOYMENT.md` for precise oracle semantics and commands. It refuses other chain IDs and mainnets. Never put a key in a `NEXT_PUBLIC_` variable. Rebuild the terminal with the resulting manifest, and record public receipts before claiming that gate passed.
+For Sepolia, supply a funded deployer wallet and `FLOOR_RPC_URL` as process environment variables, then run `pnpm deploy:sepolia`. It uses Circle's canonical external Sepolia USDC and deploys a permissionless historical-feed resolver; it never deploys MockUSDC on Sepolia. See `docs/EXTERNAL_DEPLOYMENT.md` for precise oracle semantics and commands. It refuses other chain IDs and mainnets. Never put private keys or deployer secrets in `NEXT_PUBLIC_` variables. Rebuild the terminal with the resulting manifest, and record public receipts before claiming that gate passed. To include the feed-resolution page in a static Sepolia build, set `NEXT_PUBLIC_ENABLE_OPERATIONS_UI=true` and keep `NEXT_PUBLIC_ENABLE_LOCAL_DEMO_UI=false`; the local `pnpm dev` runner enables both local controls automatically.
+
+For Arkiv, set `NEXT_PUBLIC_ARKIV_ACCESS_KEY` to a Rabdi access key restricted to the web origin; the key is public RPC access, not a wallet credential. Users sign entity writes with their own wallet and need Rabdi test tGLM. AQRA stores only a public portfolio recipe, not collateral, debt, private data or proof authority. See `docs/HACKATHON_WINNER_RESEARCH.md` and `arkiv/` for honest track evidence and gaps.
+
+**AI disclosure for hackathon submissions:** Codex assisted with repository research, implementation and documentation. Builders remain responsible for reviewing the code, validating every claim, and disclosing AI use in the submission as required by ETHGlobal.
 
 ## Mechanism and trust
 
