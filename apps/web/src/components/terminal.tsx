@@ -43,6 +43,7 @@ export function Terminal({initialPage}:{initialPage:string}){
   const chooseMode=(next:'Borrow'|'Lend')=>{setCreditMode(next);setSection(next);window.localStorage.setItem('aqra-credit-mode',next);setMobileOpen(false)};
 
   const role=p.address&&p.deployment?Object.entries(p.deployment.roles).find(([,v])=>v.toLowerCase()===p.address!.toLowerCase())?.[0]:null;
+  const networkLabel = p.deployment?.chainId === 31337 ? 'Local test network' : p.deployment?.chainName ?? 'No network';
 
   return <div className="app-shell">
 
@@ -69,14 +70,14 @@ export function Terminal({initialPage}:{initialPage:string}){
 
       <div className="sidebar-bottom">
         <Link href="/whitepaper/" aria-current={screen==='whitepaper'?'page':undefined} onClick={()=>setMobileOpen(false)} className={`nav-item sidebar-paper-link ${screen==='whitepaper'?'selected':''}`}><FileText size={17}/><span>Whitepaper</span>{screen==='whitepaper'&&<i/>}</Link>
-        <div className="network-card" title={p.online?'AQRA network connected':'AQRA network unavailable'} aria-label={p.online?'AQRA network connected':'AQRA network unavailable'}><div><span className={`status-dot ${p.online?'live':'amber'}`}/>{p.online?'CONNECTED':'OFFLINE'}</div><span className="mono">{p.deployment?.chainName??'NO NETWORK'} · {p.deployment?.chainId??'—'}</span></div>
+        <div className="network-card" title={p.online?'AQRA network connected':'AQRA network unavailable'} aria-label={p.online?'AQRA network connected':'AQRA network unavailable'}><div><span className={`status-dot ${p.online?'live':'amber'}`}/>{p.online?'CONNECTED':'OFFLINE'}</div><span className="mono">{networkLabel}</span></div>
       </div>
 
     </aside>
 
     <div className="app-main">
 
-      <header className="topbar"><div className="breadcrumbs"><button className="icon-button mobile-menu" onClick={()=>setMobileOpen(true)} aria-label="Open navigation"><Menu size={18}/></button><span>AQRA</span><span className="crumb-slash">/</span><strong>{current}</strong></div><div className="header-actions"><span className="testnet-chip"><FlaskConical size={12}/>{p.deployment?.chainName?.toUpperCase()??'NO NETWORK'}</span><button className="icon-button" aria-label="Refresh chain state" onClick={()=>void p.refresh()}><RefreshCw size={15} className={p.loading?'spin':''}/></button><button className="wallet-button" data-testid="wallet-menu" onClick={()=>setWalletOpen(true)}>{p.address?<Identicon address={p.address} size={26}/>:<Wallet size={15}/>} {p.address?<><span className="capitalize">{role??'Wallet'}</span><span className="mono">{short(p.address)}</span><ChevronDown size={12}/></>:<>Connect wallet<ArrowRight size={14}/></>}</button></div></header>
+      <header className="topbar"><div className="breadcrumbs"><button className="icon-button mobile-menu" onClick={()=>setMobileOpen(true)} aria-label="Open navigation"><Menu size={18}/></button><span>AQRA</span><span className="crumb-slash">/</span><strong>{current}</strong></div><div className="header-actions"><span className="testnet-chip"><FlaskConical size={12}/>{networkLabel.toUpperCase()}</span><button className="icon-button" aria-label="Refresh chain state" onClick={()=>void p.refresh()}><RefreshCw size={15} className={p.loading?'spin':''}/></button><button className="wallet-button" data-testid="wallet-menu" onClick={()=>setWalletOpen(true)}>{p.address?<Identicon address={p.address} size={26}/>:<Wallet size={15}/>} {p.address?<><span className="capitalize">{role==='resolver'?'Demo reviewer':role??'Wallet'}</span><span className="mono">{short(p.address)}</span><ChevronDown size={12}/></>:<>Connect wallet<ArrowRight size={14}/></>}</button></div></header>
 
       {!p.online&&<div className="connection-banner" role="status"><span className="status-dot amber"/>Network unavailable · transactions paused</div>}
 
@@ -86,7 +87,7 @@ export function Terminal({initialPage}:{initialPage:string}){
           <div className="credit-mode-intro"><span className="eyebrow">AQRA / CREDIT DESK</span><h1 id="credit-mode-title">Choose your mode</h1><p>Start with the workflow you need. Borrowers review Polymarket history and request a bonded loan. Lenders review requests and verify the borrower report before funding.</p></div>
           <div className="credit-mode-options">
             <button type="button" className="credit-mode-card" onClick={()=>chooseMode('Borrow')}>
-              <span className="credit-mode-icon"><HandCoins size={20}/></span><span className="eyebrow">BORROWER</span><strong>Review your trading history</strong><span>Check dated Polymarket performance, choose loan terms, and submit a wallet-signed request with a USDC bond.</span><i>Open borrower desk <ArrowRight size={15}/></i>
+              <span className="credit-mode-icon"><HandCoins size={20}/></span><span className="eyebrow">BORROWER</span><strong>Connect your Polymarket portfolio</strong><span>See holdings and trading history, calculate collateral coverage, and request credit.</span><i>Open borrower desk <ArrowRight size={15}/></i>
             </button>
             <button type="button" className="credit-mode-card" onClick={()=>chooseMode('Lend')}>
               <span className="credit-mode-icon"><Landmark size={20}/></span><span className="eyebrow">LENDER</span><strong>Review requests before funding</strong><span>Discover report-backed requests through Arkiv, verify the Swarm report against the loan, and inspect the bond and shortfall.</span><i>Open lender desk <ArrowRight size={15}/></i>
@@ -99,7 +100,8 @@ export function Terminal({initialPage}:{initialPage:string}){
             <button type="button" aria-pressed={creditMode==='Borrow'} className={creditMode==='Borrow'?'selected':''} onClick={()=>chooseMode('Borrow')}><HandCoins size={14}/>Borrower</button>
             <button type="button" aria-pressed={creditMode==='Lend'} className={creditMode==='Lend'?'selected':''} onClick={()=>chooseMode('Lend')}><Landmark size={14}/>Lender</button>
           </div>
-          <TraderCredit activeTab={section==='Borrow'||section==='Lend'?section:'Data'} onTabChange={setSection} focusRiskSignal={focusRiskSignal} />
+          <TraderCredit onConnectWallet={()=>setWalletOpen(true)} activeTab={section==='Borrow'||section==='Lend'?section:'Data'}
+            onTabChange={tab=>tab==='Borrow'||tab==='Lend'?chooseMode(tab):setSection(tab)} focusRiskSignal={focusRiskSignal} />
         </>}{screen==='whitepaper'&&<Whitepaper/>}
 
       </main>

@@ -110,7 +110,12 @@ function LocalDemoPanel({ requestId, status, onOpen, onRefresh, loading }: {
   </Panel>;
 }
 
-export function TraderCredit({ activeTab = 'Data', focusRiskSignal = 0, onTabChange }: { activeTab?: TraderCreditSection; onTabChange?: (tab: TraderCreditSection) => void; focusRiskSignal?: number }) {
+export function TraderCredit({ activeTab = 'Data', focusRiskSignal = 0, onTabChange, onConnectWallet }: {
+  activeTab?: TraderCreditSection;
+  onTabChange?: (tab: TraderCreditSection) => void;
+  onConnectWallet?: () => void;
+  focusRiskSignal?: number;
+}) {
   const p = useProtocol();
   const { deployment, online, rpcUrl } = p;
   const [request, setRequest] = useState<bigint>();
@@ -147,10 +152,13 @@ export function TraderCredit({ activeTab = 'Data', focusRiskSignal = 0, onTabCha
       <div><span className="eyebrow">AQRA / {activeTab === 'Data' ? 'PERFORMANCE UNDERWRITING' : activeTab === 'Borrow' ? 'BORROW DESK' : 'LENDER DESK'}</span><h1>{activeTab === 'Data' ? 'Performance-based lending' : activeTab}</h1>{activeTab === 'Data' && <p className="trader-note">Prediction-market performance metrics determine pilot eligibility; lenders choose whether to fund each bonded request.</p>}</div>
       {deployment?.traderCredit && <Badge tone="amber">TEST NETWORK</Badge>}
     </div>
-    {activeTab !== 'Data' && <LocalDemoPanel requestId={demoRequestId} status={demoStatus} loading={demoStatusLoading} onRefresh={() => void refreshDemoStatus()} onOpen={openDemoRequest} />}
+    {activeTab !== 'Data' && !deployment?.traderCredit?.positionCollateral && <LocalDemoPanel requestId={demoRequestId} status={demoStatus} loading={demoStatusLoading} onRefresh={() => void refreshDemoStatus()} onOpen={openDemoRequest} />}
     <section aria-label={`${activeTab} section`}>
       {activeTab === 'Data' && <TraderReplay focusRiskSignal={focusRiskSignal} />}
-      {activeTab === 'Borrow' && <><TraderBorrow onRequest={setRequest} /><TraderLoans mine selectedId={request} demoRequestId={demoRequestId} /></>}
+      {activeTab === 'Borrow' && <><TraderBorrow onConnectWallet={onConnectWallet} onRequest={(id, demo) => {
+        setRequest(id);
+        if (demo) onTabChange?.('Lend');
+      }} /><TraderLoans mine selectedId={request} demoRequestId={demoRequestId} /></>}
       {activeTab === 'Lend' && <TraderLoans selectedId={request} demoRequestId={demoRequestId} />}
     </section>
   </div>;

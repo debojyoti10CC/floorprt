@@ -1,14 +1,17 @@
 'use client';
 
-import { useState } from 'react';
-import { Fingerprint, ShieldCheck } from 'lucide-react';
-import { isAddress, zeroHash, type Address as EvmAddress, type Hex } from 'viem';
+import { useEffect, useState } from 'react';
+import { Fingerprint, FlaskConical, Layers3, ShieldCheck, Wallet } from 'lucide-react';
+import { formatUnits, isAddress, zeroHash, type Address as EvmAddress, type Hex } from 'viem';
 import { parseAmount } from '@floor/proof-engine';
+import { PositionCreditDeskAbi, quotePositionCredit } from '@floor/shared';
 import type { Evidence } from '../../../../services/underwriting/policy';
+import type { PolymarketPortfolio } from '../../../../services/underwriting/polymarket';
 import { linkContext } from '../../../../services/underwriting/reports';
 import { short, useProtocol } from '../lib/protocol';
-import { approveTraderCredit, sameWallet, traderDesk, underwritingApi, type EnsGroup } from '../lib/trader-credit';
+import { approveTraderCredit, positionInventory, sameWallet, traderDesk, underwritingApi, type EnsGroup } from '../lib/trader-credit';
 import { eventArgs, useAction } from './actions';
+import { PolymarketHoldings } from './polymarket-portfolio';
 import { usd } from './trader-replay';
 import { Address, Badge, Button, Panel } from './ui';
 
@@ -29,12 +32,27 @@ function loanTerms(principalText: string, bondText: string, daysText: string) {
   }
 }
 
-export function TraderBorrow({ onRequest }: { onRequest: (id: bigint) => void }) {
+const percentage = (bps: bigint | null | undefined) => bps == null ? '—' : (Number(bps) / 100).toFixed(2) + '%';
+const localDemoUi = process.env.NEXT_PUBLIC_ENABLE_LOCAL_DEMO_UI === 'true';
+
+export function TraderBorrow({ onRequest, onConnectWallet }: {
+  onRequest: (id: bigint, demo?: boolean) => void;
+  onConnectWallet?: () => void;
+}) {
   const p = useProtocol();
   const action = useAction();
   const [input, setInput] = useState('');
   const [identity, setIdentity] = useState<EnsGroup | null>(null);
   const [evidence, setEvidence] = useState<Evidence | null>(null);
+  const [portfolio, setPortfolio] = useState<PolymarketPortfolio | null>(null);
+  const [portfolioError, setPortfolioError] = useState<string | null>(null);
+  const [evidenceError, setEvidenceError] = useState<string | null>(null);
+  const [linkedSigner, setLinkedSigner] = useState<EvmAddress | null>(null);
+  const [fixture, setFixture] = useState(false);
+  const [usePositions, setUsePositions] = useState(false);
+  const [quantity, setQuantity] = useState('120');
+  const [inventory, setInventory] = useState<{ owner: EvmAddress; data: NonNullable<Awaited<ReturnType<typeof positionInventory>>> } | null>(null);
+  const [inventoryError, setInventoryError] = useState<string | null>(null);
   const [controllerInput, setControllerInput] = useState<Record<string, string>>({});
   const [consent, setConsent] = useState<Consent | null>(null);
   const [principal, setPrincipal] = useState('100');
@@ -42,6 +60,16 @@ export function TraderBorrow({ onRequest }: { onRequest: (id: bigint) => void })
   const [days, setDays] = useState('30');
   const terms = loanTerms(principal, bond, days);
   const wallet = p.address;
+  const { deployment, rpcUrl, online } = p;
+  const blockNumber = p.data?.blockNumber;
+  const positionMarket = deployment?.traderCredit?.positionCollateral;
+  const currentInventory = sameWallet(wallet, inventory?.owner) ? inventory?.data : undefined;
+  let pairs = 0n;
+  try { pairs = parseAmount(quantity); } catch { /* Show the quantity validation below. */ }
+  const positionQuote = usePositions && terms && pairs > 0n
+    ? quotePositionCredit(terms.principal, terms.due, terms.bond, pairs) : null;
+  const validPledge = !usePositions || !!(terms && positionQuote && currentInventory
+    && pairs <= currentInventory.pairs && terms.due <= positionQuote.maxDue);
   const canBorrow = p.walletReady && !!p.deployment?.contracts.TraderCreditDesk && (!identity || sameWallet(identity.primary, wallet));
   const links = (evidence?.wallets ?? []).map(value => ({
     trader: value as EvmAddress,
@@ -52,22 +80,74 @@ export function TraderBorrow({ onRequest }: { onRequest: (id: bigint) => void })
   const isPrepared = !!consent && sameWallet(consent.borrower, wallet) && sameWallet(consent.desk, p.deployment?.contracts.TraderCreditDesk);
   const signaturesReady = isPrepared && consent.proofs.every(proof => /^0x(?:[a-f0-9]{2}){1,512}$/i.test(proof.signature.trim()));
 
-  const getEvidence = async () => {
+  useEffect(() => {
+    setInventory(null);
+    setInventoryError(null);
+    if (!usePositions || !positionMarket || !wallet || !online) return;
+    let stale = false;
+    void positionInventory({ deployment, rpcUrl }, wallet).then(data => {
+      if (!stale && data) setInventory({ owner: wallet, data });
+    }).catch(error => {
+      if (!stale) setInventoryError(error instanceof Error ? error.message : 'The position ledger is unavailable.');
+    });
+    return () => { stale = true; };
+  }, [usePositions, positionMarket, wallet, deployment, rpcUrl, online, blockNumber]);
+
+  const resetAccount = () => {
     setEvidence(null);
+    setPortfolio(null);
+    setPortfolioError(null);
+    setEvidenceError(null);
+    setLinkedSigner(null);
+    setFixture(false);
     setControllerInput({});
     setConsent(null);
     setIdentity(null);
+  };
+
+  const getEvidence = async (sample = false) => {
+    resetAccount();
     const query = input.trim();
-    const group = query.toLowerCase().endsWith('.eth')
+    const group = !sample && query.toLowerCase().endsWith('.eth')
       ? await underwritingApi<EnsGroup>('/identity?' + new URLSearchParams({ name: query })) : null;
-    const wallets = group?.wallets ?? (query ? query.split(/[\s,]+/) : wallet ? [wallet] : []);
+    const samplePortfolio = sample ? await underwritingApi<PolymarketPortfolio>('/polymarket/positions?sample=1') : null;
+    const wallets = samplePortfolio ? [samplePortfolio.account] : group?.wallets ?? (query ? query.split(/[\s,]+/) : wallet ? [wallet] : []);
     if (!wallets.length || wallets.length > 4 || wallets.some(address => !isAddress(address, { strict: false }))) {
       throw new Error('Enter a .eth name or one to four distinct EVM addresses.');
     }
+    if (samplePortfolio) setInput(samplePortfolio.account);
     setIdentity(group);
     const params = new URLSearchParams();
     for (const address of wallets) params.append('wallet', address);
-    setEvidence(await underwritingApi<Evidence>('/evidence?' + params));
+    const [holdings, score, ownership] = await Promise.allSettled([
+      samplePortfolio ?? underwritingApi<PolymarketPortfolio>('/polymarket/positions?' + new URLSearchParams({ wallet: wallets[0] })),
+      underwritingApi<Evidence>('/evidence?' + params),
+      !sample && wallet && !sameWallet(wallets[0] as EvmAddress, wallet)
+        ? underwritingApi<{ verified: boolean }>('/controller?' + new URLSearchParams({ trader: wallets[0], controller: wallet })) : null,
+    ]);
+    if (holdings.status === 'fulfilled') setPortfolio(holdings.value);
+    else setPortfolioError(holdings.reason instanceof Error ? holdings.reason.message : 'Polymarket positions could not be loaded.');
+    if (score.status === 'fulfilled') setEvidence(score.value);
+    else setEvidenceError(score.reason instanceof Error ? score.reason.message : 'Performance history could not be loaded.');
+    if (wallet && ownership.status === 'fulfilled' && ownership.value?.verified) {
+      setControllerInput({ [wallets[0].toLowerCase()]: wallet });
+      setLinkedSigner(wallet);
+    }
+  };
+
+  const loadTestBorrower = async () => {
+    if (!positionMarket) throw new Error('The local position desk is unavailable.');
+    resetAccount();
+    const test = await underwritingApi<Evidence>('/demo-position-evidence');
+    await p.connectLocal('borrower');
+    setInput(test.wallets[0]);
+    setEvidence(test);
+    setFixture(true);
+    setUsePositions(true);
+    setPrincipal('100');
+    setBond('25');
+    setQuantity('120');
+    setDays('1');
   };
 
   const prepare = async () => {
@@ -98,7 +178,12 @@ export function TraderBorrow({ onRequest }: { onRequest: (id: bigint) => void })
   };
 
   const request = async () => {
-    if (!wallet || !canBorrow || !terms || !evidence?.decision.qualified || !validControllers) throw new Error('Review the borrower, evidence and loan terms.');
+    if (!wallet || !canBorrow || !terms || !evidence?.decision.qualified || !validControllers || !validPledge) {
+      throw new Error('Review the borrower, evidence and collateral terms.');
+    }
+    if (fixture && (!usePositions || !sameWallet(wallet, deployment?.roles.borrower) || p.mode !== 'local')) {
+      throw new Error('Test evidence is reserved for the local position demo borrower.');
+    }
     const { client, contract, block, active } = await traderDesk(p);
     const asOf = BigInt(evidence.asOf);
     if (block.timestamp < asOf || block.timestamp >= asOf + 35n * 86400n) throw new Error('The evidence is outside the funding window.');
@@ -124,28 +209,56 @@ export function TraderBorrow({ onRequest }: { onRequest: (id: bigint) => void })
       ...terms, asOf, evidenceDigest: evidence.digest, ensNode: identity?.node ?? zeroHash,
       linkExpires: others.length ? consent!.expires : block.timestamp + 3600n,
     }, traders];
+    if (usePositions) {
+      const pledged = await positionInventory(p, wallet);
+      if (!pledged || pairs <= 0n || pairs > pledged.pairs) throw new Error('The wallet no longer has enough matched shares.');
+      const limit = await client.readContract({ address: contract.address, abi: PositionCreditDeskAbi,
+        functionName: 'maximumPositionDue', args: [terms.bond, pairs] });
+      if (terms.due > limit) throw new Error('Total repayment exceeds the onchain collateral limit.');
+      if (!pledged.approved) {
+        await p.transact('Approve the desk for local Conditional Tokens', 'PositionTokenLedger', 'setApprovalForAll', [contract.address, true]);
+      }
+    }
     await approveTraderCredit(p, terms.bond);
-    const receipt = await p.transact('Escrow bond and request trader credit', 'TraderCreditDesk',
-      proxies.length ? 'requestLoanWithControllers' : 'requestLoan',
-      proxies.length ? [...args, controllers, consents] : [...args, consents]);
+    const receipt = await p.transact(usePositions ? 'Lock positions and request credit' : 'Escrow bond and request credit', 'TraderCreditDesk',
+      usePositions ? 'requestLoanWithPositions' : proxies.length ? 'requestLoanWithControllers' : 'requestLoan',
+      usePositions ? [...args, controllers, consents, pairs] : proxies.length ? [...args, controllers, consents] : [...args, consents]);
     const id = eventArgs(receipt, 'TraderCreditDesk', 'TraderCreditRequested').loanId as bigint;
     setConsent(null);
-    onRequest(id);
+    onRequest(id, fixture);
   };
 
-  return <div className="trader-loan-layout">
-    <Panel title="Polymarket account history" eyebrow="PUBLIC WALLET DATA · READ ONLY">
+  return <div className="trader-loan-layout trader-borrow-layout">
+    <Panel title="Polymarket portfolio" eyebrow="ACCOUNT CONNECTION · POLYGON">
       <div className="trader-panel-body">
-        <p className="trader-note">Enter the Polymarket proxy/account address used for trading, or an ENS name that resolves to it. This reads public history; it does not sign in to Polymarket, move positions, or pledge them as collateral.</p>
+        <div className="poly-connect-heading">
+          <span className="poly-brand-mark" aria-hidden="true"><Layers3 size={21} /></span>
+          <div><strong>Connect trading history</strong><p className="trader-note">Use the deposit or proxy address shown in your Polymarket profile. Your AQRA signing wallet can be different.</p></div>
+          {wallet && <Badge tone="green"><Wallet size={12} /> SIGNER {short(wallet)}</Badge>}
+        </div>
         <form className="trader-form" onSubmit={event => { event.preventDefault(); void action.run(getEvidence); }}>
-          <label className="trader-field">Polymarket account address or ENS name
+          <label className="trader-field">Polymarket trading address or ENS name
             <input value={input} placeholder={wallet ?? 'name.eth or 0x…'} maxLength={255} disabled={action.busy}
-              onChange={event => { setInput(event.target.value); setEvidence(null); setConsent(null); setIdentity(null); action.setError(null); }} />
+              onChange={event => { setInput(event.target.value); resetAccount(); action.setError(null); }} />
           </label>
-          <Button type="submit" variant="secondary" disabled={action.busy || (!input.trim() && !wallet)}><Fingerprint size={15} /> {action.busy ? 'Working…' : 'Check wallet history'}</Button>
+          <div className="trader-inline">
+            {!wallet && onConnectWallet && <Button type="button" variant="secondary" onClick={onConnectWallet}><Wallet size={15} /> Connect signing wallet</Button>}
+            <Button type="submit" variant="secondary" disabled={action.busy || (!input.trim() && !wallet)}><Fingerprint size={15} /> {action.busy ? 'Working…' : 'Load Polymarket'}</Button>
+            <Button type="button" variant="ghost" disabled={action.busy} onClick={() => void action.run(() => getEvidence(true))}>Preview public portfolio</Button>
+          </div>
         </form>
+        {localDemoUi && positionMarket && <div className="poly-demo-start">
+          <div><Badge tone="amber"><FlaskConical size={12} /> TEST LOAN</Badge><p className="trader-note">Use funded test shares and a labeled performance fixture to run the full loan.</p></div>
+          <Button variant="secondary" disabled={action.busy || !online} onClick={() => void action.run(loadTestBorrower)}>Load test borrower</Button>
+        </div>}
+        {portfolio && <PolymarketHoldings key={portfolio.account} portfolio={portfolio} />}
+        {portfolioError && <div className="error-box" role="alert">{portfolioError}</div>}
+        {evidenceError && <div className="error-box" role="alert">Performance history · {evidenceError}</div>}
+        {portfolio && wallet && (sameWallet(wallet, portfolio.account) || sameWallet(wallet, linkedSigner))
+          && <Badge tone="green">TRADER SIGNER VERIFIED</Badge>}
         {identity && <div className="trader-inline"><Badge tone="blue">{identity.name}</Badge><Address value={identity.primary} /><span className="trader-note">ENS block {identity.block}</span></div>}
         {evidence && <>
+          {fixture && <Badge tone="amber">LOCAL PERFORMANCE FIXTURE</Badge>}
           <div className="trader-inline"><Badge tone={evidence.decision.qualified ? 'green' : 'amber'}>{evidence.decision.qualified ? 'Meets performance policy' : 'Below performance policy'}</Badge>
             <strong className="mono">{evidence.decision.score}/100</strong><span className="trader-note">{evidence.decision.reason}</span></div>
           <div className="trader-inline">{evidence.wallets.map(address => <Address value={address} key={address} />)}</div>
@@ -191,8 +304,26 @@ export function TraderBorrow({ onRequest }: { onRequest: (id: bigint) => void })
         {action.error && <div className="error-box" role="alert">{action.error}</div>}
       </div>
     </Panel>
-    <Panel title="Request terms" eyebrow="FIRST-LOSS BOND">
+    <Panel title="Request terms" eyebrow={usePositions ? 'POSITION COLLATERAL' : 'FIRST-LOSS BOND'}>
       <div className="trader-panel-body">
+        {positionMarket && <div className="trader-inline poly-collateral-toggle" role="group" aria-label="Collateral type">
+          <Button variant={usePositions ? 'ghost' : 'secondary'} aria-pressed={!usePositions} disabled={fixture || action.busy} onClick={() => setUsePositions(false)}>Cash bond</Button>
+          <Button variant={usePositions ? 'secondary' : 'ghost'} aria-pressed={usePositions} disabled={action.busy} onClick={() => setUsePositions(true)}><Layers3 size={14} /> Positions + bond</Button>
+        </div>}
+        {usePositions && positionMarket && <div className="poly-collateral-box">
+          <div className="trader-inline"><strong>{positionMarket.title}</strong><Badge tone="amber">LOCAL CTF</Badge></div>
+          {inventoryError && <div className="error-box" role="alert">{inventoryError}</div>}
+          <dl className="trader-metrics">
+            <div><dt>Free YES</dt><dd>{currentInventory ? formatUnits(currentInventory.yes, 6) : '—'}</dd></div>
+            <div><dt>Free NO</dt><dd>{currentInventory ? formatUnits(currentInventory.no, 6) : '—'}</dd></div>
+            <div><dt>Matched pairs</dt><dd>{currentInventory ? formatUnits(currentInventory.pairs, 6) : '—'}</dd></div>
+          </dl>
+          <label className="trader-field">Pairs to lock
+            <input inputMode="decimal" value={quantity} onChange={event => setQuantity(event.target.value)} disabled={action.busy} />
+          </label>
+          {currentInventory && pairs > currentInventory.pairs && <p className="trader-note" role="status">Available balance is below the requested pair quantity.</p>}
+          {!wallet && <p className="trader-note">Connect a signer to check the position ledger.</p>}
+        </div>}
         <div className="trader-controls">
           <label>Principal · USDC<input inputMode="decimal" value={principal} onChange={event => setPrincipal(event.target.value)} disabled={action.busy} /></label>
           <label>Bond · USDC<input inputMode="decimal" value={bond} onChange={event => setBond(event.target.value)} disabled={action.busy} /></label>
@@ -200,12 +331,23 @@ export function TraderBorrow({ onRequest }: { onRequest: (id: bigint) => void })
         </div>
         <dl className="trader-metrics">
           <div><dt>Repayment</dt><dd>{usd(terms?.due)}</dd></div>
-          <div><dt>Shortfall after full bond recovery</dt><dd className="trader-loss">{usd(terms ? terms.principal > terms.bond ? terms.principal - terms.bond : 0n : null)}</dd></div>
+          {usePositions ? <>
+            <div><dt>Bond + matched value</dt><dd>{usd(positionQuote?.gross)}</dd></div>
+            <div><dt>Principal LTV</dt><dd>{percentage(positionQuote?.principalLtvBps)}</dd></div>
+            <div><dt>Debt LTV</dt><dd>{percentage(positionQuote?.dueLtvBps)}</dd></div>
+            <div><dt>Max due at 80%</dt><dd>{usd(positionQuote?.maxDue)}</dd></div>
+            <div><dt>Pairs required</dt><dd>{positionQuote ? formatUnits(positionQuote.requiredPairs, 6) : '—'}</dd></div>
+          </> : <div><dt>Shortfall after full bond recovery</dt><dd className="trader-loss">{usd(terms ? terms.principal > terms.bond ? terms.principal - terms.bond : 0n : null)}</dd></div>}
         </dl>
+        {usePositions && terms && positionQuote && <div className="poly-ltv" data-over={terms.due > positionQuote.maxDue}>
+          <div aria-hidden="true"><span style={{ width: Math.min(Number(positionQuote.dueLtvBps ?? 0n) / 100, 100) + '%' }} /><i /></div>
+          <small>{terms.due <= positionQuote.maxDue ? 'Within the 80% debt limit' : 'Repayment exceeds the 80% debt limit'}</small>
+        </div>}
+        {usePositions && <p className="trader-note">One complete pair contributes one test USDC of backing. The desk locks both shares and the cash bond.</p>}
         {!terms && <p className="trader-note">Enter up to 100 USDC, a bond of 25% to 102% of principal, and a term of 1 to 30 days.</p>}
         {!wallet && <p className="trader-note">Connect the borrower wallet to sign.</p>}
-        <Button disabled={action.busy || !canBorrow || !terms || !validControllers || !evidence?.decision.qualified || (others.length > 0 && !signaturesReady)}
-          onClick={() => void action.run(request)}><ShieldCheck size={15} /> Escrow bond and request</Button>
+        <Button disabled={action.busy || !canBorrow || !terms || !validPledge || !validControllers || !evidence?.decision.qualified || (others.length > 0 && !signaturesReady)}
+          onClick={() => void action.run(request)}><ShieldCheck size={15} /> {usePositions ? 'Lock positions and request' : 'Escrow bond and request'}</Button>
       </div>
     </Panel>
   </div>;

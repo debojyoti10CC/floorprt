@@ -1,27 +1,33 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { ArrowUpRight, Radio, RefreshCw } from 'lucide-react';
-import type { Address as EvmAddress, Hex } from 'viem';
+import { ArrowUpRight, Check, Layers3, Radio, RefreshCw } from 'lucide-react';
+import { formatUnits, zeroHash, type Address as EvmAddress, type Hex } from 'viem';
+import { quotePositionCredit, type PositionPledge } from '@floor/shared';
 import { walletSetHash } from '../../../../services/underwriting/reports';
+import { serializeAssessment } from '../../../../services/underwriting/position-assessment';
 import { message, useProtocol } from '../lib/protocol';
 import { approveTraderCredit, repaySeededLocalDemo, sameWallet, traderDesk, underwritingApi, type TraderLoan } from '../lib/trader-credit';
-import { arkivAccessKeyConfigured, arkivExplorer, packetMatches, publishPacket, readPackets, type ArkivPacket } from '../lib/underwriting-packets';
-import { prepareAssessmentRelease, requestBorrowerSignature, retrieveAssessment, uploadConsentedAssessment, type AssessmentChallenge, type PublicAssessment } from '../lib/assessment-evidence';
+import { arkivAccessKeyConfigured, arkivExplorer, arkivLocal, packetMatches, publishPacket, readPackets, type ArkivPacket } from '../lib/underwriting-packets';
+import { assertPositionReport, prepareAssessmentRelease, retrieveAssessment, uploadConsentedAssessment, type AssessmentChallenge, type PublicAssessment } from '../lib/assessment-evidence';
 import { useAction } from './actions';
 import { usd } from './trader-replay';
 import { Address, Badge, Button, Panel, TxLink } from './ui';
 
-type Row = { id: bigint; loan: TraderLoan; packet?: ArkivPacket };
+type Row = { id: bigint; loan: TraderLoan; pledge: PositionPledge | null; packet?: ArkivPacket };
+type SwarmStatus = { swarmConfigured: boolean; swarmReady: boolean; swarmMode: 'LOCAL_BEE' | 'NETWORK_BEE' };
 const states = ['Missing', 'Requested', 'Funded', 'Repaid', 'Defaulted', 'Cancelled'];
 const eventNames: Record<string, string> = {
   TraderCreditRequested: 'Request', ScoreAttested: 'Score', TraderLoanFunded: 'Funding',
   AssessmentCommitted: 'Report commitment', TraderLoanRepaid: 'Repayment', TraderLoanDefaulted: 'Default', TraderCreditCancelled: 'Cancellation',
+  PositionCollateralLocked: 'Position lock', PositionCollateralReleased: 'Position release', PositionCollateralMerged: 'Pair merge',
 };
 const date = (seconds: bigint) => new Date(Number(seconds) * 1000).toISOString().slice(0, 16).replace('T', ' ') + ' UTC';
 const validId = /^[1-9]\d{0,18}$/;
 
-function LoanCard({ row, now, active, demoRequestId, swarmReady, onChange }: { row: Row; now: bigint; active: bigint; demoRequestId?: bigint; swarmReady: boolean | null; onChange: () => void }) {
+function LoanCard({ row, now, active, demoRequestId, swarm, onChange }: {
+  row: Row; now: bigint; active: bigint; demoRequestId?: bigint; swarm: SwarmStatus | null; onChange: () => void;
+}) {
   const p = useProtocol();
   const action = useAction();
   const [acceptedBy, setAcceptedBy] = useState<EvmAddress | null>(null);
@@ -31,8 +37,8 @@ function LoanCard({ row, now, active, demoRequestId, swarmReady, onChange }: { r
   const [releasePreview, setReleasePreview] = useState<AssessmentChallenge | null>(null);
   const [publicConsent, setPublicConsent] = useState(false);
   const [uploaded, setUploaded] = useState<PublicAssessment | null>(null);
-  const [published, setPublished] = useState<{ entityKey: Hex; txHash: Hex | null; artifact: PublicAssessment } | null>(null);
-  const { id, loan, packet } = row;
+  const [published, setPublished] = useState<{ entityKey: Hex; txHash: Hex | null; readBack: boolean; artifact: PublicAssessment } | null>(null);
+  const { id, loan, pledge, packet } = row;
   const local = p.deployment?.traderCredit?.mode === 'LOCAL_FORWARDER';
   const desk = p.deployment?.contracts.TraderCreditDesk;
   const borrower = sameWallet(p.address, loan.borrower);
@@ -44,12 +50,29 @@ function LoanCard({ row, now, active, demoRequestId, swarmReady, onChange }: { r
   const canAct = p.walletReady && !action.busy;
   const canAttest = local && sameWallet(p.address, p.deployment?.roles.curator) && !expired && !attested;
   const canReviewFunding = requested && attested && !expired && !borrower && active !== id && !!packet;
-  const canRepayDemo = local && demoRequestId === id && funded;
+  const canRepayDemo = local && !pledge && demoRequestId === id && funded;
   const acknowledged = sameWallet(acceptedBy, p.address);
-  const loss = loan.terms.principal > loan.terms.bond ? loan.terms.principal - loan.terms.bond : 0n;
+  const quote = pledge && quotePositionCredit(loan.terms.principal, loan.terms.due, loan.terms.bond, BigInt(pledge.pairs));
+  const recoverable = quote?.gross ?? loan.terms.bond;
+  const loss = loan.terms.principal > recoverable ? loan.terms.principal - recoverable : 0n;
+  const claimable = !!pledge && !pledge.released && (loan.state === 3 || loan.state === 5);
+  const demo = local && !!pledge && sameWallet(loan.borrower, p.deployment?.roles.borrower)
+    && process.env.NEXT_PUBLIC_ENABLE_LOCAL_DEMO_UI === 'true';
+  const nextRole = demo && requested && !expired
+    ? !attested ? 'resolver' : packet || published ? 'lender' : 'borrower'
+    : demo && (funded && !mature || claimable) ? 'borrower' : null;
+  const canPublish = p.mode === 'injected' || p.mode === 'local' && arkivLocal;
+  const checkPosition = (position: PublicAssessment['position'], current: TraderLoan, currentPledge: PositionPledge | null) => {
+    if (!p.deployment || !desk) throw new Error('The lending desk is unavailable.');
+    assertPositionReport(position, currentPledge, {
+      chainId: p.deployment.chainId, desk, asset: p.deployment.contracts.CollateralToken, id,
+    }, current);
+  };
   const reviewPerformance = () => {
-    setPerformanceOpen(value => !value);
-    if (performanceEvidence || performanceOpen) return;
+    if (performanceEvidence) {
+      setPerformanceOpen(value => !value);
+      return;
+    }
     if (!packet) {
       action.setError('Discover this loan on Arkiv first. Funding review requires the borrower-published evidence pointer.');
       return;
@@ -59,7 +82,10 @@ function LoanCard({ row, now, active, demoRequestId, swarmReady, onChange }: { r
       try {
         const report = await retrieveAssessment(packet.reportRef.value, packet.reportHash.value);
         const live = await traderDesk(p);
-        const wallets = await live.client.readContract({ ...live.contract, functionName: 'traderWallets', args: [id] });
+        const [wallets, current, currentPledge] = await Promise.all([
+          live.client.readContract({ ...live.contract, functionName: 'traderWallets', args: [id] }),
+          live.loan(id), live.pledge(id),
+        ]);
         const evidence = report.evidence;
         if (evidence.asOf !== Number(loan.terms.asOf)
           || evidence.digest.toLowerCase() !== loan.terms.evidenceDigest.toLowerCase()
@@ -69,7 +95,9 @@ function LoanCard({ row, now, active, demoRequestId, swarmReady, onChange }: { r
           || evidence.wallets.some((wallet, index) => wallet.toLowerCase() !== wallets[index]?.toLowerCase())) {
           throw new Error('The retrieved Swarm report does not match the borrower, wallet group and score attested to this loan.');
         }
+        checkPosition(report.position, current, currentPledge);
         setPerformanceEvidence(report);
+        setPerformanceOpen(true);
       } finally {
         setPerformanceLoading(false);
       }
@@ -86,9 +114,10 @@ function LoanCard({ row, now, active, demoRequestId, swarmReady, onChange }: { r
       }
       if (fn === 'fundLoan') {
         if (!packet || !performanceEvidence) throw new Error('Inspect the Arkiv-listed Swarm report before funding.');
-        const [committedHash, committedReference] = await Promise.all([
+        const [committedHash, committedReference, currentPledge] = await Promise.all([
           live.client.readContract({ ...live.contract, functionName: 'assessmentHashOf', args: [id] }),
           live.client.readContract({ ...live.contract, functionName: 'assessmentReferenceOf', args: [id] }),
+          live.pledge(id),
         ]);
         if (committedHash.toLowerCase() !== `0x${packet.reportHash.value.toLowerCase()}`
           || committedReference.toLowerCase() !== `0x${packet.reportRef.value.toLowerCase()}`
@@ -96,6 +125,8 @@ function LoanCard({ row, now, active, demoRequestId, swarmReady, onChange }: { r
           || performanceEvidence.reference.toLowerCase() !== packet.reportRef.value.toLowerCase()) {
           throw new Error('The Arkiv listing and inspected Swarm bytes no longer match the onchain report commitment.');
         }
+        if (!packetMatches(packet, current, live.block.timestamp, currentPledge)) throw new Error('Arkiv does not match the current loan.');
+        checkPosition(performanceEvidence.position, current, currentPledge);
       }
       if (fn === 'repay' && (current.state !== 2 || current.maturity <= live.block.timestamp)) {
         throw new Error('The loan is past its repayment window.');
@@ -112,11 +143,23 @@ function LoanCard({ row, now, active, demoRequestId, swarmReady, onChange }: { r
     onChange();
   });
   const prepareRelease = () => void action.run(async () => {
+    const live = await traderDesk(p);
+    const [hash, reference] = await Promise.all([
+      live.client.readContract({ ...live.contract, functionName: 'assessmentHashOf', args: [id] }),
+      live.client.readContract({ ...live.contract, functionName: 'assessmentReferenceOf', args: [id] }),
+    ]);
+    if (hash !== zeroHash && reference !== zeroHash) {
+      const artifact = await retrieveAssessment(reference.slice(2), hash.slice(2));
+      checkPosition(artifact.position, loan, pledge);
+      setUploaded(artifact);
+      return;
+    }
     const challenge = await prepareAssessmentRelease(id);
     if (challenge.evidence.digest.toLowerCase() !== loan.terms.evidenceDigest.toLowerCase()
       || challenge.evidence.decision.score !== loan.score) {
       throw new Error('The public report preview differs from the report already attested to this loan.');
     }
+    checkPosition(challenge.position, loan, pledge);
     setReleasePreview(challenge);
     setPublicConsent(false);
   });
@@ -126,7 +169,7 @@ function LoanCard({ row, now, active, demoRequestId, swarmReady, onChange }: { r
     let artifact = uploaded;
     if (!artifact) {
       if (!releasePreview) throw new Error('Prepare and inspect the public report preview first.');
-      const signature = await requestBorrowerSignature(loan.borrower, releasePreview.message);
+      const signature = await p.signMessage(releasePreview.message, loan.borrower);
       artifact = await uploadConsentedAssessment(id, releasePreview.challengeId, signature);
       if (artifact.sha256.toLowerCase() !== releasePreview.sha256.toLowerCase()
         || artifact.evidence.digest.toLowerCase() !== releasePreview.evidence.digest.toLowerCase()) {
@@ -135,17 +178,26 @@ function LoanCard({ row, now, active, demoRequestId, swarmReady, onChange }: { r
       setUploaded(artifact);
     }
     const live = await traderDesk(p);
-    const current = await live.loan(id);
+    const [current, currentPledge, hash, reference] = await Promise.all([
+      live.loan(id), live.pledge(id),
+      live.client.readContract({ ...live.contract, functionName: 'assessmentHashOf', args: [id] }),
+      live.client.readContract({ ...live.contract, functionName: 'assessmentReferenceOf', args: [id] }),
+    ]);
     if (current.state !== 1 || current.score !== loan.score
       || current.terms.evidenceDigest.toLowerCase() !== loan.terms.evidenceDigest.toLowerCase()) {
       throw new Error('The loan changed after the report was uploaded. Refresh before publishing it.');
     }
-    await p.transact('Commit assessment report to loan', 'TraderCreditDesk', 'commitAssessment', [
-      id, `0x${artifact.sha256}`, `0x${artifact.reference}`,
-    ]);
+    checkPosition(artifact.position, current, currentPledge);
+    if (hash === zeroHash && reference === zeroHash) {
+      await p.transact('Commit assessment report to loan', 'TraderCreditDesk', 'commitAssessment', [
+        id, '0x' + artifact.sha256, '0x' + artifact.reference,
+      ]);
+    } else if (hash.toLowerCase() !== '0x' + artifact.sha256 || reference.toLowerCase() !== '0x' + artifact.reference) {
+      throw new Error('The existing commitment names a different Swarm report.');
+    }
     const receipt = await publishPacket(p.deployment!.chainId, live.address, id, current, {
-      reference: artifact.reference, sha256: artifact.sha256,
-    });
+      reference: artifact.reference, sha256: artifact.sha256, pledge: currentPledge,
+    }, p.mode);
     setPublished({ ...receipt, artifact });
     onChange();
   });
@@ -167,8 +219,36 @@ function LoanCard({ row, now, active, demoRequestId, swarmReady, onChange }: { r
       <div><dt>Principal</dt><dd>{usd(loan.terms.principal)}</dd></div>
       <div><dt>Repayment</dt><dd>{usd(loan.terms.due)}</dd></div>
       <div><dt>Bond</dt><dd>{usd(loan.terms.bond)}</dd></div>
-      <div><dt>Shortfall after full bond recovery</dt><dd className="trader-loss">{usd(loss)}</dd></div>
+      <div><dt>{pledge ? 'Shortfall after full recovery' : 'Shortfall after bond recovery'}</dt><dd className={loss > 0n ? 'trader-loss' : undefined}>{usd(loss)}</dd></div>
     </dl>
+    {pledge && quote && <div className="poly-collateral-box">
+      <div className="trader-inline">
+        <Layers3 size={16} /><strong>Position pledge</strong>
+        <Badge tone={pledge.released ? 'muted' : claimable ? 'blue' : 'green'}>{pledge.released ? loan.state === 4 ? 'MERGED' : 'RELEASED' : claimable ? 'CLAIMABLE' : 'LOCKED'}</Badge>
+      </div>
+      <dl className="trader-metrics">
+        <div><dt>YES + NO pairs</dt><dd>{formatUnits(BigInt(pledge.pairs), 6)}</dd></div>
+        <div><dt>Total backing</dt><dd>{usd(quote.gross)}</dd></div>
+        <div><dt>Debt LTV</dt><dd>{(Number(quote.dueLtvBps) / 100).toFixed(2)}%</dd></div>
+        <div><dt>Max due at 80%</dt><dd>{usd(quote.maxDue)}</dd></div>
+      </dl>
+      <div className="trader-inline trader-note"><span>Ledger</span><Address value={pledge.ledger} /><span>Condition</span><Address value={pledge.conditionId} /></div>
+    </div>}
+    {requested && pledge && <ol className="poly-loan-steps" aria-label="Loan progress">
+      {[
+        { label: 'Positions locked', done: true },
+        { label: 'Score attested', done: attested },
+        { label: 'Swarm report', done: !!uploaded || !!packet },
+        { label: 'Arkiv listing', done: !!packet || !!published?.readBack },
+        { label: 'Lender funding', done: false },
+      ].map(step => <li key={step.label} data-done={step.done}>{step.done && <Check size={13} />}{step.label}</li>)}
+    </ol>}
+    {nextRole && !sameWallet(p.address, p.deployment?.roles[nextRole]) && <div className="poly-demo-start">
+      <span className="trader-note">Continue as the demo {nextRole === 'resolver' ? 'reviewer' : nextRole}.</span>
+      <Button variant="secondary" disabled={action.busy || !p.online} onClick={() => void action.run(() => p.connectLocal(nextRole))}>
+        Switch to demo {nextRole === 'resolver' ? 'reviewer' : nextRole}
+      </Button>
+    </div>}
     <div className="trader-inline trader-note">
       <span>{requested ? 'Fund by ' + date(loan.fundBy) : loan.maturity > 0n ? 'Maturity ' + date(loan.maturity) : ''}</span>
       <span>Evidence <Address value={loan.terms.evidenceDigest} /></span>
@@ -179,7 +259,10 @@ function LoanCard({ row, now, active, demoRequestId, swarmReady, onChange }: { r
         {performanceLoading ? 'Verifying Swarm report…' : performanceOpen ? 'Hide assessment evidence' : 'Inspect assessment evidence'}
       </Button> : requested && !borrower ? <p className="trader-note">No fundable Arkiv listing loaded. Use “Discover on Arkiv” to find a borrower-published Swarm report.</p> : null}
       {performanceOpen && performanceEvidence && <>
-        <div className="trader-inline"><Badge tone="green">Swarm bytes, Arkiv hash and on-chain evidence digest verified</Badge><span className="trader-note">As of {new Date(performanceEvidence.evidence.asOf * 1000).toISOString().slice(0, 10)}</span></div>
+        <div className="trader-inline"><Badge tone="green">SWARM AND ONCHAIN REPORT VERIFIED</Badge>
+          {performanceEvidence.position && <Badge tone="blue">POSITION PLEDGE MATCHED</Badge>}
+          {performanceEvidence.position?.source === 'LOCAL_FIXTURE' && <Badge tone="amber">TEST PERFORMANCE FIXTURE</Badge>}
+          <span className="trader-note">As of {new Date(performanceEvidence.evidence.asOf * 1000).toISOString().slice(0, 10)}</span></div>
         <div className="trader-inline trader-note"><span>Swarm reference</span><code className="trader-hash">{performanceEvidence.reference}</code></div>
         <div className="trader-inline trader-note"><span>SHA-256</span><code className="trader-hash">{performanceEvidence.sha256}</code></div>
         <dl className="trader-metrics">
@@ -196,18 +279,22 @@ function LoanCard({ row, now, active, demoRequestId, swarmReady, onChange }: { r
     </div>}
     {canReviewFunding && <label className="trader-inline trader-risk">
       <input type="checkbox" checked={acknowledged} disabled={!p.address} onChange={event => setAcceptedBy(event.target.checked ? p.address : null)} />
-      I accept a principal shortfall of up to {usd(loss)}, assuming full bond recovery.
+      {pledge ? 'I reviewed the locked shares, backing and repayment amount.' : 'I accept a principal shortfall of up to ' + usd(loss) + ', assuming full bond recovery.'}
     </label>}
     <div className="trader-inline">
       {requested && canAttest && <Button variant="secondary" disabled={!canAct} onClick={attest}>Approve performance report</Button>}
       {canReviewFunding && <Button disabled={!canAct || !acknowledged || !performanceEvidence} onClick={() => transact('Fund trader loan', 'fundLoan', loan.terms.principal)}>Fund {usd(loan.terms.principal)}</Button>}
-      {requested && (borrower || expired) && <Button variant="secondary" disabled={!canAct} onClick={() => transact('Cancel request and return bond', 'cancelRequest')}>Cancel and return bond</Button>}
-      {requested && attested && !expired && borrower && p.mode === 'injected' && !packet && !published && <>
-        {swarmReady === false && <p className="trader-note" role="status">Swarm publication is unavailable: the AQRA API needs a Bee node URL and funded postage batch.</p>}
-        {swarmReady === null && <p className="trader-note" role="status">Checking Swarm storage configuration…</p>}
+      {requested && (borrower || expired) && <Button variant="secondary" disabled={!canAct} onClick={() => transact('Cancel request and return bond', 'cancelRequest')}>Cancel request</Button>}
+      {requested && attested && !expired && borrower && !packet && !published && !canPublish
+        && <p className="trader-note" role="status">Publication needs the borrower’s Rabdi wallet or the local Arkiv devnet.</p>}
+      {requested && attested && !expired && borrower && canPublish && !packet && !published && <>
+        {swarm && !swarm.swarmReady && <p className="trader-note" role="status">Swarm publication needs a reachable Bee node and a usable postage batch.</p>}
+        {!swarm && <p className="trader-note" role="status">Checking Swarm storage…</p>}
         {releasePreview && !uploaded && <div className="trader-public-preview">
           <strong>Public report preview</strong>
-          <p>Anyone can retrieve this report from Swarm and discover its listing on Arkiv. It contains the linked wallet addresses and the metrics below.</p>
+          <p>{arkivLocal && swarm?.swarmMode === 'LOCAL_BEE'
+            ? 'This report will be stored on the local Bee and Arkiv nodes.'
+            : 'This report and its listing can be read by anyone with network access.'} The file includes the wallet addresses, performance metrics and pledge details.</p>
           <div className="trader-inline"><span className="trader-note">Wallets</span>{releasePreview.evidence.wallets.map(value => <Address key={value} value={value as EvmAddress} />)}</div>
           <dl className="trader-metrics">
             <div><dt>Score</dt><dd>{releasePreview.evidence.decision.score}/100</dd></div>
@@ -218,24 +305,33 @@ function LoanCard({ row, now, active, demoRequestId, swarmReady, onChange }: { r
             <div><dt>Turnover</dt><dd>{usd(releasePreview.evidence.decision.turnover)}</dd></div>
           </dl>
           <div className="trader-inline trader-note"><span>Report SHA-256</span><code className="trader-hash">{releasePreview.sha256}</code></div>
+          <details className="trader-method"><summary>Exact report JSON</summary>
+            <pre className="poly-report-json">{serializeAssessment(releasePreview.evidence, releasePreview.position)}</pre>
+          </details>
           <p className="trader-note">Consent expires {new Date(releasePreview.expiresAt * 1000).toLocaleString()}.</p>
           <label className="trader-inline trader-risk"><input type="checkbox" checked={publicConsent} disabled={!canAct} onChange={event => setPublicConsent(event.target.checked)} />
-            I approve publishing this exact report publicly on Swarm and in Arkiv.</label>
+            I approve publishing this exact report on Swarm and in Arkiv.</label>
         </div>}
         <div className="trader-inline">
-          {!uploaded && <Button variant="secondary" disabled={!canAct || swarmReady !== true} onClick={prepareRelease}><Radio size={14} /> {releasePreview ? 'Refresh public report preview' : 'Preview public report'}</Button>}
-          {(releasePreview || uploaded) && <Button variant="secondary" disabled={!canAct || swarmReady !== true || (!publicConsent && !uploaded)} onClick={publish}><Radio size={14} /> {uploaded ? 'Retry Arkiv listing' : 'Sign consent, upload and publish'}</Button>}
+          {!uploaded && <Button variant="secondary" disabled={!canAct || !swarm?.swarmReady} onClick={prepareRelease}><Radio size={14} /> {releasePreview ? 'Refresh report preview' : 'Preview report'}</Button>}
+          {(releasePreview || uploaded) && <Button variant="secondary" disabled={!canAct || !swarm?.swarmReady || (!publicConsent && !uploaded)} onClick={publish}><Radio size={14} /> {uploaded ? 'Publish Arkiv listing' : 'Sign consent, upload and publish'}</Button>}
         </div>
       </>}
       {funded && borrower && !mature && <Button disabled={!canAct} onClick={() => transact('Repay trader loan', 'repay', loan.terms.due)}>Repay {usd(loan.terms.due)}</Button>}
+      {claimable && borrower && <Button disabled={!canAct} onClick={() => void action.run(async () => {
+        await p.transact('Return locked outcome shares', 'TraderCreditDesk', 'claimPositionCollateral', [id, loan.borrower]);
+        onChange();
+      })}>Claim locked positions</Button>}
       {canRepayDemo && <Button variant="secondary" disabled={!p.online || action.busy}
         onClick={() => void action.run(async () => { await repaySeededLocalDemo(p, id); onChange(); })}>Repay from demo borrower account</Button>}
-      {mature && <Button variant="danger" disabled={!canAct} onClick={() => transact('Settle default and release bond', 'settleDefault')}>Settle default</Button>}
+      {mature && <Button variant="danger" disabled={!canAct} onClick={() => transact(pledge ? 'Merge position collateral and settle default' : 'Settle default and release bond', 'settleDefault')}>Settle default</Button>}
     </div>
     {published && <div className="trader-inline trader-note">
       <span>Arkiv entity</span><Address value={published.entityKey} />
-      {published.txHash && <a href={arkivExplorer.replace(/\/+$/, '') + '/tx/' + published.txHash} target="_blank" rel="noreferrer" className="text-link">Publication receipt <ArrowUpRight size={12} /></a>}
-      <span>Swarm SHA-256</span><code className="trader-hash">{published.artifact.sha256}</code>
+      {published.txHash && (arkivLocal ? <><span>Arkiv transaction</span><Address value={published.txHash} /></>
+        : <a href={arkivExplorer + '/tx/' + published.txHash} target="_blank" rel="noreferrer" className="text-link">Publication receipt <ArrowUpRight size={12} /></a>)}
+      <Badge tone={published.readBack ? 'green' : 'amber'}>{published.readBack ? 'ARKIV READ-BACK VERIFIED' : 'ARKIV WRITE CONFIRMED'}</Badge>
+      <span>Swarm reference</span><code className="trader-hash">{published.artifact.reference}</code>
     </div>}
     {action.error && <div className="error-box" role="alert">{action.error}</div>}
   </article>;
@@ -255,18 +351,18 @@ export function TraderLoans({ mine = false, selectedId, demoRequestId }: { mine?
   const [discover, setDiscover] = useState(!mine);
   const [packetStatus, setPacketStatus] = useState('');
   const [packetCount, setPacketCount] = useState<number | null>(null);
-  const [swarmReady, setSwarmReady] = useState<boolean | null>(null);
+  const [swarm, setSwarm] = useState<SwarmStatus | null>(null);
   const deskAddress = deployment?.contracts.TraderCreditDesk;
   const block = p.data?.blockNumber;
   const confirmed = p.tx?.status === 'confirmed' ? p.tx.hash : undefined;
   const refresh = () => setRevision(value => value + 1);
   useEffect(() => {
     let stale = false;
-    void underwritingApi<{ swarmConfigured: boolean }>('/storage-status')
-      .then(status => { if (!stale) setSwarmReady(status.swarmConfigured); })
-      .catch(() => { if (!stale) setSwarmReady(false); });
+    void underwritingApi<SwarmStatus>('/storage-status')
+      .then(status => { if (!stale) setSwarm(status); })
+      .catch(() => { if (!stale) setSwarm({ swarmConfigured: false, swarmReady: false, swarmMode: 'NETWORK_BEE' }); });
     return () => { stale = true; };
-  }, []);
+  }, [revision]);
   useEffect(() => {
     if (!deskAddress || !online || (mine && !address)) return;
     let stale = false;
@@ -276,6 +372,16 @@ export function TraderLoans({ mine = false, selectedId, demoRequestId }: { mine?
       const live = await traderDesk({ deployment, rpcUrl });
       const current = live.block.timestamp;
       const count = await live.client.readContract({ ...live.contract, functionName: 'loanCount' });
+      const positionMarket = await live.positionMarket();
+      const cachedRows = new Map<bigint, Promise<Row>>();
+      const readRow = (loanId: bigint) => {
+        const cached = cachedRows.get(loanId);
+        if (cached) return cached;
+        const row = Promise.all([live.loan(loanId), live.pledge(loanId, positionMarket)])
+          .then(([loan, pledge]) => ({ id: loanId, loan, pledge }));
+        cachedRows.set(loanId, row);
+        return row;
+      };
       const ids = new Set<bigint>();
       if (selectedId) ids.add(selectedId);
       if (id) ids.add(id);
@@ -284,58 +390,59 @@ export function TraderLoans({ mine = false, selectedId, demoRequestId }: { mine?
       if (!mine && !id) for (let index = count; index > 0n && count - index < 10n; index--) ids.add(index);
       const matched = new Map<bigint, ArkivPacket>();
       let status = '';
+      let verifiedCount: number | null = null;
       if (discover && deployment) {
-        setPacketStatus('Querying Arkiv Rabdi for report-backed requests…');
+        setPacketStatus('Querying Arkiv for report-backed requests…');
         setPacketCount(null);
         try {
-          const packets = await readPackets(deployment.chainId, live.address);
+          const packets = await readPackets(deployment.chainId, live.address, id);
           const checked = await Promise.all(packets.filter(packet => packet.loanId.value > 0n && packet.loanId.value <= count)
             .map(async packet => {
-              const [loan, reportHash, reportReference] = await Promise.all([
-                live.loan(packet.loanId.value),
+              const [row, reportHash, reportReference] = await Promise.all([
+                readRow(packet.loanId.value),
                 live.client.readContract({ ...live.contract, functionName: 'assessmentHashOf', args: [packet.loanId.value] }),
                 live.client.readContract({ ...live.contract, functionName: 'assessmentReferenceOf', args: [packet.loanId.value] }),
               ]);
-              return { packet, loan, reportHash, reportReference };
+              return { packet, row, reportHash, reportReference };
             }));
-          for (const { packet, loan, reportHash, reportReference } of checked) {
+          for (const { packet, row, reportHash, reportReference } of checked) {
             const artifactMatches = reportHash.toLowerCase() === `0x${packet.reportHash.value.toLowerCase()}`
               && reportReference.toLowerCase() === `0x${packet.reportRef.value.toLowerCase()}`;
-            if (artifactMatches && packetMatches(packet, loan, current)) {
+            if (artifactMatches && packetMatches(packet, row.loan, current, row.pledge)) {
               matched.set(packet.loanId.value, packet);
               ids.add(packet.loanId.value);
             }
           }
           status = matched.size ? matched.size + ' open, report-backed Arkiv listings verified against the lending chain.' : 'No current report-backed Arkiv listings for this desk.';
-          setPacketCount(matched.size);
+          verifiedCount = matched.size;
         } catch {
           status = 'Arkiv query unavailable. Onchain requests are still available.';
-          setPacketCount(null);
         }
       }
-      const nextRows = await Promise.all([...ids].map(async id => ({ id, loan: await live.loan(id), packet: matched.get(id) })));
+      const nextRows = await Promise.all([...ids].map(async id => ({ ...await readRow(id), packet: matched.get(id) })));
       if (stale) return;
       setNow(current);
       setActive(activeId);
       setRows(nextRows.filter(row => row.loan.state > 0 && (!mine || sameWallet(row.loan.borrower, address))));
       setPacketStatus(status);
+      setPacketCount(verifiedCount);
       if (id && id > count) setError('No request with that ID.');
     })().catch(error => { if (!stale) { setError(message(error)); setRows([]); } })
       .finally(() => { if (!stale) setLoading(false); });
     return () => { stale = true; };
   }, [address, block, confirmed, deployment, deskAddress, discover, id, mine, online, revision, rpcUrl, selectedId]);
 
-  return <Panel title={mine ? 'Your request' : 'Arkiv reports & lending book'} eyebrow={mine ? 'ONCHAIN STATUS' : 'RABDI DISCOVERY · ONCHAIN FUNDING'}
+  return <Panel title={mine ? 'Your request' : 'Arkiv reports & lending book'} eyebrow={mine ? 'ONCHAIN STATUS' : 'REPORT DISCOVERY · ONCHAIN FUNDING'}
     action={<Button variant="ghost" onClick={refresh} disabled={!online || !deskAddress} aria-label="Refresh credit requests"><RefreshCw size={15} className={loading && online && deskAddress ? 'spin' : ''} /></Button>}>
     <div className="trader-panel-body">
       {!mine && <div className="arkiv-credit-status" role="status" aria-live="polite">
-        <div className="arkiv-credit-status-copy"><span className="eyebrow">ARKIV / RABDI</span><strong>{packetStatus || (loading ? 'Reading the lending desk and Arkiv…' : 'Arkiv discovery is ready')}</strong>
-          <p>Arkiv publishes borrower-approved report pointers. Loan principal, bond and funding remain on the lending chain.</p></div>
+        <div className="arkiv-credit-status-copy"><span className="eyebrow">{arkivLocal ? 'ARKIV / LOCAL DEVNET' : 'ARKIV / RABDI'}</span><strong>{packetStatus || (loading ? 'Reading the lending desk and Arkiv…' : 'Waiting to query the lending desk')}</strong>
+          <p>Arkiv indexes consented reports. The lender checks the Swarm file, pledge and repayment terms against the lending contract.</p></div>
         <div className="arkiv-credit-status-meta">
           <Badge tone={packetCount && packetCount > 0 ? 'green' : packetCount === 0 ? 'muted' : 'amber'}>{packetCount === null ? discover ? loading ? 'QUERYING' : 'NOT VERIFIED' : 'NOT QUERIED' : `${packetCount} LISTING${packetCount === 1 ? '' : 'S'}`}</Badge>
-          <Badge tone={arkivAccessKeyConfigured ? 'green' : 'amber'}>{arkivAccessKeyConfigured ? 'RABDI KEY SET' : 'PUBLIC RPC · RATE LIMITED'}</Badge>
-          <Badge tone={swarmReady ? 'green' : swarmReady === false ? 'amber' : 'muted'}>{swarmReady ? 'SWARM CONFIGURED' : swarmReady === false ? 'SWARM NOT CONFIGURED' : 'CHECKING SWARM'}</Badge>
-          <a href={arkivExplorer} target="_blank" rel="noreferrer" className="text-link">Arkiv explorer <ArrowUpRight size={12} /></a>
+          <Badge tone={arkivLocal || arkivAccessKeyConfigured ? 'green' : 'amber'}>{arkivLocal ? 'LOCAL ARKIV NODE' : arkivAccessKeyConfigured ? 'RABDI KEY SET' : 'PUBLIC RABDI RPC'}</Badge>
+          <Badge tone={swarm?.swarmReady ? 'green' : swarm ? 'amber' : 'muted'}>{swarm?.swarmReady ? swarm.swarmMode === 'LOCAL_BEE' ? 'LOCAL BEE READY' : 'SWARM READY' : swarm ? 'SWARM UNAVAILABLE' : 'CHECKING SWARM'}</Badge>
+          {!arkivLocal && <a href={arkivExplorer} target="_blank" rel="noreferrer" className="text-link">Arkiv explorer <ArrowUpRight size={12} /></a>}
         </div>
       </div>}
       {!mine && <div className="trader-inline trader-discovery">
@@ -353,7 +460,7 @@ export function TraderLoans({ mine = false, selectedId, demoRequestId }: { mine?
       {error && <div className="error-box" role="alert">{error}</div>}
       {deskAddress && online && (!mine || address) && !rows.length && !error && <p className="trader-note" role="status">{loading ? 'Reading the desk…' : 'No credit requests.'}</p>}
       {deskAddress && online && <div className="trader-loan-list">{rows.filter(row => !mine || sameWallet(row.loan.borrower, address)).map(row =>
-        <LoanCard key={deskAddress + ':' + row.id} row={row} now={now} active={active} demoRequestId={demoRequestId} swarmReady={swarmReady} onChange={refresh} />)}</div>}
+        <LoanCard key={deskAddress + ':' + row.id} row={row} now={now} active={active} demoRequestId={demoRequestId} swarm={swarm} onChange={refresh} />)}</div>}
     </div>
   </Panel>;
 }

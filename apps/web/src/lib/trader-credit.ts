@@ -1,5 +1,5 @@
 import { createTestClient, createWalletClient, http, keccak256, parseEventLogs, zeroHash, type Address, type Hex } from 'viem';
-import { CollateralTokenAbi, MockUSDCAbi, TraderCreditDeskAbi, chainFor, publicClientFor } from '@floor/shared';
+import { CollateralTokenAbi, MockUSDCAbi, TraderCreditDeskAbi, chainFor, publicClientFor, readPositionMarket, readPositionPledge, positionTokenAbi, type PositionMarket } from '@floor/shared';
 import type { Evidence } from '../../../../services/underwriting/policy';
 import { lastCompleteMonth } from '../../../../services/underwriting/calendar';
 import { linkContext } from '../../../../services/underwriting/reports';
@@ -42,7 +42,28 @@ export async function traderDesk({ deployment, rpcUrl }: CreditConnection) {
     address, client, block, contract,
     loan: (id: bigint) => client.readContract({ ...contract, functionName: 'getLoan', args: [id] }),
     active: (wallet: Address) => client.readContract({ ...contract, functionName: 'activeForWallet', args: [wallet] }),
+    positionMarket: () => readPositionMarket(client, deployment, block.number),
+    pledge: (id: bigint, market?: PositionMarket | null) => readPositionPledge(client, deployment, block.number, id, market),
   };
+}
+
+export async function positionInventory(p: CreditConnection, owner: Address) {
+  const live = await traderDesk(p);
+  const market = await live.positionMarket();
+  if (!market) return null;
+  const ledger = { address: market.ledger, abi: positionTokenAbi, blockNumber: live.block.number } as const;
+  const [code, balances, approved] = await Promise.all([
+    live.client.getCode({ address: market.ledger, blockNumber: live.block.number }),
+    live.client.readContract({
+      ...ledger, functionName: 'balanceOfBatch', args: [[owner, owner], [BigInt(market.yesTokenId), BigInt(market.noTokenId)]],
+    }),
+    live.client.readContract({ ...ledger, functionName: 'isApprovedForAll', args: [owner, live.address] }),
+  ]);
+  if (!code || keccak256(code) !== p.deployment?.codeHashes.PositionTokenLedger || balances.length !== 2) {
+    throw new Error('The position ledger or wallet balances could not be verified.');
+  }
+  const [yes, no] = balances;
+  return { market, yes, no, pairs: yes < no ? yes : no, approved };
 }
 
 export type TraderLoan = Awaited<ReturnType<Awaited<ReturnType<typeof traderDesk>>['loan']>>;

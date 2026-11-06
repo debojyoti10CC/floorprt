@@ -261,3 +261,84 @@
 .arkiv-credit-status-meta .text-link { display: inline-flex; align-items: center; gap: var(--space-2); color: var(--color-accent); font-size: var(--font-size-xs); }
 @media(max-width:760px) { .credit-mode-options,.arkiv-credit-status { grid-template-columns: minmax(0,1fr); } .credit-mode-card { min-height: 230px; } .arkiv-credit-status-meta { justify-content: flex-start; } }
 @media(max-width:460px) { .credit-mode-switch { width: 100%; justify-content: space-between; } .credit-mode-switch>.eyebrow { display: none; } .credit-mode-switch button { flex: 1; padding: 0 var(--space-3); font-size: var(--font-size-xs); } }
+
+.trader-borrow-layout { grid-template-columns: minmax(0, 1.8fr) minmax(315px, 1fr); }
+.poly-connect-heading, .poly-account-line, .poly-table-controls, .poly-portfolio-footer, .poly-demo-start {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+}
+.poly-connect-heading { justify-content: flex-start; }
+.poly-connect-heading > div { flex: 1 1 200px; }
+.poly-connect-heading strong { font-size: var(--font-size-lg); }
+.poly-connect-heading .trader-note, .poly-demo-start .trader-note { margin: var(--space-2) 0 0; }
+.poly-brand-mark {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--color-accent) 15%, var(--color-surface-muted));
+  color: var(--color-accent);
+  box-shadow: var(--shadow-inset);
+}
+.poly-demo-start, .poly-pair-strip, .poly-collateral-box {
+  padding: var(--space-5);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-muted);
+}
+.poly-demo-start .trader-note { max-width: 390px; }
+.polymarket-holdings, .poly-collateral-box { display: grid; min-width: 0; gap: var(--space-5); }
+.poly-account-line { padding-top: var(--space-5); border-top: 1px solid var(--color-border-default); }
+.poly-portfolio-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1px;
+  margin: 0;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--color-border-default);
+}
+.poly-portfolio-summary > div { padding: var(--space-5); min-width: 0; background: var(--color-surface-raised); }
+.poly-portfolio-summary dt, .poly-portfolio-footer small { font-size: var(--font-size-xs); color: var(--color-text-secondary); }
+.poly-portfolio-summary dd { margin: var(--space-2) 0 0; font: 500 var(--font-size-xl) var(--mono); overflow-wrap: anywhere; }
+.poly-pair-strip { display: flex; align-items: flex-start; gap: var(--space-4); color: var(--color-accent); }
+.poly-pair-strip div { display: grid; gap: var(--space-2); min-width: 0; }
+.poly-pair-strip span, .poly-pair-strip small { font-size: var(--font-size-sm); color: var(--color-text-secondary); }
+.poly-table-controls input { width: min(100%, 190px); min-height: 34px; }
+.poly-table-scroll { max-width: 100%; overflow: auto; border: 1px solid var(--color-border-default); border-radius: var(--radius-xs); }
+.poly-table { width: 100%; min-width: 570px; border-collapse: collapse; font-size: var(--font-size-sm); }
+.poly-table th, .poly-table td { padding: var(--space-4); text-align: right; border-bottom: 1px solid var(--color-border-default); }
+.poly-table th:first-child, .poly-table td:first-child { width: 41%; text-align: left; }
+.poly-table th { background: var(--color-surface-muted); color: var(--color-text-secondary); font-weight: 500; }
+.poly-table td:not(:first-child) { font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.poly-table tr:last-child td { border-bottom: 0; }
+.poly-table td:first-child a { display: inline-flex; align-items: center; gap: var(--space-2); color: var(--color-text-primary); }
+.poly-table td:first-child a:hover { color: var(--color-accent); }
+.poly-table td:first-child .trader-inline { margin-top: var(--space-2); }
+.poly-confirmed { display: inline-flex; align-items: center; gap: 4px; color: var(--color-text-secondary); font-size: var(--font-size-xs); }
+.poly-gain { color: var(--color-positive); }
+.poly-collateral-box .trader-metrics { grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); }
+.poly-ltv { display: grid; gap: var(--space-3); color: var(--color-text-secondary); }
+.poly-ltv > div { position: relative; height: 8px; border-radius: var(--radius-pill); background: var(--color-surface-muted); }
+.poly-ltv > div span { display: block; height: 100%; border-radius: inherit; background: var(--color-accent); }
+.poly-ltv[data-over="true"] > div span { background: var(--color-negative); }
+.poly-ltv > div i { position: absolute; inset: -3px auto -3px 80%; width: 2px; background: var(--color-text-secondary); }
+.poly-loan-steps { display: flex; flex-wrap: wrap; gap: var(--space-3); padding: 0; margin: 0; list-style: none; }
+.poly-loan-steps li {
+  display: flex; align-items: center; gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-pill);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xs);
+}
+.poly-loan-steps li[data-done="true"] { color: var(--color-positive); }
+.poly-report-json { max-width: 100%; max-height: 215px; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; font: var(--font-size-xs) var(--mono); }
+@media (max-width: 1120px) { .trader-borrow-layout { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 660px) { .poly-portfolio-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
