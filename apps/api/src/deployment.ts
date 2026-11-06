@@ -5,7 +5,7 @@ import type {Deployment} from '../../../packages/shared/src/index';
 export type ApiRuntime={deployment:Deployment;rpcUrl:string;journal:EventJournal};
 
 /** Each request holds one manifest generation even if a deployment changes during its reads. */
-export function deploymentLoader(path='apps/web/public/deployment.json',rpcOverride=process.env.FLOOR_RPC_URL){
+export function deploymentLoader(path=process.env.FLOOR_DEPLOYMENT_FILE??'apps/web/public/deployment.json',rpcOverride=process.env.FLOOR_RPC_URL){
   let current:{contents:string;key:string;runtime:ApiRuntime}|undefined;
   return async():Promise<ApiRuntime>=>{
     const contents=await readFile(path,'utf8');

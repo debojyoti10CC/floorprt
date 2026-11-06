@@ -2,7 +2,7 @@
 
 import React,{createContext,useContext,useEffect,useState,useCallback,useRef} from 'react';
 
-import {createWalletClient,custom,http,type Abi,type Address,type EIP1193Provider,type Hash,keccak256,isAddress,type TransactionReceipt} from 'viem';
+import {createWalletClient,custom,http,type Abi,type Address,type EIP1193Provider,type Hash,type Hex,keccak256,isAddress,numberToHex,type TransactionReceipt} from 'viem';
 
 import {abis,MockUSDCAbi,chainFor,publicClientFor,readSnapshot,contractNames,latestEligiblePair,type Deployment,type Snapshot,type ContractName} from '@floor/shared';
 
@@ -12,12 +12,28 @@ export type TransactionState={label:string;status:'signing'|'pending'|'confirmed
 
 type Draft={lower:string;upper:string;lowerUnits:string;upperUnits:string};
 
-type ProtocolContext={deployment:Deployment|null;data:Snapshot|null;online:boolean;loading:boolean;error:string|null;address:Address|null;mode:'local'|'injected'|null;tx:TransactionState|null;rpcUrl:string;draft:Draft;setDraft:React.Dispatch<React.SetStateAction<Draft>>;refresh:()=>Promise<void>;connectLocal:(role:'borrower'|'lender'|'resolver')=>Promise<void>;connectInjected:()=>Promise<void>;disconnect:()=>void;transact:(label:string,name:ContractName,fn:string,args:unknown[])=>Promise<TransactionReceipt>;dismissTx:()=>void;configure:(rpc:string,manifest?:Deployment)=>void};
+type ProtocolContext={deployment:Deployment|null;data:Snapshot|null;online:boolean;loading:boolean;error:string|null;address:Address|null;mode:'local'|'injected'|null;tx:TransactionState|null;rpcUrl:string;draft:Draft;setDraft:React.Dispatch<React.SetStateAction<Draft>>;refresh:()=>Promise<void>;connectLocal:(role:'borrower'|'lender'|'resolver')=>Promise<void>;connectInjected:()=>Promise<void>;disconnect:()=>void;signMessage:(message:string,expected:Address)=>Promise<Hex>;transact:(label:string,name:ContractName,fn:string,args:unknown[])=>Promise<TransactionReceipt>;dismissTx:()=>void;configure:(rpc:string,manifest?:Deployment)=>void};
 
 const Ctx=createContext<ProtocolContext|null>(null);
 
 const loopback=(url:string)=>{try{return ['localhost','127.0.0.1','[::1]'].includes(new URL(url).hostname)}catch{return false}};
 const localDemoUi=process.env.NEXT_PUBLIC_ENABLE_LOCAL_DEMO_UI==='true';
+
+async function switchSigningChain(provider: EIP1193Provider, deployment: Deployment, rpcUrl: string) {
+  const chainId = ('0x' + deployment.chainId.toString(16)) as Hex;
+  if (Number(BigInt(await provider.request({ method: 'eth_chainId' }))) === deployment.chainId) return;
+  const switchChain = () => provider.request({ method: 'wallet_switchEthereumChain', params: [{ chainId }] });
+  try {
+    await switchChain();
+  } catch (error) {
+    if ((error as { code?: number }).code !== 4902) throw error;
+    const chain = chainFor(deployment.chainId, rpcUrl);
+    await provider.request({ method: 'wallet_addEthereumChain', params: [{
+      chainId, chainName: deployment.chainName, nativeCurrency: chain.nativeCurrency, rpcUrls: [rpcUrl],
+    }] });
+    await switchChain();
+  }
+}
 
 export function ProtocolProvider({children}:{children:React.ReactNode}){
 
@@ -41,7 +57,8 @@ export function ProtocolProvider({children}:{children:React.ReactNode}){
 
       const settings=saved?JSON.parse(saved):null;
 
-      const response=await fetch('/deployment.json',{cache:'no-store'});
+      const manifestFile = process.env.NEXT_PUBLIC_AQRA_POSITIONS_DEV === 'true' ? '/deployment.positions.local.json' : '/deployment.json';
+      const response=await fetch(manifestFile,{cache:'no-store'});
 
       if(!response.ok)throw new Error('Deployment manifest is missing. Run pnpm deploy:local.');
 
@@ -82,14 +99,14 @@ export function ProtocolProvider({children}:{children:React.ReactNode}){
 
     if(await client.getChainId()!==deployment.chainId)throw new Error('ERR_CHAIN_MISMATCH');
 
-    const optional = (['ChainlinkObservationResolver', 'TraderCreditDesk'] as const).filter(name => deployment.contracts[name]);
+    const optional = (['ChainlinkObservationResolver', 'TraderCreditDesk', 'PositionTokenLedger'] as const).filter(name => deployment.contracts[name]);
     await Promise.all([...contractNames, ...optional].map(async name=>{const code=await client.getCode({address:deployment.contracts[name]!});if(!code||keccak256(code)!==deployment.codeHashes[name])throw new Error(`ERR_CONTRACT_CODE_MISMATCH: ${name}. Redeploy and refresh the manifest.`);}));
 
   },[deployment,rpcUrl]);
 
   const connectLocal=async(role:'borrower'|'lender'|'resolver')=>{
 
-    if(!deployment||deployment.chainId!==31337||!loopback(rpcUrl))throw new Error('Local wallets require a loopback Anvil RPC on chain 31337.');
+    if(!localDemoUi||!deployment?.mockCollateral||deployment.chainId!==31337||!loopback(rpcUrl)||!loopback(window.location.href))throw new Error('Local wallets require the loopback demo on chain 31337.');
 
     await validateCode();
 
@@ -111,17 +128,7 @@ export function ProtocolProvider({children}:{children:React.ReactNode}){
 
     const accounts=await window.ethereum.request({method:'eth_requestAccounts'}) as Address[];
 
-    const wallet=createWalletClient({transport:custom(window.ethereum)});
-
-    if(await wallet.getChainId()!==deployment.chainId){
-
-      try{await window.ethereum.request({method:'wallet_switchEthereumChain',params:[{chainId:'0x'+deployment.chainId.toString(16)}]});}
-
-      catch(e){if((e as {code:number}).code===4902){const chain=chainFor(deployment.chainId,rpcUrl);await window.ethereum.request({method:'wallet_addEthereumChain',params:[{chainId:'0x'+deployment.chainId.toString(16),chainName:deployment.chainName,nativeCurrency:chain.nativeCurrency,rpcUrls:[rpcUrl]}]});await window.ethereum.request({method:'wallet_switchEthereumChain',params:[{chainId:'0x'+deployment.chainId.toString(16)}]});}else throw e;}
-
-    }
-
-    if(await wallet.getChainId()!==deployment.chainId)throw new Error('Wallet did not switch to the configured AQRA network.');
+    if(!accounts[0]||!isAddress(accounts[0]))throw new Error('The wallet did not return an account.');
 
     await validateCode();setAddress(accounts[0]);setMode('injected');localStorage.setItem('floor-wallet',JSON.stringify({mode:'injected',chainId:deployment.chainId,desk:deployment.contracts.CreditDesk}));
 
@@ -138,8 +145,8 @@ export function ProtocolProvider({children}:{children:React.ReactNode}){
         const accounts=await createWalletClient({transport:http(rpcUrl)}).getAddresses();const selected=deployment.roles[saved.role as 'borrower'|'lender'|'resolver'];
         if(!cancelled&&accounts.some(a=>a.toLowerCase()===selected.toLowerCase())){setAddress(selected);setMode('local');}
       }else if(saved.mode==='injected'&&window.ethereum){
-        const wallet=createWalletClient({transport:custom(window.ethereum)}),accounts=await window.ethereum.request({method:'eth_accounts'}) as Address[];
-        if(!cancelled&&accounts[0]&&await wallet.getChainId()===deployment.chainId){setAddress(accounts[0]);setMode('injected');}
+        const accounts=await window.ethereum.request({method:'eth_accounts'}) as Address[];
+        if(!cancelled&&accounts[0]){setAddress(accounts[0]);setMode('injected');}
       }
     }catch{localStorage.removeItem('floor-wallet')}})();return()=>{cancelled=true};
   },[deployment,online,address,rpcUrl,validateCode]);
@@ -151,11 +158,8 @@ export function ProtocolProvider({children}:{children:React.ReactNode}){
 
     const changed=(accounts:unknown)=>{const next=(accounts as Address[])[0];setAddress(next??null);if(!next)setMode(null)};
 
-    const chainChanged=()=>{localStorage.removeItem('floor-wallet');setAddress(null);setMode(null);setError('Wallet network changed. Reconnect to verify chain and contract identities.');};
-
-    provider.on?.('accountsChanged',changed);provider.on?.('chainChanged',chainChanged);
-
-    return()=>{provider.removeListener?.('accountsChanged',changed);provider.removeListener?.('chainChanged',chainChanged)};
+    provider.on?.('accountsChanged',changed);
+    return()=>provider.removeListener?.('accountsChanged',changed);
 
   },[mode]);
 
@@ -183,6 +187,25 @@ export function ProtocolProvider({children}:{children:React.ReactNode}){
 
   },[deployment,rpcUrl]);
 
+  const signMessage = async (text: string, expected: Address) => {
+    if (!deployment || !address || !mode || address.toLowerCase() !== expected.toLowerCase()) {
+      throw new Error('Connect the wallet that owns this request.');
+    }
+    if (mode === 'local') {
+      if (!localDemoUi || deployment.chainId !== 31337 || !deployment.mockCollateral || !loopback(rpcUrl) || !loopback(window.location.href)) {
+        throw new Error('The local signer requires the loopback demo.');
+      }
+      await validateCode();
+      return createWalletClient({ account: address, transport: http(rpcUrl) }).signMessage({ message: text });
+    }
+    const provider = window.ethereum;
+    if (!provider) throw new Error('Reconnect your browser wallet.');
+    const wallet = createWalletClient({ account: address, transport: custom(provider) });
+    const [selected] = await wallet.getAddresses();
+    if (selected?.toLowerCase() !== address.toLowerCase()) throw new Error('Select the request owner in your wallet.');
+    return wallet.signMessage({ message: text });
+  };
+
   const transact=async(label:string,name:ContractName,fn:string,args:unknown[])=>{
 
     if(!deployment||!address||!mode)throw new Error('Connect a wallet before signing.');
@@ -203,7 +226,24 @@ export function ProtocolProvider({children}:{children:React.ReactNode}){
 
       if(mode==='local'&&(deployment.chainId!==31337||!loopback(rpcUrl)))throw new Error('Local signer is restricted to loopback devnet.');
 
-      const wallet=createWalletClient({account:address,chain,transport:mode==='local'?http(rpcUrl):custom(window.ethereum!)});
+      const provider = window.ethereum;
+      if (mode === 'injected') {
+        if (!provider) throw new Error('Reconnect your browser wallet.');
+        const [selected] = await provider.request({ method: 'eth_accounts' });
+        if (selected?.toLowerCase() !== address.toLowerCase()) throw new Error('The wallet account changed. Select the correct signer.');
+        await switchSigningChain(provider, deployment, rpcUrl);
+        if (deployment.chainId === 31337) {
+          const blockNumber = BigInt(deployment.traderCredit?.deploymentBlock ?? deployment.deploymentBlock);
+          const [walletBlock, expectedBlock] = await Promise.all([
+            provider.request({ method: 'eth_getBlockByNumber', params: [numberToHex(blockNumber), false] }),
+            client.getBlock({ blockNumber }),
+          ]);
+          if (!walletBlock?.hash || walletBlock.hash.toLowerCase() !== expectedBlock.hash.toLowerCase()) {
+            throw new Error('Set the local test network RPC in your wallet to ' + rpcUrl + ' before signing.');
+          }
+        }
+      }
+      const wallet=createWalletClient({account:address,chain,transport:mode==='local'?http(rpcUrl):custom(provider!)});
 
       if(await wallet.getChainId()!==deployment.chainId)throw new Error('ERR_CHAIN_MISMATCH');
 
@@ -239,7 +279,7 @@ export function ProtocolProvider({children}:{children:React.ReactNode}){
 
   };
 
-  return <Ctx.Provider value={{deployment,data,online,loading,error,address,mode,tx,rpcUrl,draft,setDraft:next=>{draftTouched.current=true;setDraft(next)},refresh,connectLocal,connectInjected,disconnect:()=>{localStorage.removeItem('floor-wallet');setAddress(null);setMode(null)},transact,dismissTx:()=>setTx(null),configure}}>{children}</Ctx.Provider>;
+  return <Ctx.Provider value={{deployment,data,online,loading,error,address,mode,tx,rpcUrl,draft,setDraft:next=>{draftTouched.current=true;setDraft(next)},refresh,connectLocal,connectInjected,disconnect:()=>{localStorage.removeItem('floor-wallet');setAddress(null);setMode(null)},signMessage,transact,dismissTx:()=>setTx(null),configure}}>{children}</Ctx.Provider>;
 
 }
 
@@ -259,6 +299,15 @@ export function validateManifest(d:Deployment){
     if (d.traderCredit?.mode !== mode || !/^\d+$/.test(d.traderCredit.deploymentBlock)
       || !isAddress(d.contracts.TraderCreditDesk ?? '') || !/^0x[0-9a-fA-F]{64}$/.test(d.codeHashes.TraderCreditDesk ?? '')) {
       throw new Error('Invalid trader credit deployment.');
+    }
+  }
+  if (d.traderCredit?.positionCollateral || d.contracts.PositionTokenLedger) {
+    const position = d.traderCredit?.positionCollateral;
+    if (d.chainId !== 31337 || !d.mockCollateral || !position || !isAddress(d.contracts.PositionTokenLedger ?? '')
+      || !/^0x[0-9a-f]{64}$/i.test(d.codeHashes.PositionTokenLedger ?? '')
+      || !/^0x[0-9a-f]{64}$/i.test(position.conditionId)
+      || !/^\d{1,78}$/.test(position.yesTokenId) || !/^\d{1,78}$/.test(position.noTokenId)) {
+      throw new Error('Invalid position collateral deployment.');
     }
   }
 
