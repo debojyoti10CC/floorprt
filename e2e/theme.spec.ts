@@ -1,6 +1,6 @@
 import {test,expect} from '@playwright/test';
 test('Kimia foundations, contrast, keyboard chart and wallet focus are usable',async({page})=>{
-  await page.goto('/');
+  await page.goto('/markets/');
   await expect(page.locator('body')).toHaveCSS('background-color','rgb(9, 8, 12)');
   await expect(page.locator('body')).toHaveCSS('font-family',/Poppins/);
   await page.evaluate(()=>document.fonts.ready);

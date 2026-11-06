@@ -1,9 +1,9 @@
 import {test,expect} from '@playwright/test';
 
-test('the seven terminal destinations are connected from the sidebar',async({page})=>{
+test('the eight terminal destinations are connected from the sidebar',async({page})=>{
   await page.goto('/');
   const navigation=page.getByRole('navigation',{name:'Main navigation'});
-  await expect(navigation.getByRole('link')).toHaveCount(7);
+  await expect(navigation.getByRole('link')).toHaveCount(8);
   const screens=[
     ['Outcome graph','Outcome graph'],
     ['Portfolio composer','Portfolio composer'],
@@ -12,6 +12,7 @@ test('the seven terminal destinations are connected from the sidebar',async({pag
     ['Portfolio dashboard','Portfolio dashboard'],
     ['Settlement explorer','Settlement explorer'],
     ['Market terminal','Market terminal'],
+    ['Trader credit','Trader credit'],
   ] as const;
   for(const [link,title] of screens){await navigation.getByRole('link',{name:link,exact:true}).click();await expect(page.getByRole('heading',{name:title,exact:true})).toBeVisible()}
 });

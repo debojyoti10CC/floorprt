@@ -21,7 +21,7 @@ test.describe.serial('wallet-signed outcome collateral lifecycle',()=>{
     const slider=page.getByRole('slider',{name:'Explore settlement price'}),before=await slider.inputValue();await slider.focus();await page.keyboard.press('ArrowRight');await expect(slider).not.toHaveValue(before);
   });
   test('market terminal mints fully backed complete sets onchain',async({page})=>{
-    await page.goto('/');await expect(page.getByRole('heading',{name:'Market terminal'})).toBeVisible();await connect(page,'borrower');await page.getByRole('tab',{name:/AQRA collateral/}).click();
+    await page.goto('/markets/');await expect(page.getByRole('heading',{name:'Market terminal'})).toBeVisible();await connect(page,'borrower');await page.getByRole('tab',{name:/AQRA collateral/}).click();
     const marketId=BigInt(await page.getByLabel('Choose an AQRA collateral market').inputValue());
     const yesToken=marketId*2n+1n,noToken=yesToken+1n;
     const readBalance=(tokenId:bigint)=>client.readContract({address:d.contracts.OutcomeTokens,abi:OutcomeTokensAbi,functionName:'balanceOf',args:[d.roles.borrower,tokenId]});
