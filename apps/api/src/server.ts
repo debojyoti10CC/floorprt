@@ -1,7 +1,9 @@
 import {serve} from '@hono/node-server';
+import {existsSync} from 'node:fs';
 import {createReadApi} from './app';
 import {deploymentLoader} from './deployment';
 
+if(existsSync('.env'))process.loadEnvFile('.env');
 const loadRuntime=deploymentLoader();await loadRuntime();
 const app=createReadApi(loadRuntime);
 const port=Number(process.env.FLOOR_API_PORT??8787);serve({fetch:app.fetch,port,hostname:'127.0.0.1'},()=>console.log(`Floor read API: http://127.0.0.1:${port} · no signing keys`));
