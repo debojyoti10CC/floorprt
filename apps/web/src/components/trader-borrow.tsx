@@ -134,10 +134,11 @@ export function TraderBorrow({ onRequest }: { onRequest: (id: bigint) => void })
   };
 
   return <div className="trader-loan-layout">
-    <Panel title="Trader identity" eyebrow="WALLET EVIDENCE">
+    <Panel title="Polymarket account history" eyebrow="PUBLIC WALLET DATA · READ ONLY">
       <div className="trader-panel-body">
+        <p className="trader-note">Enter the Polymarket proxy/account address used for trading, or an ENS name that resolves to it. This reads public history; it does not sign in to Polymarket, move positions, or pledge them as collateral.</p>
         <form className="trader-form" onSubmit={event => { event.preventDefault(); void action.run(getEvidence); }}>
-          <label className="trader-field">ENS name or wallet addresses
+          <label className="trader-field">Polymarket account address or ENS name
             <input value={input} placeholder={wallet ?? 'name.eth or 0x…'} maxLength={255} disabled={action.busy}
               onChange={event => { setInput(event.target.value); setEvidence(null); setConsent(null); setIdentity(null); action.setError(null); }} />
           </label>
