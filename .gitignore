@@ -15,4 +15,7 @@ packages/contracts/lib/
 test-results/
 playwright-report/
 services/indexer/state/
+work/
+services/trader-cre/workflow/config.local.json
+services/trader-cre/workflow/config.sepolia.json
 !packages/contracts/deployments/

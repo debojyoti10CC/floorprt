@@ -8,6 +8,11 @@
     "node": ">=22.0.0"
   },
   "scripts": {
+    "underwriting:collect": "tsx scripts/underwriting-collect.ts",
+    "underwriting:replay": "tsx scripts/underwriting-backtest.ts",
+    "underwriting:benchmark": "pnpm underwriting:collect --benchmark && pnpm underwriting:replay --benchmark",
+    "underwriting:demo": "tsx scripts/demo-trader-credit.ts",
+    "underwriting:deploy": "pnpm contracts:build && pnpm abi && tsx scripts/deploy-trader-credit.ts",
     "docs:generate": "node scripts/docs-generate.mjs && node scripts/docs-api-generate.mjs",
     "docs:check": "node scripts/docs-generate.mjs --check && node scripts/docs-api-generate.mjs --check && cd docs/mintlify && pnpm dlx mint@4.2.1205 validate",
     "docs:links": "cd docs/mintlify && pnpm dlx mint@4.2.1205 broken-links --check-anchors --check-redirects --check-snippets",
@@ -25,7 +30,7 @@
     "preflight": "tsx scripts/preflight.ts",
     "test": "vitest run",
     "test:differential": "tsx scripts/differential.ts",
-    "typecheck": "tsc --noEmit && pnpm --filter @floor/web typecheck",
+    "typecheck": "tsc --noEmit && tsc -p services/trader-cre/workflow && pnpm --filter @floor/web typecheck",
     "build": "pnpm contracts:build && pnpm abi && pnpm --filter @floor/web build && node scripts/package-web.mjs",
     "e2e": "playwright test",
     "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm contracts:test && pnpm test:differential",

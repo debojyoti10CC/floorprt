@@ -6,5 +6,5 @@
     "noEmit": true, "types": ["node"]
   },
   "include": ["scripts/**/*.ts", "packages/*/src/**/*.ts", "apps/api/**/*.ts", "services/**/*.ts", "e2e/**/*.ts", "*.config.ts"],
-  "exclude": ["node_modules", "packages/contracts/lib", "apps/web", "dist"]
+  "exclude": ["node_modules", "packages/contracts/lib", "apps/web", "services/trader-cre", "dist"]
 }
