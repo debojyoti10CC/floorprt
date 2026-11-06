@@ -13,9 +13,10 @@ The technical risk engine computes explicit default and bond-recovery scenarios,
 1. AQRA reads public, dated wallet performance and records evidence for a UTC cutoff.
 2. A borrower can associate up to four addresses and must obtain scoped consent from additional wallet controllers. ENS helps discover a wallet group but does not prove that the borrower controls each address.
 3. An eligible borrower requests fixed terms and escrows a bond in the repayment token.
-4. An authenticated report binds the score to the wallet set, policy version, cutoff and evidence digest. The lender reloads those dated metrics and confirms the digest matches before the app enables funding.
-5. The lender reviews terms and maximum principal shortfall, acknowledges the risk and chooses whether to fund.
-6. Repayment returns the bond. A matured default can transfer the bond to the lender and records principal shortfall. There is no automatic access to the borrower's market account or future P&L.
+4. An authenticated report binds the score to the wallet set, policy version, cutoff and evidence digest. After previewing the public assessment, the borrower signs a loan-specific release; the API uploads canonical JSON to Swarm and verifies its read-back. The borrower commits the Swarm reference and SHA-256 to the loan contract, then publishes the searchable pointer on Arkiv.
+5. The lender discovers the request on Arkiv, reconciles it with the loan contract, fetches the exact Swarm bytes, recomputes the report, and checks the hash, wallet set, score, cutoff and evidence digest before the app enables funding.
+6. The lender reviews terms and maximum principal shortfall, acknowledges the risk and chooses whether to fund.
+7. Repayment returns the bond. A matured default can transfer the bond to the lender and records principal shortfall. There is no automatic access to the borrower's market account or future P&L.
 
 The local/testnet demonstration uses $100 principal, $102 due and a $25 bond. These are prototype terms. The lender's principal shortfall can reach $75 before recovery haircuts and fees. No production pool, external Polymarket-position custody or public Chainlink DON execution is claimed.
 
@@ -50,7 +51,7 @@ The UI exposes these calculations as assumptions and results, without suggesting
 - **Polymarket:** public wallet P&L, trades and resolved outcomes support historical performance research.
 - **ENS:** primary-name resolution and a wallet-group text record help discover addresses; each linked controller still has to consent.
 - **Chainlink CRE:** workflow source recomputes evidence for a request-bound report. No successful official CLI simulation or live CRE deployment is recorded yet; simulation would still not be a public DON execution receipt.
-- **Arkiv:** optional expiring public underwriting packets can be checked against the onchain request. Packet publication does not transfer funds or create collateral.
+- **Arkiv and Swarm:** v2 loan listings point to public borrower-consented evidence on Swarm. SHA-256 and Swarm reference are committed to the loan contract, and lender discovery reads Arkiv before verifying the exact report. No live Rabdi/Swarm receipt or service configuration is present in this checkout. Packet publication does not transfer funds or create collateral.
 
 ## Limitations and next study
 

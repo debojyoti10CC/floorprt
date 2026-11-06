@@ -28,15 +28,15 @@ The metrics are the protocol's underwriting input, but they have only been bench
 
 ### Lend
 
-- Reads requests from the lending contract, reloads the dated performance inputs, requires a digest match to the attested report, then presents the bond-adjusted principal shortfall and records the lender's acknowledgement before the app enables funding.
+- Reads requests from the lending contract and discovers report-backed listings through Arkiv. It fetches the exact Swarm file and requires SHA-256, Swarm reference, wallet set, cutoff, score and evidence-digest checks against the attestation and contract before the app enables funding.
 - Supports full repayment before maturity and matured default settlement from the escrowed bond. Transaction status is read from chain state and receipts.
 - A lender can lose up to $75 of principal at the $100/$25 terms if the bond transfers in full; lower bond recovery or token/contract failures can increase the loss.
 
 ## Demo and integrations
 
-- **Local Anvil:** test USDC and named borrower/lender/curator accounts. The local walkthrough impersonates a sampled wallet only on loopback Anvil; it is a contract demo, not a real borrower's consent or production credit decision.
+- **Local Anvil:** test USDC and named borrower/lender/curator accounts. The pending-request helper impersonates a sampled wallet only on loopback Anvil and stops before report release/funding; it is not a real borrower's consent or production credit decision.
 - **Chainlink CRE:** workflow source is present. A successful `cre workflow simulate` output or a live CRE deployment is not yet recorded; do not call a report CRE-attested until that evidence exists.
-- **Arkiv:** wallet-owned, expiring request packets can be written and queried on Rabdi. No public transaction receipt or writer address is currently recorded. A packet is not a credit report, collateral or payment.
+- **Arkiv and Swarm:** borrower-signed public report release, Bee upload/read-back, SHA-256 + report recomputation, immutable report hash/reference on the loan, expiring Arkiv v2 listing, and lender retrieval are implemented. This checkout has no Bee URL, postage batch, Rabdi writer, public receipt or second-wallet proof. These artifacts are not collateral or payment.
 - **ENS:** helps discover linked addresses. It does not prove common beneficial ownership or replace controller signatures.
 - **Arc:** no Arc Studio artifact, Arc deployment or Arc transaction exists in this repo's evidence.
 
@@ -46,6 +46,7 @@ The metrics are the protocol's underwriting input, but they have only been bench
 - Daily realized P&L is not ROI without opening equity, full holdings and bankroll. A single 10× or 100× fill does not establish persistent skill.
 - No historical AQRA repayment/default or recovery labels exist. PD, default correlation, recovery haircuts, cost and scenario capital are uncalibrated assumptions.
 - The workflow does not custody prediction-market positions, execute trades, pledge future income or automatically collect trading profits.
+- The lender UI checks the report file and Arkiv pointer, and the contract requires a report commitment; the contract cannot verify that a lender downloaded or read the public file. File validity depends on Swarm availability, and no retention extension worker exists yet.
 - The local test token has no market value. No public lending liquidity, production deployment, audit or regulatory clearance is claimed.
 - The legacy outcome-token protocol remains in code and technical documentation. It is not part of the AQRA app's four-screen trader-credit flow.
 

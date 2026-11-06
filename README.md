@@ -7,9 +7,11 @@ The working interface has four navigation destinations:
 - **Data** — observed monthly wallet outcomes, cohort comparisons and dated wallet evidence.
 - **Risk engine** — expected loss, portfolio loss distribution, VaR, Expected Shortfall, reserve gap and a binding credit gate. Default probability and default correlation are explicit stress assumptions, not inferred from P&L.
 - **Borrow** — ENS/wallet discovery, performance-metric review and wallet-signed bonded credit requests. The policy gates request eligibility; it does not set pricing or approve lender funding.
-- **Lend** — onchain requests, exact attested performance-metric review, bond-adjusted principal shortfall, lender risk acknowledgement, funding, repayment/default state and transaction receipts.
+- **Lend** — Arkiv discovery, borrower-consented Swarm reports, SHA-256 and onchain report-commitment verification, bond-adjusted principal shortfall, lender risk acknowledgement, funding, repayment/default state and transaction receipts.
 
 The current $100 demo advance has $102 due and a $25 bond: up to $75 of principal remains uncovered assuming full bond recovery. Full bond recovery is not guaranteed if token, contract or operational failures occur. AQRA has no mature loan outcomes, calibrated probability of default, or live lending pool; pool underwriting stays rejected. Full limits are in [`docs/RISK_ENGINE.md`](docs/RISK_ENGINE.md) and [`docs/FEATURES_AND_LIMITATIONS.md`](docs/FEATURES_AND_LIMITATIONS.md).
+
+New funding requires a borrower-committed Swarm reference and SHA-256 in the lending contract. The lender UI discovers the v2 request on Arkiv, fetches the actual Swarm report, verifies its bytes and recomputes the evidence before enabling funding. To exercise that flow, copy `.env.example` to `.env`, configure a Bee node and funded postage batch plus a Rabdi access key, and restart `pnpm dev`. Without Swarm configuration, users can inspect/request and cancel, but cannot originate a funded loan; repayment/default for already-funded loans remains onchain and independent of storage. Setup and current proof status are in [`arkiv/swarm.md`](arkiv/swarm.md).
 
 ## Run the demo
 
@@ -20,9 +22,9 @@ pnpm install --frozen-lockfile
 pnpm dev
 ```
 
-Open <http://127.0.0.1:3000/>. The local runner starts Anvil, deploys contracts, seeds the test stack and starts the read API. In the wallet menu, choose the labeled local borrower, lender or resolver account. This uses test USDC on local chain 31337. Wallet-authorized actions write to the local contracts and show transaction receipts.
+Open <http://127.0.0.1:3000/>. The local runner starts Anvil, deploys contracts, seeds the test stack and starts the read API. In the wallet menu, choose the labeled local borrower, lender or resolver account. This uses test USDC on local chain 31337. Wallet-authorized request, cancellation, repayment and settlement actions write to local contracts and show transaction receipts. Funding requires the separately configured Swarm/Arkiv evidence flow above.
 
-For a full historical-evidence request, run `pnpm underwriting:demo --pending` against the local stack. It records local receipts at `work/underwriting/local-credit-demo.json`.
+For a local historical-evidence request that stops before borrower consent and funding, run `pnpm underwriting:demo --pending` against the local stack. It records local receipts at `work/underwriting/local-credit-demo.json`. This uses a historical public wallet under Anvil impersonation and must not be used to bypass the interactive public-report consent flow.
 
 ## Reproduce the benchmark
 
@@ -46,6 +48,7 @@ The replay reports next-month realized trader P&L and profitable-wallet frequenc
 - [`docs/TRADER_CREDIT.md`](docs/TRADER_CREDIT.md) — product mechanics and data workflow.
 - [`docs/MECHANISM_AND_PROOFS.md`](docs/MECHANISM_AND_PROOFS.md) — outcome-token protocol and proof constraints.
 - [`docs/mintlify`](docs/mintlify) — developer documentation source.
+- [`arkiv/schema.md`](arkiv/schema.md), [`arkiv/how-you-use-arkiv.md`](arkiv/how-you-use-arkiv.md), [`arkiv/swarm.md`](arkiv/swarm.md) — Arkiv/Swarm schemas, app flow and reproducible-proof status.
 
 Useful implementation commands:
 
