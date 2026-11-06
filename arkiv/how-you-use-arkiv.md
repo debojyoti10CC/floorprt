@@ -1,5 +1,17 @@
 # How AQRA uses Arkiv
 
+## Borrower evidence and lender discovery
+
+Borrower flow: after the report workflow attests an open request, AQRA shows the exact fields that will be public. The borrower checks the disclosure and signs a short-lived, loan-specific message. The server uploads that evidence JSON to a configured Bee node, downloads it again, and checks its SHA-256 and internal evidence digest. The borrower then publishes `aqra.trader.credit.v2` from their Rabdi browser wallet and commits the report hash and Swarm reference to the loan contract.
+
+Lender flow: **Discover on Arkiv** queries the indexed namespace, chain and desk. AQRA reads each candidate's loan state and report commitment from the lending chain. Only matching open, unexpired requests are shown as fundable. **Inspect assessment evidence** fetches the listed Swarm file through the AQRA API; the server and browser check the SHA-256, AQRA recomputes the report decision and digest, and the component compares the wallet group, score, cutoff, report hash and Swarm reference to the lender-chain commitment. Funding is disabled until those checks pass.
+
+The API never sends a Bee node URL, postage batch or token to the browser. The Arkiv access key is public and should be origin-restricted. Each packet is borrower-owned and read-only. `fundBy` controls origination validity; the Arkiv entity is set to expire 90 days later. Repayment and default settlement use the loan contract and do not call Arkiv or Swarm.
+
+The current implementation supports this path only when `SWARM_BEE_URL`, `SWARM_POSTAGE_BATCH_ID`, a funded Rabdi wallet and `NEXT_PUBLIC_ARKIV_ACCESS_KEY` are configured. No live entity receipt is recorded in this repository yet.
+
+## Outcome strategy recipes
+
 The composer offers four user-facing Arkiv actions: query public strategy recipes, search visible recipe titles, publish the currently verified pair from a Rabdi wallet, and load a recipe that belongs to the exact AQRA deployment. The entity expires after 30 days. Its owner can delete it from the same wallet. A loaded recipe is only draft input; AQRA rechecks it against current chain state before collateral can be locked.
 
 The query selects the entity key, owner, expiry, strategy title, chain, observation, asset, both market IDs, both quantities, strikes, saved floor, recipe fingerprint, registry and vault. It filters by the indexed app discriminator. The UI shows the owner and expiry-capable record; the current list query is capped at 100 records and the component filters titles locally.
