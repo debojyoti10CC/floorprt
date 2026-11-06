@@ -28,7 +28,7 @@ try{
   if(!apiUp)start(tsx,['apps/api/src/server.ts']);
   await ready('http://127.0.0.1:8787/api/v1/health');
   let webUp=false;try{webUp=(await fetch('http://127.0.0.1:3000')).ok}catch{}
-  if(!webUp){if(!pnpm)throw new Error('Start with pnpm dev so the pinned package manager is available.');start(pnpm,['--filter','@floor/web','dev']);}
+  if(!webUp){if(!pnpm)throw new Error('Start with pnpm dev so the pinned package manager is available.');process.env.NEXT_PUBLIC_ENABLE_LOCAL_DEMO_UI='true';process.env.NEXT_PUBLIC_ENABLE_OPERATIONS_UI='true';start(pnpm,['--filter','@floor/web','dev']);}
   await ready('http://127.0.0.1:3000');
   console.log('\nFloor Protocol is ready: http://127.0.0.1:3000 · API :8787 · Anvil :8545\nTest funds only. Choose a borrower, lender or resolver from Connect wallet.');
   setInterval(()=>{},60_000);
