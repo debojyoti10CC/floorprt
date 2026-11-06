@@ -2,6 +2,8 @@ export * from './abis.generated';
 export * from './chain';
 export * from './eligibility';
 export * from './feed';
+export * from './position-credit';
+export * from './position-collateral';
 export const REASONS: Record<number,string> = {
   0:'OK_SHARED_SCALAR_THRESHOLD', 1:'ERR_UNKNOWN_MARKET', 2:'ERR_OBSERVATION_MISMATCH',
   3:'ERR_BAD_STRIKE_ORDER', 4:'ERR_ZERO_UNITS', 5:'ERR_ALREADY_RESOLVED_OR_MATURED',

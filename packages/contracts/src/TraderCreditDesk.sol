@@ -14,7 +14,7 @@ interface ITraderReportReceiver {
 }
 
 /// @notice A lender accepts fixed terms after a report authenticates the borrower's evidence.
-/// @dev The first-loss bond is the only collateral. The trading account and future P&L remain outside this contract.
+/// @dev The base desk holds the first-loss bond. A position desk may also recover approved outcome collateral.
 contract TraderCreditDesk is ReentrancyGuard, IERC165, ITraderReportReceiver {
     using SafeERC20 for IERC20;
 
@@ -126,11 +126,11 @@ contract TraderCreditDesk is ReentrancyGuard, IERC165, ITraderReportReceiver {
         emit WorkflowPinned(id);
     }
 
-    function supportsInterface(bytes4 interfaceId) external pure returns (bool) {
+    function supportsInterface(bytes4 interfaceId) public pure virtual returns (bool) {
         return interfaceId == type(IERC165).interfaceId || interfaceId == type(ITraderReportReceiver).interfaceId;
     }
 
-    function getLoan(uint256 id) external view returns (Loan memory) {
+    function getLoan(uint256 id) public view returns (Loan memory) {
         return _loans[id];
     }
 
@@ -176,7 +176,7 @@ contract TraderCreditDesk is ReentrancyGuard, IERC165, ITraderReportReceiver {
         address[] calldata traders,
         address[] calldata controllers,
         bytes[] calldata consents
-    ) private returns (uint256 id) {
+    ) internal returns (uint256 id) {
         if (workflowId == bytes32(0)) revert InvalidConfiguration();
         uint256 minimumBond = (uint256(terms.principal) * MIN_BOND_BPS + 9_999) / 10_000;
         uint256 maximumDue = uint256(terms.principal) * (10_000 + MAX_FEE_BPS) / 10_000;
@@ -290,10 +290,17 @@ contract TraderCreditDesk is ReentrancyGuard, IERC165, ITraderReportReceiver {
         if (block.timestamp < loan.maturity) revert Deadline();
         loan.state = State.Defaulted;
         _releaseWallets(id, loan.borrower);
-        uint256 bond = loan.terms.bond;
+        uint256 recovered = uint256(loan.terms.bond) + _recoverPositionCollateral(id);
+        uint256 due = loan.terms.due;
+        uint256 paid = recovered < due ? recovered : due;
+        _sendExact(loan.lender, paid);
+        if (recovered > paid) _sendExact(loan.borrower, recovered - paid);
         uint256 principal = loan.terms.principal;
-        _sendExact(loan.lender, bond);
-        emit TraderLoanDefaulted(id, bond, loan.terms.due - bond, principal > bond ? principal - bond : 0);
+        emit TraderLoanDefaulted(id, paid, due - paid, principal > paid ? principal - paid : 0);
+    }
+
+    function _recoverPositionCollateral(uint256) internal virtual returns (uint256) {
+        return 0;
     }
 
     function cancelRequest(uint256 id) external nonReentrant {

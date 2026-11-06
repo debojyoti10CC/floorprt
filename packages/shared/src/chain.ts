@@ -1,23 +1,26 @@
 import { createPublicClient, http, defineChain, type Address, type Hash, type PublicClient, decodeEventLog, type Abi } from 'viem';
 import * as A from './abis.generated';
 import {erc20Abi} from 'viem';
+import {positionTokenAbi} from './position-credit';
 export const CollateralTokenAbi=erc20Abi;
 
 export type CoreContractName = 'CollateralToken'|'SharedObservationRegistry'|'OutcomeMarketFactory'|'OutcomeTokens'|'FloorVerifier'|'FloorVault'|'CreditDesk';
-export type ContractName = CoreContractName|'ChainlinkObservationResolver'|'TraderCreditDesk';
+type OptionalContractName = 'ChainlinkObservationResolver'|'TraderCreditDesk'|'PositionTokenLedger';
+export type ContractName = CoreContractName|OptionalContractName;
 export type Deployment = {
   schema: 'floor-deployment/v1'; chainId: number; chainName: string; rpcUrl: string;
   explorerUrl: string; deploymentBlock: string; deployedAt: string;
-  contracts: Record<CoreContractName, Address> & Partial<Record<'ChainlinkObservationResolver'|'TraderCreditDesk', Address>>;
-  codeHashes: Record<CoreContractName, Hash> & Partial<Record<'ChainlinkObservationResolver'|'TraderCreditDesk', Hash>>;
+  contracts: Record<CoreContractName, Address> & Partial<Record<OptionalContractName, Address>>;
+  codeHashes: Record<CoreContractName, Hash> & Partial<Record<OptionalContractName, Hash>>;
   roles: { curator: Address; resolver: Address; borrower: Address; lender: Address };
   mockCollateral: boolean; oracleMode: 'TRUSTED_TEST_RESOLVER'|'CHAINLINK_HISTORICAL';
   oracle?:{feed:Address;sourceId:Hash;assetId:Hash;maxAge:number};
-  traderCredit?:{mode:'LOCAL_FORWARDER'|'CHAINLINK_CRE';deploymentBlock:string;transactionHash:Hash;buildHash?:Hash};
+  traderCredit?:{mode:'LOCAL_FORWARDER'|'CHAINLINK_CRE';deploymentBlock:string;transactionHash:Hash;buildHash?:Hash;
+    positionCollateral?:{conditionId:Hash;yesTokenId:string;noTokenId:string;title:string}};
   buildFingerprint?:string;seededBlock?:string;defaultPair?:{lower:string;upper:string};
 };
 export const contractNames: CoreContractName[]=['CollateralToken','SharedObservationRegistry','OutcomeMarketFactory','OutcomeTokens','FloorVerifier','FloorVault','CreditDesk'];
-export const abis: Record<ContractName, Abi>={CollateralToken:erc20Abi,ChainlinkObservationResolver:A.ChainlinkObservationResolverAbi, SharedObservationRegistry:A.SharedObservationRegistryAbi,OutcomeMarketFactory:A.OutcomeMarketFactoryAbi,OutcomeTokens:A.OutcomeTokensAbi,FloorVerifier:A.FloorVerifierAbi,FloorVault:A.FloorVaultAbi,CreditDesk:A.CreditDeskAbi,TraderCreditDesk:A.TraderCreditDeskAbi};
+export const abis: Record<ContractName, Abi>={CollateralToken:erc20Abi,ChainlinkObservationResolver:A.ChainlinkObservationResolverAbi, SharedObservationRegistry:A.SharedObservationRegistryAbi,OutcomeMarketFactory:A.OutcomeMarketFactoryAbi,OutcomeTokens:A.OutcomeTokensAbi,FloorVerifier:A.FloorVerifierAbi,FloorVault:A.FloorVaultAbi,CreditDesk:A.CreditDeskAbi,TraderCreditDesk:A.PositionCreditDeskAbi,PositionTokenLedger:positionTokenAbi};
 export const chainFor=(id:number,rpcUrl:string)=>defineChain({id,name:id===31337?'Anvil local devnet':'EVM testnet',nativeCurrency:{name:'Test Ether',symbol:'ETH',decimals:18},rpcUrls:{default:{http:[rpcUrl]}}});
 export const publicClientFor=(deployment:Deployment,rpcUrl=deployment.rpcUrl)=>createPublicClient({chain:chainFor(deployment.chainId,rpcUrl),transport:http(rpcUrl,{batch:{batchSize:50,wait:10},retryCount:1,timeout:8000})});
 export const jsonSafe=<T>(value:T):any=>JSON.parse(JSON.stringify(value,(_k,v)=>typeof v==='bigint'?v.toString():v));

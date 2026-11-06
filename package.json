@@ -18,6 +18,7 @@
     "docs:links": "cd docs/mintlify && npx --yes mint@4.2.1205 broken-links --check-anchors --check-redirects --check-snippets",
     "docs:dev": "cd docs/mintlify && npx --yes mint@4.2.1205 dev --port 3001 --no-open",
     "dev": "node scripts/dev.mjs",
+    "dev:positions": "node scripts/dev.mjs --positions",
     "dev:web": "pnpm --filter @floor/web dev",
     "dev:api": "tsx apps/api/src/server.ts",
     "chain": "node scripts/foundry.mjs anvil --host 127.0.0.1 --port 8545 --chain-id 31337 --silent",
@@ -53,6 +54,7 @@
   "devDependencies": {
     "@foundry-rs/anvil": "1.7.1",
     "@foundry-rs/forge": "1.7.1",
+    "@gnosis.pm/conditional-tokens-contracts": "1.0.3",
     "@playwright/test": "1.64.1",
     "@types/node": "24.10.1",
     "tsx": "4.23.15",

@@ -39,6 +39,9 @@ importers:
       '@foundry-rs/forge':
         specifier: 1.7.1
         version: 1.7.1
+      '@gnosis.pm/conditional-tokens-contracts':
+        specifier: 1.0.3
+        version: 1.0.3
       '@playwright/test':
         specifier: 1.64.1
         version: 1.64.1
@@ -412,6 +415,9 @@ packages:
   '@foundry-rs/forge@1.7.1':
     resolution: {integrity: sha512-ji244KYCP15RTaHg/V3VpTarX+8Tl7qm54B8laVeabbUMKhsJI5QK28gh5fbTxndB7tdsnbliwdrx/FwAXzEoA==}
     hasBin: true
+
+  '@gnosis.pm/conditional-tokens-contracts@1.0.3':
+    resolution: {integrity: sha512-tsGh+tiCb06UCUg3F8N5Gpo/MTsdMLQ7Wbu2AiWGaj9bga9rWgnu2/QVtLY3hneFdrSAjzlu/eFmhQt+5b7kSA==}
 
   '@hono/node-server@2.1.6':
     resolution: {integrity: sha512-p/KH9MnfNcsm3sR6x4lNgm5j+QN4Et8srKredl9DZfXiyZ1UQ3aQ2YVpFLbqktYN5JI+DB+VZFKM2PqE5hLKjQ==}
@@ -1163,6 +1169,9 @@ packages:
     resolution: {integrity: sha512-5vvB5+W7ePv+p3uqxi+RcW1XAzLW0/hxt3/4X4Lc4qHudzOhmBiBwOY6DRob4WnanAEGvNcLjF+KNOufrUoEQw==}
     engines: {node: '>=12.20.0'}
 
+  openzeppelin-solidity@2.3.0:
+    resolution: {integrity: sha512-QYeiPLvB1oSbDt6lDQvvpx7k8ODczvE474hb2kLXZBPKMsxKT1WxTCHBYrCU7kS7hfAku4DcJ0jqOyL+jvjwQw==}
+
   ox@0.14.59:
     resolution: {integrity: sha512-Y+DPEQScTEGKteQATjtytE1JRQ5cg1R2+DvYQ/lbhUCm/xS9n0Jnkkf2AqQyIntefQxs8xY6dZ+kyNZ7zf2FzA==}
     peerDependencies:
@@ -1619,6 +1628,10 @@ snapshots:
       '@foundry-rs/forge-linux-amd64': 1.7.1
       '@foundry-rs/forge-linux-arm64': 1.7.1
       '@foundry-rs/forge-win32-amd64': 1.7.1
+
+  '@gnosis.pm/conditional-tokens-contracts@1.0.3':
+    dependencies:
+      openzeppelin-solidity: 2.3.0
 
   '@hono/node-server@2.1.6(hono@4.13.16)':
     dependencies:
@@ -2236,6 +2249,8 @@ snapshots:
       - babel-plugin-macros
 
   obug@3.0.0: {}
+
+  openzeppelin-solidity@2.3.0: {}
 
   ox@0.14.59(typescript@5.4.5)(zod@3.25.76):
     dependencies:
