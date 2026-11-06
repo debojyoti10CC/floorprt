@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { ArrowRight, FlaskConical, RefreshCw } from 'lucide-react';
 import { useProtocol } from '../lib/protocol';
 import { createLocalDemoRequest, currentLocalDemo, type LocalDemoStatus } from '../lib/trader-credit';
+import { MarginReplay } from './margin-replay';
 import { TraderBorrow } from './trader-borrow';
 import { TraderLoans } from './trader-loans';
 import { TraderReplay } from './trader-replay';
@@ -153,6 +154,7 @@ export function TraderCredit({ activeTab = 'Data', focusRiskSignal = 0, onTabCha
       {deployment?.traderCredit && <Badge tone="amber">TEST NETWORK</Badge>}
     </div>
     {activeTab !== 'Data' && !deployment?.traderCredit?.positionCollateral && <LocalDemoPanel requestId={demoRequestId} status={demoStatus} loading={demoStatusLoading} onRefresh={() => void refreshDemoStatus()} onOpen={openDemoRequest} />}
+    {local && activeTab === 'Lend' && <MarginReplay />}
     <section aria-label={`${activeTab} section`}>
       {activeTab === 'Data' && <TraderReplay focusRiskSignal={focusRiskSignal} />}
       {activeTab === 'Borrow' && <><TraderBorrow onConnectWallet={onConnectWallet} onRequest={(id, demo) => {
