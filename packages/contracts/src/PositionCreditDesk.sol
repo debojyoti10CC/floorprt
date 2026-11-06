@@ -94,7 +94,7 @@ contract PositionCreditDesk is TraderCreditDesk, IERC1155Receiver {
 
     function claimPositionCollateral(uint256 id, address recipient) external nonReentrant {
         Loan memory loan = getLoan(id);
-        if (msg.sender != loan.borrower) revert Unauthorized();
+        if (msg.sender != loan.borrower && recipient != loan.borrower) revert Unauthorized();
         if (loan.state != State.Repaid && loan.state != State.Cancelled) revert InvalidState();
         if (recipient == address(0) || recipient == address(this)) revert InvalidPositionCollateral();
 

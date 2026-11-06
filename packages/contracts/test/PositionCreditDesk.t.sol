@@ -3,8 +3,10 @@ pragma solidity 0.8.30;
 
 import {Test} from "forge-std/Test.sol";
 import {MockUSDC} from "../src/MockUSDC.sol";
+import {MarginCreditDesk} from "../src/MarginCreditDesk.sol";
 import {PositionCreditDesk, IConditionalTokens} from "../src/PositionCreditDesk.sol";
 import {TraderCreditDesk} from "../src/TraderCreditDesk.sol";
+import {TraderCreditKeeper} from "../src/TraderCreditKeeper.sol";
 
 interface ITestConditionalTokens is IConditionalTokens {
     function prepareCondition(address oracle, bytes32 question, uint256 slots) external;
@@ -22,6 +24,7 @@ contract PositionCreditDeskTest is Test {
     bytes32 private constant EVIDENCE = keccak256("dated evidence");
     address private borrower = makeAddr("position borrower");
     address private lender = makeAddr("position lender");
+    address private bidder = makeAddr("liquidation bidder");
     MockUSDC private asset;
     ITestConditionalTokens private ctf;
     PositionCreditDesk private desk;
@@ -117,6 +120,158 @@ contract PositionCreditDeskTest is Test {
         desk.settleDefault(id);
     }
 
+    function test_KeeperExpiresRequestAndReturnsPairsToBorrower() public {
+        uint256 id = _request(120e6);
+        TraderCreditKeeper keeper = new TraderCreditKeeper(desk, TraderCreditKeeper.Custody.Paired);
+        vm.warp(desk.getLoan(id).fundBy);
+        bytes memory report = _sweep(keeper);
+        vm.prank(lender);
+        vm.expectRevert(TraderCreditKeeper.InvalidReport.selector);
+        keeper.onReport(_metadata(), report);
+        keeper.onReport(_metadata(), report);
+        assertEq(uint256(desk.getLoan(id).state), uint256(TraderCreditDesk.State.Cancelled));
+        assertEq(asset.balanceOf(address(desk)), 0);
+        vm.expectRevert(TraderCreditKeeper.InvalidReport.selector);
+        keeper.onReport(_metadata(), report);
+        vm.warp(block.timestamp + 1);
+        keeper.onReport(_metadata(), _sweep(keeper));
+        _assertLocked(0);
+        assertEq(ctf.balanceOf(borrower, desk.yesTokenId()), 150e6);
+    }
+
+    function test_MarginEarlyLiquidationPaysFullDueAndReleasesSharesToBidder() public {
+        MarginCreditDesk margin = _marginRequest();
+        assertEq(ctf.balanceOf(address(margin), margin.tokenId()), 120e6);
+        assertEq(asset.balanceOf(address(margin)), 51e6);
+        vm.prank(bidder);
+        vm.expectRevert(MarginCreditDesk.InvalidBackstop.selector);
+        margin.withdrawBackstop(1);
+        _approveFunding(margin, 1);
+        vm.prank(lender);
+        vm.expectRevert(MarginCreditDesk.InvalidMark.selector);
+        margin.fundLoan(1);
+
+        bytes memory mark = _mark(margin, 427083, uint64(block.timestamp));
+        vm.prank(lender);
+        vm.expectRevert(TraderCreditDesk.InvalidReport.selector);
+        margin.onReport(_metadata(), mark);
+        bytes memory future = _mark(margin, 505000, uint64(block.timestamp + 1));
+        bytes memory stale = _mark(margin, 505000, uint64(block.timestamp - 16 minutes));
+        vm.expectRevert(MarginCreditDesk.InvalidMark.selector);
+        margin.onReport(_metadata(), future);
+        vm.expectRevert(MarginCreditDesk.InvalidMark.selector);
+        margin.onReport(_metadata(), stale);
+        margin.onReport(_metadata(), mark);
+        vm.prank(lender);
+        vm.expectRevert(MarginCreditDesk.AboveOriginationLtv.selector);
+        margin.fundLoan(1);
+        vm.expectRevert(MarginCreditDesk.InvalidMark.selector);
+        margin.onReport(_metadata(), mark);
+
+        vm.warp(block.timestamp + 1);
+        margin.onReport(_metadata(), _mark(margin, 505000, uint64(block.timestamp)));
+        vm.warp(block.timestamp + 16 minutes);
+        vm.prank(lender);
+        vm.expectRevert(MarginCreditDesk.InvalidMark.selector);
+        margin.fundLoan(1);
+        margin.onReport(_metadata(), _mark(margin, 505000, uint64(block.timestamp)));
+        vm.prank(lender);
+        margin.fundLoan(1);
+        vm.expectRevert(TraderCreditDesk.Deadline.selector);
+        margin.settleDefault(1);
+
+        vm.warp(block.timestamp + 1);
+        margin.onReport(_metadata(), _mark(margin, 400000, uint64(block.timestamp)));
+        assertEq(uint256(margin.getLoan(1).state), uint256(TraderCreditDesk.State.Funded));
+        vm.warp(block.timestamp + 1);
+        margin.onReport(_metadata(), _mark(margin, 500, uint64(block.timestamp)));
+        assertLt(block.timestamp, margin.getLoan(1).maturity);
+        assertEq(uint256(margin.getLoan(1).state), uint256(TraderCreditDesk.State.Defaulted));
+        assertEq(asset.balanceOf(lender), 501e6);
+        assertEq(asset.balanceOf(address(margin)), 0);
+        vm.prank(borrower);
+        vm.expectRevert(MarginCreditDesk.InvalidBackstop.selector);
+        margin.claimPositionCollateral(1, borrower);
+
+        TraderCreditKeeper keeper = new TraderCreditKeeper(margin, TraderCreditKeeper.Custody.Directional);
+        keeper.onReport(_metadata(), _sweep(keeper));
+        assertEq(ctf.balanceOf(bidder, margin.tokenId()), 120e6);
+        assertEq(ctf.balanceOf(address(margin), margin.tokenId()), 0);
+        vm.prank(bidder);
+        vm.expectRevert(MarginCreditDesk.InvalidBackstop.selector);
+        margin.claimPositionCollateral(1, bidder);
+    }
+
+    function test_MarginRepaymentRefundsUnusedReserveAndReleasesShares() public {
+        MarginCreditDesk margin = _marginRequest();
+        _approveFunding(margin, 1);
+        margin.onReport(_metadata(), _mark(margin, 505000, uint64(block.timestamp)));
+        vm.prank(lender);
+        margin.fundLoan(1);
+        vm.prank(borrower);
+        margin.repay(1);
+        margin.claimPositionCollateral(1, borrower);
+        assertEq(asset.balanceOf(bidder), 38.5e6);
+        assertEq(asset.balanceOf(address(margin)), 0);
+        assertEq(asset.balanceOf(lender), 501e6);
+        assertEq(ctf.balanceOf(borrower, margin.tokenId()), 150e6);
+    }
+
+    function _marginRequest() private returns (MarginCreditDesk margin) {
+        margin = new MarginCreditDesk(asset, address(this), address(this), WORKFLOW, ctf, desk.conditionId(), 731);
+        vm.startPrank(bidder);
+        asset.faucet(38.5e6);
+        asset.approve(address(margin), 38.5e6);
+        margin.postBackstop(borrower, 120e6, 38.5e6);
+        vm.stopPrank();
+        vm.prank(lender);
+        asset.approve(address(margin), 50e6);
+        TraderCreditDesk.Terms memory terms = TraderCreditDesk.Terms(
+            50e6, 51e6, 12.5e6, 1 days, uint64(block.timestamp), uint64(block.timestamp + 1 days), EVIDENCE, bytes32(0)
+        );
+        address[] memory traders = new address[](1);
+        traders[0] = borrower;
+        vm.startPrank(borrower);
+        ctf.setApprovalForAll(address(margin), true);
+        asset.approve(address(margin), type(uint256).max);
+        margin.requestMarginLoan(terms, traders, traders, new bytes[](1), 1);
+        vm.stopPrank();
+    }
+
+    function _mark(MarginCreditDesk margin, uint96 price, uint64 observedAt) private view returns (bytes memory) {
+        return abi.encode(
+            MarginCreditDesk.MarkReport(
+                margin.MARK_SCHEMA(),
+                block.chainid,
+                address(margin),
+                1,
+                margin.referenceTokenId(),
+                price,
+                observedAt,
+                keccak256("test order book")
+            )
+        );
+    }
+
+    function _sweep(TraderCreditKeeper keeper) private view returns (bytes memory) {
+        (uint256 first, uint256 through,, uint64 observedAt,) = keeper.preview();
+        return abi.encode(
+            TraderCreditKeeper.Sweep(
+                block.chainid,
+                address(keeper),
+                address(keeper.desk()),
+                first,
+                through,
+                observedAt,
+                keccak256("test sweep")
+            )
+        );
+    }
+
+    function _metadata() private view returns (bytes memory) {
+        return abi.encodePacked(WORKFLOW, bytes10(0), address(this));
+    }
+
     function _request(uint96 pairs) private returns (uint256) {
         TraderCreditDesk.Terms memory terms = TraderCreditDesk.Terms(
             100e6, 102e6, 25e6, 1 days, uint64(block.timestamp), uint64(block.timestamp + 1 days), EVIDENCE, bytes32(0)
@@ -128,9 +283,15 @@ contract PositionCreditDeskTest is Test {
     }
 
     function _fund(uint256 id) private {
-        TraderCreditDesk.Loan memory loan = desk.getLoan(id);
+        _approveFunding(desk, id);
+        vm.prank(lender);
+        desk.fundLoan(id);
+    }
+
+    function _approveFunding(TraderCreditDesk credit, uint256 id) private {
+        TraderCreditDesk.Loan memory loan = credit.getLoan(id);
         TraderCreditDesk.ScoreReport memory report = TraderCreditDesk.ScoreReport(
-            address(desk),
+            address(credit),
             block.chainid,
             id,
             borrower,
@@ -138,13 +299,11 @@ contract PositionCreditDeskTest is Test {
             EVIDENCE,
             loan.terms.asOf,
             78,
-            desk.POLICY_HASH()
+            credit.POLICY_HASH()
         );
-        desk.onReport(abi.encodePacked(WORKFLOW, bytes10(0), address(this)), abi.encode(report));
+        credit.onReport(_metadata(), abi.encode(report));
         vm.prank(borrower);
-        desk.commitAssessment(id, keccak256("report"), keccak256("reference"));
-        vm.prank(lender);
-        desk.fundLoan(id);
+        credit.commitAssessment(id, keccak256("report"), keccak256("reference"));
     }
 
     function _assertLocked(uint256 amount) private view {

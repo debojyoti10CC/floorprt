@@ -214,11 +214,15 @@ contract TraderCreditDesk is ReentrancyGuard, IERC165, ITraderReportReceiver {
     }
 
     /// @dev Chainlink forwarder metadata is packed workflowId(32) || workflowName(10) || workflowOwner(20).
-    function onReport(bytes calldata metadata, bytes calldata report) external nonReentrant {
+    function _authenticateReport(bytes calldata metadata) internal view {
         if (
             msg.sender != forwarder || workflowId == bytes32(0) || metadata.length != 62
                 || bytes32(metadata[:32]) != workflowId || address(bytes20(metadata[42:62])) != workflowOwner
         ) revert InvalidReport();
+    }
+
+    function onReport(bytes calldata metadata, bytes calldata report) public virtual nonReentrant {
+        _authenticateReport(metadata);
         ScoreReport memory scoreReport = abi.decode(report, (ScoreReport));
         Loan storage loan = _loans[scoreReport.loanId];
         if (
@@ -265,12 +269,15 @@ contract TraderCreditDesk is ReentrancyGuard, IERC165, ITraderReportReceiver {
         if (msg.sender == loan.borrower || activeForWallet[msg.sender] == id || msg.sender == address(this)) {
             revert Unauthorized();
         }
+        _checkFunding(id, loan);
         loan.lender = msg.sender;
         loan.maturity = uint64(block.timestamp + loan.terms.termSeconds);
         loan.state = State.Funded;
         _pullExact(msg.sender, loan.borrower, loan.terms.principal);
         emit TraderLoanFunded(id, msg.sender, loan.terms.principal, loan.maturity);
     }
+
+    function _checkFunding(uint256, Loan storage) internal view virtual {}
 
     function repay(uint256 id) external nonReentrant {
         Loan storage loan = _loans[id];
@@ -281,6 +288,7 @@ contract TraderCreditDesk is ReentrancyGuard, IERC165, ITraderReportReceiver {
         _releaseWallets(id, loan.borrower);
         _pullExact(msg.sender, loan.lender, loan.terms.due);
         _sendExact(loan.borrower, loan.terms.bond);
+        _returnUnusedRecovery(id);
         emit TraderLoanRepaid(id, loan.terms.due, loan.terms.bond);
     }
 
@@ -288,6 +296,12 @@ contract TraderCreditDesk is ReentrancyGuard, IERC165, ITraderReportReceiver {
         Loan storage loan = _loans[id];
         if (loan.state != State.Funded) revert InvalidState();
         if (block.timestamp < loan.maturity) revert Deadline();
+        _settleLoan(id);
+    }
+
+    function _settleLoan(uint256 id) internal {
+        Loan storage loan = _loans[id];
+        if (loan.state != State.Funded) revert InvalidState();
         loan.state = State.Defaulted;
         _releaseWallets(id, loan.borrower);
         uint256 recovered = uint256(loan.terms.bond) + _recoverPositionCollateral(id);
@@ -303,6 +317,8 @@ contract TraderCreditDesk is ReentrancyGuard, IERC165, ITraderReportReceiver {
         return 0;
     }
 
+    function _returnUnusedRecovery(uint256) internal virtual {}
+
     function cancelRequest(uint256 id) external nonReentrant {
         Loan storage loan = _loans[id];
         if (loan.state != State.Requested) revert InvalidState();
@@ -310,6 +326,7 @@ contract TraderCreditDesk is ReentrancyGuard, IERC165, ITraderReportReceiver {
         loan.state = State.Cancelled;
         _releaseWallets(id, loan.borrower);
         _sendExact(loan.borrower, loan.terms.bond);
+        _returnUnusedRecovery(id);
         emit TraderCreditCancelled(id);
     }
 
@@ -364,13 +381,13 @@ contract TraderCreditDesk is ReentrancyGuard, IERC165, ITraderReportReceiver {
         }
     }
 
-    function _pullExact(address from, address to, uint256 amount) private {
+    function _pullExact(address from, address to, uint256 amount) internal {
         uint256 beforeBalance = asset.balanceOf(to);
         asset.safeTransferFrom(from, to, amount);
         if (asset.balanceOf(to) != beforeBalance + amount) revert TransferMismatch();
     }
 
-    function _sendExact(address to, uint256 amount) private {
+    function _sendExact(address to, uint256 amount) internal {
         uint256 beforeBalance = asset.balanceOf(to);
         asset.safeTransfer(to, amount);
         if (asset.balanceOf(to) != beforeBalance + amount) revert TransferMismatch();

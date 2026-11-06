@@ -1,6 +1,6 @@
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { join } from 'node:path';
-const names=['MockUSDC','SharedObservationRegistry','OutcomeMarketFactory','OutcomeTokens','FloorVerifier','FloorVault','CreditDesk','ChainlinkObservationResolver','TraderCreditDesk','PositionCreditDesk'] as const;
+const names=['MockUSDC','SharedObservationRegistry','OutcomeMarketFactory','OutcomeTokens','FloorVerifier','FloorVault','CreditDesk','ChainlinkObservationResolver','TraderCreditDesk','PositionCreditDesk','TraderCreditKeeper','MarginCreditDesk'] as const;
 await mkdir('packages/shared/src',{recursive:true});
 let source='// Generated from Foundry artifacts. Run pnpm abi; do not edit.\n';
 for(const name of names){
