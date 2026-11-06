@@ -76,6 +76,115 @@ export type Evidence = {
   digest: Hex;
 };
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+function canonicalWindow(value: MonthMetrics | null): MonthMetrics | null {
+  if (value === null) return null;
+  return {
+    month: value.month,
+    pnl: value.pnl,
+    turnover: value.turnover,
+    trades: value.trades,
+    pnlDrawdown: value.pnlDrawdown,
+    startBlock: value.startBlock,
+    endBlock: value.endBlock,
+  };
+}
+
+function canonicalDecision(value: Decision): Decision {
+  return {
+    score: value.score,
+    qualified: value.qualified,
+    reason: value.reason,
+    activeMonths: value.activeMonths,
+    positiveMonths: value.positiveMonths,
+    pnl: value.pnl,
+    turnover: value.turnover,
+    efficiencyBps: value.efficiencyBps,
+    drawdownBps: value.drawdownBps,
+    components: {
+      consistency: value.components.consistency,
+      efficiency: value.components.efficiency,
+      drawdown: value.components.drawdown,
+    },
+  };
+}
+
+function canonicalEvidencePacket(evidence: Pick<Evidence, 'policyId' | 'wallets' | 'month' | 'asOf' | 'windows'>) {
+  return {
+    policyId: evidence.policyId,
+    wallets: evidence.wallets,
+    month: evidence.month,
+    asOf: evidence.asOf,
+    windows: evidence.windows.map(canonicalWindow),
+  };
+}
+
+/** Stable report bytes used for Swarm publication and byte-for-byte hash verification. */
+export function serializeEvidence(evidence: Evidence): string {
+  return JSON.stringify({
+    ...canonicalEvidencePacket(evidence),
+    decision: canonicalDecision(evidence.decision),
+    digest: evidence.digest,
+  });
+}
+
+/** Validate an untrusted downloaded report and recompute every derived field before use. */
+export function verifyEvidence(value: unknown): Evidence {
+  if (!isRecord(value) || value.policyId !== POLICY_ID || typeof value.month !== 'string'
+    || !/^\d{4}-(0[1-9]|1[0-2])$/.test(value.month)
+    || !Number.isSafeInteger(value.asOf)
+    || !Array.isArray(value.wallets) || value.wallets.length < 1 || value.wallets.length > 4
+    || value.wallets.some(wallet => typeof wallet !== 'string' || !/^0x[0-9a-f]{40}$/.test(wallet))
+    || new Set(value.wallets).size !== value.wallets.length
+    || [...(value.wallets as string[])].sort().some((wallet, index) => wallet !== (value.wallets as string[])[index])
+    || !Array.isArray(value.windows) || value.windows.length !== 3
+    || !isRecord(value.decision) || !isRecord(value.decision.components)
+    || typeof value.digest !== 'string' || !/^0x[0-9a-f]{64}$/.test(value.digest)) {
+    throw new Error('Assessment report has an invalid schema.');
+  }
+
+  const windows = value.windows as unknown[];
+  const expectedMonths = [-2, -1, 0].map(offset => offsetMonth(value.month as string, offset));
+  for (let index = 0; index < windows.length; index++) {
+    const window = windows[index];
+    if (window === null) continue;
+    if (!isRecord(window) || window.month !== expectedMonths[index]
+      || !Number.isSafeInteger(window.pnl) || !Number.isSafeInteger(window.turnover) || Number(window.turnover) < 0
+      || !Number.isSafeInteger(window.trades) || Number(window.trades) < 0
+      || !Number.isSafeInteger(window.pnlDrawdown) || Number(window.pnlDrawdown) < 0
+      || !Number.isSafeInteger(window.startBlock) || Number(window.startBlock) < 0
+      || !Number.isSafeInteger(window.endBlock) || Number(window.endBlock) < Number(window.startBlock)) {
+      throw new Error('Assessment report contains an invalid monthly window.');
+    }
+  }
+  if (Number(value.asOf) !== monthStart(offsetMonth(value.month as string, 1))) {
+    throw new Error('Assessment report cutoff does not match its decision month.');
+  }
+
+  const typedWindows = windows as (MonthMetrics | null)[];
+  const expectedDecision = scoreWindows(typedWindows);
+  if (JSON.stringify(canonicalDecision(value.decision as unknown as Decision)) !== JSON.stringify(canonicalDecision(expectedDecision))) {
+    throw new Error('Assessment report decision does not recompute from its monthly evidence.');
+  }
+  const packet = canonicalEvidencePacket({
+    policyId: POLICY_ID,
+    wallets: value.wallets as string[],
+    month: value.month as string,
+    asOf: Number(value.asOf),
+    windows: typedWindows,
+  });
+  if (keccak256(stringToHex(JSON.stringify(packet))).toLowerCase() !== (value.digest as string).toLowerCase()) {
+    throw new Error('Assessment report digest does not match its evidence.');
+  }
+  return {
+    ...packet,
+    decision: expectedDecision,
+    digest: value.digest as Hex,
+  };
+}
+
 const asMicros = (dollars: number) => {
   const micros = Math.round(dollars * MICRO);
   return Number.isSafeInteger(micros) ? micros : null;

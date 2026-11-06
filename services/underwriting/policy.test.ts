@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { DAY, monthStart } from './calendar.js';
-import { evidenceFromHistories, historyIndex, monthMetrics, type AccountHistory } from './policy.js';
+import { evidenceFromHistories, historyIndex, monthMetrics, serializeEvidence, verifyEvidence, type AccountHistory } from './policy.js';
 
 const wallet = '0x' + '01'.repeat(20);
 const start = monthStart('2026-07');
@@ -42,5 +42,19 @@ describe('historical credit evidence', () => {
     const combined = evidenceFromHistories([first, second], '2026-09');
     expect(combined.digest).toEqual(evidenceFromHistories([second, first], '2026-09').digest);
     expect(combined.windows[2]?.pnl).toBe(2 * evidenceFromHistories([first], '2026-09').windows[2]!.pnl);
+  });
+
+  it('round-trips the public report and rejects altered metrics or decisions', () => {
+    const evidence = evidenceFromHistories([history()], '2026-09');
+    const bytes = serializeEvidence(evidence);
+    expect(verifyEvidence(JSON.parse(bytes))).toEqual(evidence);
+
+    const tamperedWindow = JSON.parse(bytes) as typeof evidence;
+    tamperedWindow.windows[2]!.pnl++;
+    expect(() => verifyEvidence(tamperedWindow)).toThrow(/digest|recompute/);
+
+    const tamperedDecision = JSON.parse(bytes) as typeof evidence;
+    tamperedDecision.decision.score++;
+    expect(() => verifyEvidence(tamperedDecision)).toThrow(/does not recompute/);
   });
 });
