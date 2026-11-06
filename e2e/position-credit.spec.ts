@@ -1,0 +1,42 @@
+import { expect, test } from '@playwright/test';
+
+test('positions lock, report reaches the lender, repayment releases both shares', async ({ page }) => {
+  test.skip(process.env.AQRA_E2E_POSITIONS !== 'true', 'Requires the position profile and local Bee and Arkiv nodes.');
+  const button = (name: string) => page.getByRole('button', { name, exact: true });
+  await page.goto('/');
+  await page.getByRole('navigation', { name: 'Credit desk navigation' }).getByRole('button', { name: 'Borrow', exact: true }).click();
+  await button('Load test borrower').click();
+  await expect(page.locator('.poly-collateral-box')).toContainText('150');
+  await page.getByLabel('Pairs to lock').fill('102.499999');
+  await expect(button('Lock positions and request')).toBeDisabled();
+  await expect(page.getByText('Repayment exceeds the 80% debt limit', { exact: true })).toBeVisible();
+  await page.getByLabel('Pairs to lock').fill('120');
+  await expect(page.getByText('70.34%', { exact: true })).toBeVisible();
+  await expect(page.getByText('$116.00', { exact: true })).toBeVisible();
+  await button('Lock positions and request').click();
+  await button('Switch to demo reviewer').click();
+  const loan = page.locator('.trader-loan-card').filter({ hasText: 'LOCKED' });
+  const request = await loan.getByRole('heading', { level: 3 }).innerText();
+  const card = page.locator('.trader-loan-card').filter({ has: page.getByRole('heading', { name: request, exact: true }) });
+  await button('Approve performance report').click();
+  await button('Switch to demo borrower').click();
+  await button('Preview report').click();
+  const publish = button('Sign consent, upload and publish');
+  await expect(publish).toBeDisabled();
+  await page.getByLabel('I approve publishing this exact report on Swarm and in Arkiv.').check();
+  await publish.click();
+  await expect(card.getByText('ARKIV READ-BACK VERIFIED', { exact: true })).toBeVisible();
+
+  await page.reload();
+  await expect(card.getByText('Arkiv report listing matched', { exact: true })).toBeVisible();
+  await button('Switch to demo lender').click();
+  await button('Inspect assessment evidence').click();
+  await expect(card.getByText('POSITION PLEDGE MATCHED', { exact: true })).toBeVisible();
+  await page.getByLabel('I reviewed the locked shares, backing and repayment amount.').check();
+  await button('Fund $100.00').click();
+  await button('Switch to demo borrower').click();
+  await button('Repay $102.00').click();
+  await button('Claim locked positions').click();
+  await expect(card.getByText('Repaid', { exact: true })).toBeVisible();
+  await expect(card.getByText('RELEASED', { exact: true })).toBeVisible();
+});
