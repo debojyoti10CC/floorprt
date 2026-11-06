@@ -14,7 +14,8 @@ const snapshot=({deployment,rpcUrl}:ApiRuntime)=>readSnapshot(deployment,undefin
 
 export function createReadApi(loadRuntime:()=>Promise<ApiRuntime>){
   const app=new Hono<{Variables:{runtime:ApiRuntime}}>();
-  app.use('/api/*',cors({origin:origin=>/^https?:\/\/(127\.0\.0\.1|localhost)(:\d+)?$/.test(origin)?origin:undefined}));
+  const configuredOrigins=new Set((process.env.FLOOR_WEB_ORIGINS??'').split(',').map(value=>value.trim()).filter(Boolean));
+  app.use('/api/*',cors({origin:origin=>/^https?:\/\/(127\.0\.0\.1|localhost)(:\d+)?$/.test(origin)||configuredOrigins.has(origin)?origin:undefined}));
   app.use('/api/*',async(c,next)=>{c.set('runtime',await loadRuntime());await next();});
   app.onError((error,c)=>c.json({error:error.message,authority:'READ_ONLY_API'},500));
   app.get('/api/v1/config',c=>c.json(c.get('runtime').deployment));
