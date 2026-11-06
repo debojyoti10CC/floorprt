@@ -14,9 +14,9 @@
     "underwriting:demo": "tsx scripts/demo-trader-credit.ts",
     "underwriting:deploy": "pnpm contracts:build && pnpm abi && tsx scripts/deploy-trader-credit.ts",
     "docs:generate": "node scripts/docs-generate.mjs && node scripts/docs-api-generate.mjs",
-    "docs:check": "node scripts/docs-generate.mjs --check && node scripts/docs-api-generate.mjs --check && cd docs/mintlify && pnpm dlx mint@4.2.1205 validate",
-    "docs:links": "cd docs/mintlify && pnpm dlx mint@4.2.1205 broken-links --check-anchors --check-redirects --check-snippets",
-    "docs:dev": "cd docs/mintlify && pnpm dlx mint@4.2.1205 dev --port 3001 --no-open",
+    "docs:check": "node scripts/docs-generate.mjs --check && node scripts/docs-api-generate.mjs --check && cd docs/mintlify && npx --yes mint@4.2.1205 validate",
+    "docs:links": "cd docs/mintlify && npx --yes mint@4.2.1205 broken-links --check-anchors --check-redirects --check-snippets",
+    "docs:dev": "cd docs/mintlify && npx --yes mint@4.2.1205 dev --port 3001 --no-open",
     "dev": "node scripts/dev.mjs",
     "dev:web": "pnpm --filter @floor/web dev",
     "dev:api": "tsx apps/api/src/server.ts",
@@ -41,6 +41,7 @@
     "test:fork": "node scripts/test-fork.mjs"
   },
   "dependencies": {
+    "@ethersphere/bee-js": "13.2.0",
     "@floor/proof-engine": "workspace:*",
     "@floor/shared": "workspace:*",
     "@hono/node-server": "2.1.6",

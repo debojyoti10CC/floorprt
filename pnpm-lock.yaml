@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@ethersphere/bee-js':
+        specifier: 13.2.0
+        version: 13.2.0
       '@floor/proof-engine':
         specifier: workspace:*
         version: link:packages/proof-engine
@@ -323,6 +326,15 @@ packages:
     cpu: [x64]
     os: [win32]
 
+  '@ethersphere/bee-js@13.2.0':
+    resolution: {integrity: sha512-GAl6xkAWwPvy2sxUkzWpaF3JULtOvZ3S1U3JwL5S24sYFjPoGbbsqdUz2TVQxoTMLHx1BRmLGbIExtMs9pl6Ag==}
+    engines: {bee: 2.8.3, beeApiVersion: 8.2.0}
+    hasBin: true
+
+  '@ethersphere/core-sdk@0.2.2':
+    resolution: {integrity: sha512-hfnjPlJbo+LKL34iTeUUVPc8mArMPkFhuKInbTqlwpNlpljeODbMNS3G39kDQHaMZi7zanMDGoD5INTjvokgyg==}
+    engines: {node: '>=22'}
+
   '@foundry-rs/anvil-darwin-amd64@1.7.1':
     resolution: {integrity: sha512-OgwzwY+FsGrsPyDv4mmbhOwARO8s37YHrm2qaNzgSH4VlKnXgJCrnoT7bpgOhLyBPtxXjBT8L2E3b79deesXRg==}
     engines: {node: '>=20'}
@@ -620,6 +632,10 @@ packages:
 
   '@noble/curves@1.9.1':
     resolution: {integrity: sha512-k11yZxZg+t+gWvBbIswW0yoJlu8cHOC7dhunwOzoWH/mXGBiYyR4YY6hAEK/3EUs4UpB8la1RfdRpeGsFHkWsA==}
+    engines: {node: ^14.21.3 || >=16}
+
+  '@noble/curves@1.9.7':
+    resolution: {integrity: sha512-gbKGcRUYIjA3/zCCNaWDciTMFI0dCkvou3TL8Zmy5Nc7sJ47a0jtOeZoTaMxkuqRo9cRhjOdZJXegxYE5FN/xw==}
     engines: {node: ^14.21.3 || >=16}
 
   '@noble/hashes@1.8.0':
@@ -979,6 +995,9 @@ packages:
     engines: {node: '>=6.0.0'}
     hasBin: true
 
+  cafe-utility@34.0.0:
+    resolution: {integrity: sha512-4gxiVyngFbRa1G10+DIDUjk/Qu8OMxgK5bnNXMj4y80Tc+RLdZlk+pE7scgediQS2cxn8L+3XauS8tE62EfsTg==}
+
   caniuse-lite@1.0.30001822:
     resolution: {integrity: sha512-Y3fvWQWzc69dlCyr07tuNrEhotv+db5FpMSPD3slZnkPKwRNOKwFBz2dP966XUmWMXLTOt+YShkFoQoom3U7hg==}
 
@@ -1092,6 +1111,11 @@ packages:
   hono@4.13.16:
     resolution: {integrity: sha512-AOLOEhvrV+iH92xXCnFr/5+3KjPKcI3xP63XJtX5spAnkznPdHijlIsUTpi7/9EhWqrTCekw5c5zh1K+YsVw7A==}
     engines: {node: '>=16.9.0'}
+
+  isomorphic-ws@5.0.0:
+    resolution: {integrity: sha512-muId7Zzn9ywDsyXgTIafTry2sV3nySZeUDe6YedVd1Hvuuep5AsIlqK+XefWpYTyJG5e503F2xIuT2lcU6rCSw==}
+    peerDependencies:
+      ws: '*'
 
   isows@1.0.7:
     resolution: {integrity: sha512-I1fSfDCZL5P0v33sVqeTDSpcstAg/N+wF5HS033mogOVIp4B+oHC7oOCsA3axAbBSGTJ8QubbNmnIRN/h8U7hg==}
@@ -1531,6 +1555,25 @@ snapshots:
   '@esbuild/win32-x64@0.28.2':
     optional: true
 
+  '@ethersphere/bee-js@13.2.0':
+    dependencies:
+      '@ethersphere/core-sdk': 0.2.2
+      cafe-utility: 34.0.0
+      debug: 4.4.3
+      isomorphic-ws: 5.0.0(ws@8.21.0)
+      semver: 7.8.6
+      ws: 8.21.0
+      zod: 4.6.7
+    transitivePeerDependencies:
+      - bufferutil
+      - supports-color
+      - utf-8-validate
+
+  '@ethersphere/core-sdk@0.2.2':
+    dependencies:
+      '@noble/curves': 1.9.7
+      '@noble/hashes': 1.8.0
+
   '@foundry-rs/anvil-darwin-amd64@1.7.1':
     optional: true
 
@@ -1726,6 +1769,10 @@ snapshots:
   '@noble/ciphers@1.3.0': {}
 
   '@noble/curves@1.9.1':
+    dependencies:
+      '@noble/hashes': 1.8.0
+
+  '@noble/curves@1.9.7':
     dependencies:
       '@noble/hashes': 1.8.0
 
@@ -2030,6 +2077,8 @@ snapshots:
 
   baseline-browser-mapping@2.11.35: {}
 
+  cafe-utility@34.0.0: {}
+
   caniuse-lite@1.0.30001822: {}
 
   chai@6.3.0: {}
@@ -2139,6 +2188,10 @@ snapshots:
     optional: true
 
   hono@4.13.16: {}
+
+  isomorphic-ws@5.0.0(ws@8.21.0):
+    dependencies:
+      ws: 8.21.0
 
   isows@1.0.7(ws@8.21.0):
     dependencies:
@@ -2292,8 +2345,7 @@ snapshots:
 
   scheduler@0.28.0: {}
 
-  semver@7.8.6:
-    optional: true
+  semver@7.8.6: {}
 
   sharp@0.35.5(@types/node@24.10.1):
     dependencies:
