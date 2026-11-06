@@ -1,0 +1,27 @@
+.arkiv-toolbar,.arkiv-search,.arkiv-receipt,.arkiv-row,.arkiv-row-stats,.arkiv-row-actions{display:flex;align-items:center;gap:10px}
+.arkiv-toolbar{justify-content:space-between;padding:0 18px 13px}
+.arkiv-publish{display:flex;gap:9px;padding:0 18px 13px}
+.arkiv-publish input,.arkiv-search input{min-width:0;min-height:38px;padding:0 13px;border:1px solid var(--color-border-default);border-radius:10px;background:var(--control-background);color:var(--color-text-primary);box-shadow:var(--shadow-inset)}
+.arkiv-publish input{flex:1}
+.arkiv-search{justify-content:space-between;padding:0 18px 12px;border-bottom:1px solid var(--color-border-default);color:var(--color-text-secondary);font:11px var(--mono)}
+.arkiv-search input{width:min(280px,55%)}
+.arkiv-list{max-height:360px;overflow:auto}
+.arkiv-row{justify-content:space-between;min-width:620px;gap:20px;padding:14px 18px;border-bottom:1px solid var(--color-border-default)}
+.arkiv-row-main{display:grid;gap:8px;min-width:0}
+.arkiv-row-title{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.arkiv-row-title strong{font-size:var(--font-size-sm);font-weight:600}
+.arkiv-row-title span,.arkiv-owner{color:var(--color-text-secondary);font:10px var(--mono)}
+.arkiv-row-stats{flex-wrap:wrap;color:var(--color-text-secondary);font-size:var(--font-size-xs)}
+.arkiv-row-stats b{color:var(--color-text-primary);font-weight:600}
+.arkiv-owner{font-size:9px}
+.arkiv-row-actions{flex-shrink:0}
+.arkiv-row-actions .button{min-height:32px;padding:0 11px;font-size:10px}
+.arkiv-receipt{padding:10px 18px;border-bottom:1px solid var(--color-border-default);color:var(--color-positive);font-size:11px}
+.arkiv-receipt code{overflow:hidden;color:var(--color-text-secondary);text-overflow:ellipsis;white-space:nowrap;font:10px var(--mono)}
+.arkiv-receipt a{margin-left:auto;color:var(--color-text-secondary)}
+.arkiv-empty{padding:20px 18px;color:var(--color-text-secondary);font-size:var(--font-size-xs)}
+.arkiv-footnote{padding:11px 18px;border-top:1px solid var(--color-border-default);color:var(--color-text-secondary);font-size:10px}
+.arkiv-publish .button{flex-shrink:0}
+.spin{animation:arkiv-spin .9s linear infinite}
+@keyframes arkiv-spin{to{transform:rotate(360deg)}}
+@media(max-width:700px){.arkiv-publish{flex-direction:column}.arkiv-publish>.button{width:100%}.arkiv-row{gap:10px}.arkiv-row-stats{display:grid;grid-template-columns:1fr 1fr}.arkiv-row-actions{flex-direction:column}.arkiv-toolbar{align-items:flex-start;flex-direction:column}}

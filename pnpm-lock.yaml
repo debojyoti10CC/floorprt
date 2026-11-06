@@ -54,6 +54,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@arkiv-network/sdk':
+        specifier: 1.0.1
+        version: 1.0.1(typescript@5.9.3)(viem@2.57.16(typescript@5.9.3)(zod@4.6.7))
       '@floor/proof-engine':
         specifier: workspace:*
         version: link:../../packages/proof-engine
@@ -107,6 +110,16 @@ packages:
 
   '@adraffy/ens-normalize@1.11.1':
     resolution: {integrity: sha512-nhCBV3quEgesuf7c7KYfperqSS14T8bYuvJ8PcLJp6znkZpFc0AuW4qBtr8eKVyPPe/8RSr7sglCWPU5eaxwKQ==}
+
+  '@arkiv-network/sdk@1.0.1':
+    resolution: {integrity: sha512-DCOFdGunn4I5nYrvIV/YIkMCkLZM7EQNSyNPtqpmQkP2JzTEfRLBJleBSB2rokWMa833/9P8DMiwsEXACr3CUQ==}
+    engines: {node: '>=18.0.0'}
+    peerDependencies:
+      typescript: '>=5.0.0'
+      viem: ^2.0.0
+    peerDependenciesMeta:
+      typescript:
+        optional: true
 
   '@emnapi/runtime@1.11.3':
     resolution: {integrity: sha512-Xz4Tpyki7XyrpbUK1jR1AhdAdaXyhhY4lZ3neLodmhpuWfy2PAQN5B46sAiU4liOXGLkHypn/qU+jvfWSCYYLA==}
@@ -1201,6 +1214,12 @@ packages:
 snapshots:
 
   '@adraffy/ens-normalize@1.11.1': {}
+
+  '@arkiv-network/sdk@1.0.1(typescript@5.9.3)(viem@2.57.16(typescript@5.9.3)(zod@4.6.7))':
+    dependencies:
+      viem: 2.57.16(typescript@5.9.3)(zod@4.6.7)
+    optionalDependencies:
+      typescript: 5.9.3
 
   '@emnapi/runtime@1.11.3':
     dependencies:
