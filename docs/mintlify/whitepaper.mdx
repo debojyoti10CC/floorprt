@@ -1,0 +1,65 @@
+---
+title: "AQRA Trader Credit Protocol"
+description: "Evidence-backed lending for prediction-market traders, including the benchmark method and prototype limits."
+---
+
+# AQRA — Trader Credit Protocol
+
+**Version 0.1 · 6 November 2026**
+
+## Abstract
+
+AQRA evaluates a trader’s publicly observable, settled prediction-market history before a lender funds a small fixed-term loan. A deterministic underwriting policy, wallet consent and a borrower-funded first-loss bond make each request inspectable. The lender still assumes loss beyond the bond.
+
+The product tests a narrow claim: a past-performance screen may help organize credit decisions for prediction-market traders. It does not establish future profitability, repayment probability or principal protection.
+
+## Protocol
+
+1. **Build evidence.** AQRA reads settled Polymarket wallet history through a dated cutoff and records its evidence digest.
+2. **Prove account control.** A borrower may group up to four wallets. ENS helps discover addresses; each linked controller must consent to the request.
+3. **Request credit.** The borrower selects principal, fixed repayment and term, then escrows a first-loss bond.
+4. **Attest and fund.** A pinned report sender attests to the policy result. A separate lender reviews the terms and funds the exact request.
+5. **Repay or record default.** Repayment returns the bond. At maturity, a default can transfer the bond to the lender and records any remaining shortfall.
+
+The trader-credit desk does not custody or liquidate native Polymarket positions. Wallet history is evidence for screening, not collateral. The separate outcome-token protocol is a local test demonstration and does not establish custody of external prediction-market claims.
+
+## Underwriting policy
+
+Policy `aqra-trader-credit-v1` evaluates the three completed UTC months before the cutoff. A month is active at $500 or more of turnover and at least 20 trades. Eligibility requires two active months, two positive active months, positive combined realized P&L, activity in the latest month and a score of at least 60 out of 100.
+
+The score allocates up to 40 points to consistency, 35 to realized efficiency and 25 to observed drawdown. Missing or unaudited history is held from funding. A score is a deterministic screening output tied to the policy version and evidence digest, not a credit guarantee.
+
+## Benchmark design
+
+The Data page uses monthly walk-forward rounds. At each decision cutoff, candidate selection uses only earlier observations. Outcomes are evaluated in the following month and show realized trader P&L and activity. They are not loan returns.
+
+The contract demo advances $100 with $102 due and a $25 bond. This is a test term, not a performance result. The contract supports voluntary repayment and bond-only recovery at default; it cannot collect future trading P&L. Mature repayment/default labels are unavailable.
+
+Polymarket daily P&L is realized market P&L, not account ROI; starting bankroll and full account equity are unavailable. High-multiple settled buys are exploratory cohorts and do not prove repeatable performance.
+
+## Credit stress
+
+The separate risk engine reports principal loss after the bond, expected loss, a correlated loss distribution, VaR, Expected Shortfall, reserve gap and scenario margin. PD, correlation, bond recovery and cost inputs are assumptions. The app keeps pooled approval rejected until repayment outcomes, out-of-time validation and committed capital exist. See [Risk engine specification](/specifications/risk-engine) for formulas and calibration requirements.
+
+Coverage, policy comparisons, wallet-level evidence and the current dataset commitment are shown in the app’s Data tab.
+
+## Data and integrations
+
+- **Polymarket** public P&L and trade sources provide wallet-level observations. Boundary blocks are recorded so a decision has a verifiable as-of point.
+- **ENS** names and text records help discover wallet groups. A name alone does not prove control; linked wallets sign scoped consent.
+- **Chainlink CRE** is designed to recompute evidence and submit an authenticated report. Local demo reports are explicitly labeled local. No public DON execution is claimed.
+- **Arkiv** can hold an expiring packet so lenders can discover a request and verify its claims against the loan record. Publishing requires the borrower’s wallet and network fees.
+
+## Risk and limits
+
+- The lender can lose principal beyond the bond. A high score does not guarantee repayment.
+- Prediction-market history may be incomplete, account-specific or affected by selection and survivorship bias.
+- The application is a local or testnet prototype using test funds. It has no independent security audit or legal clearance.
+- There is no production liquidity pool, automatic loan auction, real-market position custody or guaranteed liquidation.
+
+## Primary sources
+
+- [Polymarket wallet P&L API](https://docs.polymarket.com/api-reference/wallet/get-a-users-pnl-series)
+- [Basel PD/LGD/EAD framework](https://www.bis.org/committees/bcbs/basel-framework/standard/cre.htm)
+- [Expected Shortfall reference](https://sites.math.washington.edu/~rtr/papers/rtr187-CVaR2.pdf)
+- [Chainlink CRE EVM read/write](https://docs.chain.link/cre/capabilities/evm-read-write)

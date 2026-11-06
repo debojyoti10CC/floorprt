@@ -1,106 +1,59 @@
 # AQRA
 
-An independently implemented outcome-collateral terminal: **compose → verify → lock → fund → settle**.
+AQRA studies whether public prediction-market trading history can support a safer small-loan screening process. It combines a walk-forward Polymarket data benchmark, an assumption-driven credit-loss stress engine, borrower-consented requests and separate lender funding.
 
-The application uses a real local EVM, fully backed ERC-1155 outcome claims, full fixed-debt repayment, wallet-signed transactions and a lender-first USDC settlement waterfall. Its scenario studio evaluates exact contractual payoffs; financial state comes from contract reads and confirmed events.
+The working interface has four navigation destinations:
 
-## Project documentation
+- **Data** — observed monthly wallet outcomes, cohort comparisons and dated wallet evidence.
+- **Risk engine** — expected loss, portfolio loss distribution, VaR, Expected Shortfall, reserve gap and a binding credit gate. Default probability and default correlation are explicit stress assumptions, not inferred from P&L.
+- **Borrow** — ENS/wallet discovery, evidence review and wallet-signed bonded credit requests.
+- **Lend** — onchain requests, principal-loss acknowledgement, funding, repayment/default state and transaction receipts.
 
-The complete Mintlify site lives in [`docs/mintlify`](docs/mintlify), covering the mechanism, user guides, source-derived contract/API references, operations, risks and original specifications.
+Full model definitions, assumptions and implementation limits are in [`docs/RISK_ENGINE.md`](docs/RISK_ENGINE.md). The current app is local/testnet software. It has no live lending pool or calibrated probability of default. A lender can lose principal beyond the bond; the trader’s future P&L is not collateral.
 
-```sh
-pnpm docs:generate  # sync contract/API references and specification mirrors
-pnpm docs:check     # source consistency and strict Mintlify validation
-pnpm docs:dev       # documentation preview on port 3001
-```
+## Run the demo
 
-See [`docs/mintlify/maintenance/documentation.mdx`](docs/mintlify/maintenance/documentation.mdx) for publishing and maintenance. The original `docs/*.md` blueprint is preserved separately from current implementation guidance.
-
-## Start the complete application
-
-Prerequisites: Node 24, pnpm 10.20.0, Python 3.10+ for differential tests. Foundry native binaries are pinned npm dependencies; a separate global Foundry installation is unnecessary.
+Prerequisites are Node 24, pnpm 10.20.0 and the checked-in dependencies.
 
 ```sh
 pnpm install --frozen-lockfile
 pnpm dev
 ```
 
-Open **http://127.0.0.1:3000/**. The command starts Anvil on `8545`, compiles contracts, generates typed ABIs, deploys/seeds when needed, and serves the read API on `8787`. It reuses an existing compatible local stack. Native package postinstall hooks that assume a Unix shell are deliberately disabled; the Foundry wrapper resolves the platform binary directly on Windows/Linux/macOS.
+Open <http://127.0.0.1:3000/>. The local runner starts Anvil, deploys contracts, seeds the test stack and starts the read API. In the wallet menu, choose the labeled local borrower, lender or resolver account. This uses test USDC on local chain 31337. Wallet-authorized actions write to the local contracts and show transaction receipts.
 
-Choose **Connect wallet → Borrower**, **Lender**, or **Curator / test resolver** to use the explicitly labeled local Anvil accounts. An injected Ethereum wallet is also supported. The local signer is restricted to loopback chain 31337. The API has no signing route and never holds a borrower's spending key.
+For a full historical-evidence request, run `pnpm underwriting:demo --pending` against the local stack. It records local receipts at `work/underwriting/local-credit-demo.json`.
 
-## A complete interactive journey
+## Reproduce the benchmark
 
-1. In the local runner, open **Local test tools → Resolver setup**, connect the curator/resolver, and create a fresh shared observation if the current one has matured.
-2. Connect the borrower. Open **Portfolio studio**, choose YES at the lower strike and NO at the upper strike, and mint fully backed complete sets if needed. Claim chips support dragging and keyboard/click selection.
-3. Inspect the exact payoff chart and **Proof inspector**. Approve the ERC-1155 operator and **Lock pair in vault**. The vault recomputes the proof onchain.
-4. In **Credit desk → Borrow**, select the new vault position. Publish a `0.75` principal / `0.78` maximum total-due request for a one-USDC floor.
-5. Switch to a distinct lender wallet. In **Lend**, select that request and **Approve & fund loan**. Principal transfers directly from lender to borrower.
-6. Switch to the resolver. In **Operations**, select the observation and below/inside/above/cancellation scenario. **Advance local clock & finalize** explicitly changes the test chain; the studio's slider does not.
-7. Open **Settlement audit**, select the loan and settle. The claims burn, the lender receives fixed due and the beneficiary receives the residual. Refresh to reproduce the result from chain state.
-
-The command center's rotatable 3D surface and state matrix model price versus 1–6× portfolio scale. They are deterministic payoff models, not wallet balances, probability estimates or oracle writes. Changing a scenario updates the displayed exact cashflow. The final layout follows the supplied financial-terminal and Kimia references: Poppins, black/charcoal surfaces, pale periwinkle accents, rounded controls and inset/raised depth. Explanatory lifecycle cards were removed from the transaction screens; mechanism detail lives in documentation. The earlier Coinbase reference remains in `apps/web/DESIGN.md`; `docs/DESIGN_SYSTEM.md` defines the final semantic tokens, component states and accessibility checks. Poppins is self-hosted with its SIL license; no reference brand logos or trading data are copied.
-
-## Reproduce the evidence
+The expanded dataset covers November 2025 through October 2026. Its fixed sample schedules up to 768 BTC/ETH 15-minute Polymarket sessions and samples activity and large-win wallets. The checked-in capture manifest records gaps, sample limits and Polygon month-boundary block checks.
 
 ```sh
-pnpm exec playwright install chromium  # once, for browser QA
-pnpm check                            # source/ABI checks, types, unit/property tests, Foundry, differential math
-pnpm preflight                        # chain identity, runtime code hashes and collateral decimals
-pnpm e2e                              # separate wallet contexts, all four settlements, 3D controls, drag, mobile
-pnpm demo                             # six real settlement cases; writes receipts and leaves fresh demo inventory
-pnpm test:fork                        # pinned Sepolia fork: canonical USDC + Chainlink + full waterfall
-pnpm sepolia:check                    # genuine public RPC reads; no transactions or keys
-pnpm verify                           # full checks + browser + build + dependency audit, with saved logs
+pnpm underwriting:benchmark
 ```
 
-`pnpm demo` deliberately advances the local clock. It tests below/lower-boundary/inside/upper-boundary/above/cancel states, then leaves funded and unfunded positions on a new observation for exploration. Each repeated run adds new real test transactions; it does not reset or invent a ledger.
+The command collects the missing source captures and replays the complete sample. To replay already captured data without new requests:
 
-| Canonical scenario | Redeemed | Lender paid | Borrower residual |
-|---|---:|---:|---:|
-| Below 5,000 | 1.00 | 0.78 | 0.22 |
-| Exactly 5,000 | 2.00 | 0.78 | 1.22 |
-| Inside interval | 2.00 | 0.78 | 1.22 |
-| Exactly 6,000 | 1.00 | 0.78 | 0.22 |
-| Above 6,000 | 1.00 | 0.78 | 0.22 |
-| Shared 50/50 cancellation | 1.00 | 0.78 | 0.22 |
+```sh
+pnpm underwriting:replay --benchmark
+```
 
-Amounts are test USDC. Full transaction hashes, block numbers and exact base units are saved in `evidence/demo-receipts.json` and `evidence/browser-results.json`. Compiler artifacts generate eight typed ABIs; deployment manifests pin runtime code hashes and deployment blocks.
+The replay reports next-month realized trader P&L and profitable-wallet frequency. It does not convert those outcomes into loan repayment, lender returns, default labels or collateral. Daily P&L is not account ROI because complete equity and opening bankroll are unavailable. Sources and derived CSVs are written under `work/underwriting`; the browser reads `apps/web/public/underwriting/run.json`.
 
-## Implementation map
+## Technical references
 
-| Path | Responsibility |
-|---|---|
-| `apps/web` | Next.js terminal, scenario surface, draggable outcome graph, proof, credit, portfolio, audit, operations |
-| `packages/contracts/src` | Registry, curated factory, backed claims, pair verifier, exact custody and matched credit |
-| `packages/proof-engine` | BigInt payout engine, cancellation, conservative debt bounds, research-only 2–8-leg sweep |
-| `packages/shared` | Generated ABIs, pinned-block chain reads, reason codes and types |
-| `apps/api` | Read-only Hono API, validated proof previews, provenance-tagged Gamma research feed |
-| `services/indexer` | Durable block-hash journal, idempotency, orphan retention and replay after reorg |
-| `services/oracle-workflow` | Tested report-preparation guards; explicitly not a live CRE workflow |
-| `e2e`, `scripts`, `.github/workflows` | Browser verification, independent Python model, deployment, replay and CI |
-| `docs` | Original blueprint, implementation decisions, source research and runbooks |
+- [`docs/RISK_ENGINE.md`](docs/RISK_ENGINE.md) — credit risk equations, stress model, validation requirements and sources.
+- [`docs/TRADER_CREDIT.md`](docs/TRADER_CREDIT.md) — product mechanics and data workflow.
+- [`docs/MECHANISM_AND_PROOFS.md`](docs/MECHANISM_AND_PROOFS.md) — outcome-token protocol and proof constraints.
+- [`docs/mintlify`](docs/mintlify) — developer documentation source.
 
-The direct read snapshot is bounded to the newest 200 observations/markets/positions/loans and 5,000 blocks of events. This is a local P0 terminal, not a global institutional analytics index. The persistent event journal is secondary; it never authorizes spending or overrides contract state. Portfolio studio also has an Arkiv Rabdi strategy library: wallet-signed, public presets expire after 30 days and are rechecked by AQRA before use. Public Rabdi reads and writes require a working RPC; writes also require the connected wallet to have test tGLM. This code path has not yet been evidenced by a public Arkiv transaction receipt.
+Useful implementation commands:
 
-## External integrations and deployment boundaries
+```sh
+pnpm typecheck
+pnpm build
+pnpm docs:generate
+pnpm docs:check
+```
 
-This release demonstrates the local P0 lifecycle and selected P1 components: persistent indexing, read-only external discovery, generalized research math, oracle-input guards, and an Arkiv strategy-library code path. **Public testnet transaction receipts (including Arkiv), a CRE CLI simulation/live DON write, EIP-712 RFQs and tranche issuance are not demonstrated.** Full repayment and an external Chainlink feed adapter are implemented and tested. The canonical Sepolia USDC/feed integration passes on a pinned fork; fork balance provisioning is explicitly test-only. External CTF custody and cross-chain assets are excluded. These are explicit later-release items in the original PRD, not simulated buttons.
-
-The website can be privately hosted as a static terminal. If no matching RPC is reachable, chain-powered screens show the connection state and disable writes; the app does not substitute saved or invented balances. A static web deployment does not turn Anvil into a public blockchain. For the working monetary journey, run the local stack or configure a genuine supported testnet deployment. The external prediction-market feed requires a reachable read API and remains separate from AQRA collateral.
-
-The composer chooses an open shared-observation pair on initial load and offers a recovery action for closed observations. Pending reads preserve user edits. Local startup provisions an open pair when necessary; it never bypasses maturity guards. Account avatars are generated deterministically from addresses. The capital-flow chart aggregates confirmed funding, repayment and settlement events.
-
-For Sepolia, supply a funded deployer wallet and `FLOOR_RPC_URL` as process environment variables, then run `pnpm deploy:sepolia`. It uses Circle's canonical external Sepolia USDC and deploys a permissionless historical-feed resolver; it never deploys MockUSDC on Sepolia. See `docs/EXTERNAL_DEPLOYMENT.md` for precise oracle semantics and commands. It refuses other chain IDs and mainnets. Never put private keys or deployer secrets in `NEXT_PUBLIC_` variables. Rebuild the terminal with the resulting manifest, and record public receipts before claiming that gate passed. To include the feed-resolution page in a static Sepolia build, set `NEXT_PUBLIC_ENABLE_OPERATIONS_UI=true` and keep `NEXT_PUBLIC_ENABLE_LOCAL_DEMO_UI=false`; the local `pnpm dev` runner enables both local controls automatically.
-
-For Arkiv, set `NEXT_PUBLIC_ARKIV_ACCESS_KEY` to a Rabdi access key restricted to the web origin; the key is public RPC access, not a wallet credential. Users sign entity writes with their own wallet and need Rabdi test tGLM. AQRA stores only a public portfolio recipe, not collateral, debt, private data or proof authority. See `docs/HACKATHON_WINNER_RESEARCH.md` and `arkiv/` for honest track evidence and gaps.
-
-**AI disclosure for hackathon submissions:** Codex assisted with repository research, implementation and documentation. Builders remain responsible for reviewing the code, validating every claim, and disclosing AI use in the submission as required by ETHGlobal.
-
-## Mechanism and trust
-
-For ordered thresholds sharing one observation, `F = min(qLower, qUpper) × 1,000,000` micro-USDC. Every winning unit pays 1 USDC; every canceled unit pays 0.5. Each complete set is funded by exactly 1 USDC. Due includes all lender fees and cannot exceed the floor minus the upward-rounded 20% reserve.
-
-The floor is a terminal contractual cashflow bound, conditional on backing, custody, oracle finality and settlement-token transferability. It is not an immediate resale price or an acquisition-profit guarantee. This is an independently unaudited test-funds prototype.
-
-Architecture was researched from Cumulant and Senthos without transplanting their source or assets. Pinned findings and important mechanism differences are in `docs/REFERENCE_RESEARCH.md`; dependency notices are in `THIRD_PARTY_NOTICES.md`. The original supplied specification remains in `docs/`.
+AQRA is unaudited local/testnet software. No production liquidity pool, external Polymarket position custody, public CRE execution receipt or mainnet lending is claimed.

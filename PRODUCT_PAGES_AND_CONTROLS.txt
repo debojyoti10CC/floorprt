@@ -1,68 +1,65 @@
-AQRA — CURRENT PAGES, CONTROLS AND DATA
+AQRA — CURRENT INTERFACE AND DATA
 Last updated: 2026-11-06
 
-PRODUCT JOB
-AQRA combines a prediction-market risk terminal with an onchain credit desk. The venue panel estimates a trade from visible Polymarket asks and links to the venue to execute it. AQRA lending accepts only AQRA-issued claims that pass the onchain payout-floor verifier; outside prediction-market positions are not collateral.
+PRODUCT
+AQRA uses public prediction-market trader history for research and credit screening. Trader P&L is not collateral. Borrower bond is the only pledged asset in the trader-credit demo.
 
-GLOBAL SHELL
-- The seven primary screens are Market terminal, Outcome graph, Portfolio composer, Proof inspector, Credit desk, Portfolio dashboard and Settlement explorer.
-- The header shows configured network, refresh, and Connect wallet / connected account. The wallet dialog supports an injected wallet. Local `pnpm dev` also exposes Borrower, Lender and Curator / resolver Anvil accounts plus a test-USDC faucet.
-- The sidebar shows live RPC status and chain ID. It does not substitute a saved ledger when the RPC is offline. Onchain writes are disabled until the configured deployment is verified.
-- A transaction toast shows wallet signing, pending, confirmed or failed state and a transaction link when available. The footer links to the repository documentation.
+SIDEBAR
+- Data opens the observed wallet-history benchmark.
+- Risk engine opens the stress model inside Data and scrolls to its results.
+- Borrow opens the request composer and the connected borrower's requests.
+- Lend opens the onchain request list and lender controls.
+- Whitepaper opens the in-app protocol paper.
+- The wallet card opens account connection. The bottom status reports RPC connectivity and chain.
 
-1. MARKET TERMINAL — /markets/
-Default landing page. It has two market modes:
+DATA
+- Wallet histories reports successful histories and daily observation count.
+- Walk-forward rounds reports the sample period and capture profile.
+- Polymarket fills reports observed market fills and resolved-sample coverage.
+- The outcome chart and policy rows report next-month realized trader P&L, active observations and profitable-wallet frequency. They do not show lender returns.
+- Export data downloads the current underwriting JSON.
+- Decision month filters sampled wallets and policy comparisons by UTC cutoff.
+- Selection policy filters the public-wallet table.
+- Wallet search filters that table by address.
+- Previous/Next paginate. Selecting an address shows dated windows, score status, next-month P&L, largest sampled settled buy and evidence digest. A known buy links to its Polygon transaction.
 
-Prediction markets
-- The list comes from Polymarket Gamma market discovery and CLOB order books through the read-only AQRA API. It displays market question, outcomes, visible best ask, 24-hour volume and end date. Search filters market text and outcomes.
-- Select a row to open the risk ticket. Choose an outcome and edit the USD order budget. The ticket estimates filled spend / maximum loss if filled, payout if correct, shares at visible asks, unfilled budget and best ask. It warns when visible shares are below the venue minimum. Venue fees are excluded.
-- LIVE ASK BOOK, STALE BOOK and NO LIVE BOOK indicate book availability. If upstream market data is down, a recent cached response is marked stale; without a usable response, the list or ticket reports that it is unavailable.
-- “Trade on Polymarket” opens that market at Polymarket. It does not submit an order from AQRA. The linked venue controls execution and custody. These external positions cannot be used as AQRA collateral.
+RISK ENGINE
+- Cohort selects the number of sampled loans used by the portfolio scenario.
+- Default probability, pairwise default correlation, bond recovery, tail confidence and capital charge are explicit user-set assumptions.
+- Scenario capital is a hypothetical what-if only and is not counted by the approval gate.
+- Outputs include expected credit loss, VaR, Expected Shortfall, required stress capital, risk-adjusted margin, break-even PD, loss distribution and exact scenario table.
+- The decision remains REJECT until mature loan outcomes, calibrated PD, out-of-time validation and actual committed capital exist.
+- The contract's maximum borrower-bond shortfall is displayed. Future trader P&L never reduces that loss.
 
-AQRA collateral
-- The spot chart switches between Coinbase ETH/USD and BTC/USD TradingView candles. These are research references; settlement comes from the registered AQRA observation.
-- The market selector, complete-set quantity and “Mint complete set” action mint one fully backed YES/NO pair per test-USDC unit. It requires an open AQRA observation, online chain, connected wallet and sufficient test-USDC balance.
-- “Check outcome compatibility” opens the Outcome graph. “Compose compatible pair” opens the Portfolio composer when a candidate exists.
-- The registered-market table displays market/threshold, YES and NO token IDs, observation settlement time, escrow and status. Search, observation filter and Inspect selection work on chain-derived market data.
-- Header refresh reloads contract state. Prediction market data refreshes every 15 seconds.
+BORROW
+- Enter an ENS name or up to four EVM addresses. Check wallet history retrieves available public evidence.
+- ENS displays the resolved name/address group. Every additional controller must provide scoped wallet consent before submission.
+- Review the evidence row, observation cutoff, linked wallet set and terms before signing.
+- Escrow bond and request sends wallet-authorized transactions. Confirmed requests appear below.
+- Request records show attestation status, terms, deadline, evidence digest and transaction history. The borrower can cancel an unfunded request, repay a funded loan before maturity or settle a matured default.
 
-2. OUTCOME GRAPH — /outcomes/
-- Shows actual AQRA markets grouped by shared observation ID, with asset, observation time/precision, YES/NO token IDs, strikes and escrow.
-- Click “YES · LOWER” or “NO · UPPER” on any market node to select the legs. The selected-pair panel reports whether the two markets share an observation, have ordered thresholds and remain open for new collateral.
-- “Compose selected pair” opens the composer only while the pair is eligible. The displayed floor is a deterministic one-unit preview; the contract verifies again before collateral is locked.
+LEND
+- Requests are read from the trader-credit contract. Refresh reloads chain state.
+- Discover on Arkiv queries evidence packets and verifies claims against the contract request.
+- An eligible request displays borrower, score, principal, total due, bond, deadline and maximum principal loss.
+- The lender acknowledges the possible principal loss before funding. Funding uses a separate wallet and exact token approval.
+- A borrower can repay by maturity. After maturity, any connected account can settle default. Request cards show loan events and transaction hashes.
+- Local curator attestation is labeled Local forwarder; it is not a Chainlink CRE execution receipt.
+- Publish on Arkiv requires the borrower wallet and Rabdi test-network fees. Publishing does not move loan funds.
 
-3. PORTFOLIO COMPOSER — /compose/
-- Choose registered markets and claim quantities for the lower YES and upper NO legs. Wallet claim balances are read from ERC-1155 contracts. Claim chips can be clicked, dragged and dropped on the matching leg.
-- “Mint complete set” funds missing claims with test USDC. The payout chart and scenario price input update the portfolio display. “Explore cancellation result” toggles the local cancellation case; these controls do not resolve the oracle.
-- The side panel shows current onchain eligibility, minimum and maximum payout, claims, observation, proof link and lock action. “Lock verified claims” checks wallet balances, requests ERC-1155 operator approval if needed, and then submits the vault lock. A confirmed position links to Credit desk.
-- Arkiv strategy library queries and searches public recipes. “Connect wallet” / “Switch to Rabdi” selects the wallet; “Publish verified strategy” stores a 30-day public recipe; “Load” restores a recipe only for the same AQRA deployment; the owner’s delete button removes it. AQRA rechecks the selected portfolio before locking. Public Arkiv transaction receipts have not yet been recorded.
+WHITEPAPER
+- In-app Whitepaper describes implemented flows, benchmark limits, integrations and current risks.
+- Documentation opens repository developer documentation. Data returns to the benchmark.
 
-4. PROOF INSPECTOR — /proof/
-- “Edit portfolio” returns to the composer. The page shows whether the selected pair passed the live verifier, minimum payout and verification block, plus the selected market/observation and contract addresses.
-- If verification fails or the chain is unavailable, the page says so; no local chart result authorizes a vault transaction. The vault verifies again during lock.
+GLOBAL CONTROLS
+- Header displays page, configured network, refresh and connected account.
+- Wallet dialog supports an injected browser wallet. Local demo mode exposes labeled borrower, lender, resolver accounts and the local test-USDC faucet.
+- Offline state pauses transactions; saved balances are not used as live chain state.
+- Transaction notices report signing, pending, confirmed or failed state and link to a receipt when available.
 
-5. CREDIT DESK — /credit/
-- Borrow and Lend tabs switch between borrower positions and open borrower requests. Position/request rows select the item to work with.
-- Borrower edits principal and maximum total due, then “Publish loan request” records consent onchain. “Cancel request” cancels an unfunded request.
-- The terms panel shows certified floor, safety reserve, maximum permitted due, fixed fee and borrower residual. The contract enforces the debt cap.
-- Lender reviews borrower, beneficiary, claims, floor and expiry. Principal is fixed by the borrower. “Approve & fund loan” requests exact test-USDC allowance if needed, then transfers the lender’s funds to the borrower. The same address cannot fund its own request.
-
-6. PORTFOLIO DASHBOARD — /portfolio/
-- Summary shows the connected wallet’s test-USDC balance, outstanding borrowed principal and lender receivables.
-- Collateral vault positions show exact claims, certified floor, state and loan lien. “Release claims” releases an unfunded position; “Review loan” opens settlement evidence for a funded position.
-- Free claim rows show wallet YES/NO balances and token IDs. “Merge N sets” returns backing before resolution; after resolution, “Redeem YES” / “Redeem NO” burns claims for the contract-defined payout.
-- Borrower/lender ledger shows principal, fixed due and status. A borrower can repay the full due with “Repay $X”; exact approval is requested if needed.
-
-7. SETTLEMENT EXPLORER — /settlements/
-- “Inspect loan” selects a funded or settled loan. Pending loans show current observation state and enable “Settle loan #N” after finality.
-- Settled loans show redeemed amount, lender-first payment, borrower residual, recipient addresses, LoanSettled transaction, block and log index. The event timeline links related confirmed protocol events.
-- “Open resolver controls” appears only in builds that include the operations route. Oracle provenance identifies the configured Chainlink historical-feed adapter or local test resolver; neither is presented as CRE.
-
-SUPPORT ROUTES
-- /ops/ is an opt-in operations page. `pnpm dev` exposes local resolver scenarios, local-clock advancement, test-pair creation, code-hash table and RPC/manifest settings on Anvil. Static builds can include Chainlink-feed resolution with `NEXT_PUBLIC_ENABLE_OPERATIONS_UI=true`; local demo controls stay off unless `NEXT_PUBLIC_ENABLE_LOCAL_DEMO_UI=true`.
-- /docs/ explains protocol mechanics and assumptions. It is reference material; no doc-only formula or narrative control changes balances or loan state.
-
-DATA AND TRACK BOUNDARIES
-- AQRA positions, balances, loans and receipts are read from the configured chain. All local balances are test collateral with no market value. No independently audited mainnet deployment is claimed.
-- Polymarket listings/books and TradingView candles are external research inputs. AQRA does not execute Polymarket orders, custody those positions or count them toward its lending floor.
-- The existing historical Chainlink resolver is not a Chainlink CRE workflow. Arc deployment/Studio eligibility has not been established. Arkiv recipe code is implemented, but the public Rabdi write/read path still needs a verified receipt and writer address.
+DATA BOUNDARIES
+- Benchmark covers sampled Polymarket wallets and markets, not a venue-wide census.
+- Daily wallet P&L is not ROI because complete equity and opening bankroll are unavailable.
+- The benchmark has no mature AQRA repayment/default labels or timestamped trader probability forecasts. It does not report PD, lender returns or Brier skill.
+- The schedule, source gaps, boundary audits and checksums are recorded under work/underwriting. The browser serves the checked-in run JSON.
+- This is unaudited local/testnet software. No production lending pool, external position custody, public CRE execution receipt or mainnet loan is claimed.

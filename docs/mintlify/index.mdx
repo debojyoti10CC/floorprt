@@ -1,40 +1,36 @@
 ---
-title: 'AQRA documentation'
-description: 'Compose, verify, lock, fund and settle fully backed outcome claims with Floor Protocol.'
+title: 'AQRA trader credit'
+description: 'Prediction-market trader data, underwriting and bonded test loans.'
 ---
 
-AQRA is the terminal for **Floor Protocol**, an independently implemented outcome-collateral and matched-credit prototype. Its restricted pair proof bounds terminal contractual payouts; contracts enforce backing, custody, borrower consent and lender-first settlement.
+AQRA evaluates public, settled Polymarket history before a separate lender funds a small fixed-term request. Wallet consent and a borrower-funded bond are recorded with the request.
 
 <Warning>
-Test funds only. Independently unaudited. A contractual settlement floor is not a resale price, guaranteed profit, immediate liquidity, insurance or legal clearance.
+This is a local/testnet prototype using test funds. A performance score does not guarantee repayment. The lender can lose principal beyond the borrower bond.
 </Warning>
 
 <CardGroup cols={2}>
-  <Card title="Run the application" icon="terminal" href="/quickstart">Start the local EVM, API and terminal.</Card>
-  <Card title="Understand the proof" icon="shield" href="/concepts/payout-floor">Check every price boundary and shared cancellation.</Card>
-  <Card title="Borrow against claims" icon="wallet" href="/guides/borrow">Lock actual inventory and publish consented terms.</Card>
-  <Card title="Build an integration" icon="code" href="/developers/architecture">Inspect source-derived contract and HTTP references.</Card>
+  <Card title="Data" icon="chart-line" href="/status">Review the current replay, coverage and implementation status.</Card>
+  <Card title="Whitepaper" icon="file-text" href="/whitepaper">Read the product design, benchmark method and limits.</Card>
+  <Card title="Run the demo" icon="terminal" href="/quickstart">Start the local chain and walk through a real test-fund loan.</Card>
+  <Card title="Borrow and lend" icon="wallet" href="/guides/borrow">Review wallet consent, bond terms and lender actions.</Card>
 </CardGroup>
 
-## The lifecycle
+## Credit flow
 
 ```mermaid
 flowchart LR
-  A[Mint backed complete sets] --> B[Compose YES lower + NO upper]
-  B --> C[Verify onchain]
-  C --> D[Lock exact claims]
-  D --> E[Borrower requests credit]
-  E --> F[Distinct lender funds]
-  F --> G[Common observation resolves]
-  G --> H[Redeem and distribute]
-  F --> I[Borrower repays full fixed due]
-  I --> J[Return pledged claims]
+  D[Historical market data] --> E[As-of evidence]
+  E --> B[Borrower request + bond]
+  B --> A[Authenticated score report]
+  A --> L[Separate lender funds]
+  L --> R[Repayment or recorded default]
 ```
 
-For one YES claim at 5,000 and one NO claim at 6,000 sharing the same observation, the terminal payout is 1 or 2 test USDC; shared cancellation pays 1. The sample loan advances 0.75 and owes a fixed 0.78, including fees.
+The current trader-credit desk does not custody Polymarket positions. Trading history supports screening research, and the first-loss bond is the only pledged asset. Forward outcomes are observed trader P&L and activity, not loan returns. The risk engine uses explicit PD and correlation stress assumptions; it does not infer default risk from trading history.
 
-## Read the right evidence
+## Evidence boundaries
 
-The implemented local lifecycle, public read-only Sepolia checks, pinned Sepolia fork and recorded offline terminal are different execution modes. **No public protocol deployment receipt or live CRE write is supplied by this release.** See [implementation status](/status) and [release evidence](/operations/evidence).
+Polymarket public P&L provides wallet-level realized performance, turnover and trade counts. It does not provide the trader’s complete account equity or starting bankroll, so it cannot establish ROI.
 
-The original specifications are preserved under [Specifications](/specifications/index). They include historical proposals; current pages document the checked-in source, not every original aspiration.
+ENS helps discover associated addresses, while linked controllers provide scoped consent. Chainlink CRE workflow code and an Arkiv packet path are available, with local and public execution states labeled separately. See the [whitepaper](/whitepaper) for benchmark assumptions and integration status.
