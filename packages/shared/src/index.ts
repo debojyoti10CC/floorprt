@@ -1,5 +1,6 @@
 export * from './abis.generated';
 export * from './chain';
+export * from './arc';
 export * from './eligibility';
 export * from './feed';
 export * from './position-credit';

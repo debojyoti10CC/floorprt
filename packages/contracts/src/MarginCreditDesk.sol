@@ -6,6 +6,7 @@ import {IERC1155Receiver} from "@openzeppelin/contracts/token/ERC1155/IERC1155Re
 import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import {IConditionalTokens} from "./PositionCreditDesk.sol";
 import {TraderCreditDesk} from "./TraderCreditDesk.sol";
+import {ArcTestnet} from "./ArcTestnet.sol";
 
 /// @notice Local directional outcome pilot with prefunded recovery.
 contract MarginCreditDesk is TraderCreditDesk, IERC1155Receiver {
@@ -75,8 +76,8 @@ contract MarginCreditDesk is TraderCreditDesk, IERC1155Receiver {
         uint256 referenceTokenId_
     ) TraderCreditDesk(asset_, forwarder_, workflowOwner_, workflowId_) {
         if (
-            block.chainid != 31337 || address(positionToken_).code.length == 0 || referenceTokenId_ == 0
-                || positionToken_.getOutcomeSlotCount(condition_) != 2
+            !ArcTestnet.supportsPositionCollateral(address(asset_)) || address(positionToken_).code.length == 0
+                || referenceTokenId_ == 0 || positionToken_.getOutcomeSlotCount(condition_) != 2
         ) revert InvalidConfiguration();
         positionToken = positionToken_;
         referenceTokenId = referenceTokenId_;

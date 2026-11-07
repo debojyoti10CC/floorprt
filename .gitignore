@@ -1,6 +1,7 @@
 node_modules/
 .next/
 .next-positions/
+.next-arc/
 apps/web/public/deployment.positions.local.json
 apps/web/public/cre-margin.local.json
 out/
@@ -21,6 +22,7 @@ services/indexer/state/
 work/
 services/trader-cre/workflow/config.local.json
 services/trader-cre/workflow/config.sepolia.json
+services/trader-cre/workflow/config.arc.local.json
 services/trader-cre/workflow/config.margin*.local.json
 services/trader-cre/workflow/margin*.local.wasm
 services/trader-cre/workflow/margin*.local.js

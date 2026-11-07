@@ -1,7 +1,8 @@
-import { createPublicClient, http, defineChain, type Address, type Hash, type PublicClient, decodeEventLog, type Abi } from 'viem';
+import { createPublicClient, fallback, http, defineChain, type Address, type Hash, type PublicClient, decodeEventLog, type Abi } from 'viem';
 import * as A from './abis.generated';
 import {erc20Abi} from 'viem';
 import {positionTokenAbi} from './position-credit';
+import {ARC_TESTNET_CHAIN_ID, ARC_TESTNET_EXPLORER, ARC_TESTNET_FALLBACK_RPC, ARC_TESTNET_RPC} from './arc';
 export const CollateralTokenAbi=erc20Abi;
 
 export type CoreContractName = 'CollateralToken'|'SharedObservationRegistry'|'OutcomeMarketFactory'|'OutcomeTokens'|'FloorVerifier'|'FloorVault'|'CreditDesk';
@@ -15,14 +16,28 @@ export type Deployment = {
   roles: { curator: Address; resolver: Address; borrower: Address; lender: Address };
   mockCollateral: boolean; oracleMode: 'TRUSTED_TEST_RESOLVER'|'CHAINLINK_HISTORICAL';
   oracle?:{feed:Address;sourceId:Hash;assetId:Hash;maxAge:number};
-  traderCredit?:{mode:'LOCAL_FORWARDER'|'CHAINLINK_CRE';deploymentBlock:string;transactionHash:Hash;buildHash?:Hash;
+  traderCredit?:{mode:'LOCAL_FORWARDER'|'CHAINLINK_CRE'|'ARC_TEST_RELAY';deploymentBlock:string;transactionHash:Hash;buildHash?:Hash;
+    testRelay?:{address:Address;codeHash:Hash;workflowId:Hash};
+    arcMargin?:{desk:Address;deskCodeHash:Hash;keeper:Address;keeperCodeHash:Hash;referenceTokenId:string};
     positionCollateral?:{conditionId:Hash;yesTokenId:string;noTokenId:string;title:string}};
   buildFingerprint?:string;seededBlock?:string;defaultPair?:{lower:string;upper:string};
 };
 export const contractNames: CoreContractName[]=['CollateralToken','SharedObservationRegistry','OutcomeMarketFactory','OutcomeTokens','FloorVerifier','FloorVault','CreditDesk'];
 export const abis: Record<ContractName, Abi>={CollateralToken:erc20Abi,ChainlinkObservationResolver:A.ChainlinkObservationResolverAbi, SharedObservationRegistry:A.SharedObservationRegistryAbi,OutcomeMarketFactory:A.OutcomeMarketFactoryAbi,OutcomeTokens:A.OutcomeTokensAbi,FloorVerifier:A.FloorVerifierAbi,FloorVault:A.FloorVaultAbi,CreditDesk:A.CreditDeskAbi,TraderCreditDesk:A.PositionCreditDeskAbi,PositionTokenLedger:positionTokenAbi};
-export const chainFor=(id:number,rpcUrl:string)=>defineChain({id,name:id===31337?'Anvil local devnet':'EVM testnet',nativeCurrency:{name:'Test Ether',symbol:'ETH',decimals:18},rpcUrls:{default:{http:[rpcUrl]}}});
-export const publicClientFor=(deployment:Deployment,rpcUrl=deployment.rpcUrl)=>createPublicClient({chain:chainFor(deployment.chainId,rpcUrl),transport:http(rpcUrl,{batch:{batchSize:50,wait:10},retryCount:1,timeout:8000})});
+export const chainFor=(id:number,rpcUrl:string)=>defineChain({
+  id,name:id===ARC_TESTNET_CHAIN_ID?'Arc Testnet':id===31337?'Anvil local devnet':'EVM testnet',
+  nativeCurrency:id===ARC_TESTNET_CHAIN_ID?{name:'Test USDC',symbol:'USDC',decimals:18}:{name:'Test Ether',symbol:'ETH',decimals:18},
+  rpcUrls:{default:{http:[rpcUrl]}},
+  ...(id===ARC_TESTNET_CHAIN_ID?{blockExplorers:{default:{name:'Arc Explorer',url:ARC_TESTNET_EXPLORER}}}:{}),
+});
+export const publicClientFor = (deployment: Deployment, rpcUrl = deployment.rpcUrl) => {
+  const options = { batch: { batchSize: 50, wait: 10 }, retryCount: 1, timeout: 8_000 };
+  const primary = http(rpcUrl, options);
+  const transport = deployment.chainId === ARC_TESTNET_CHAIN_ID && rpcUrl === ARC_TESTNET_RPC
+    ? fallback([primary, http(ARC_TESTNET_FALLBACK_RPC, options)], { retryCount: 1 })
+    : primary;
+  return createPublicClient({ chain: chainFor(deployment.chainId, rpcUrl), transport });
+};
 export const jsonSafe=<T>(value:T):any=>JSON.parse(JSON.stringify(value,(_k,v)=>typeof v==='bigint'?v.toString():v));
 
 export type ObservationRow={id:string;assetId:Hash;observationTime:string;priceDecimals:number;sourceId:Hash;resolutionPolicyHash:Hash;cancelAfter:string;state:number;price:string;resolver:Address};
@@ -36,7 +51,7 @@ export type Snapshot={chainId:number;blockNumber:string;blockHash:Hash;timestamp
 export async function readSnapshot(deployment:Deployment,wallet?:Address,rpcUrl?:string):Promise<Snapshot>{
   const client=publicClientFor(deployment,rpcUrl);
   if(await client.getChainId()!==deployment.chainId)throw new Error('ERR_CHAIN_MISMATCH');
-  const block=await client.getBlock(); const blockNumber=block.number;
+  const block=await client.getBlock({blockTag:deployment.chainId===ARC_TESTNET_CHAIN_ID?'finalized':'latest'}); const blockNumber=block.number;
   const read=async(name:CoreContractName,functionName:string,args:unknown[]=[])=>client.readContract({address:deployment.contracts[name],abi:abis[name],functionName,args,blockNumber}) as Promise<any>;
   const [nObs,nMarket,nPosition,nLoan,bufferBps,walletBalance]=await Promise.all([
     read('SharedObservationRegistry','observationCount'),read('OutcomeMarketFactory','marketCount'),read('FloorVault','positionCount'),read('CreditDesk','loanCount'),read('CreditDesk','bufferBps'),wallet?read('CollateralToken','balanceOf',[wallet]):Promise.resolve(null),
@@ -60,7 +75,10 @@ export async function readActivity(client:PublicClient,deployment:Deployment,toB
   const initial=BigInt(deployment.deploymentBlock);
   // bounded direct view; the persistent indexer is used for full history on a large deployment.
   const fromBlock=tip>initial+5000n?tip-5000n:initial;
-  const logs=await client.getLogs({address:Object.values(deployment.contracts),fromBlock,toBlock:tip});
+  const addresses = Object.entries(deployment.contracts)
+    .filter(([name]) => deployment.chainId !== ARC_TESTNET_CHAIN_ID || name !== 'CollateralToken')
+    .map(([, address]) => address);
+  const logs=await client.getLogs({address:addresses,fromBlock,toBlock:tip});
   const result:Activity[]=[];
   for(const log of logs){
     const name=(Object.keys(deployment.contracts) as ContractName[]).find(n=>deployment.contracts[n]?.toLowerCase()===log.address.toLowerCase());

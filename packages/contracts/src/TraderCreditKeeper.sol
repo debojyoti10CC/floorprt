@@ -6,6 +6,7 @@ import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol
 import {TraderCreditDesk, ITraderReportReceiver} from "./TraderCreditDesk.sol";
 import {PositionCreditDesk} from "./PositionCreditDesk.sol";
 import {MarginCreditDesk} from "./MarginCreditDesk.sol";
+import {ArcTestnet} from "./ArcTestnet.sol";
 
 interface IPositionClaim {
     function claimPositionCollateral(uint256 loanId, address recipient) external;
@@ -69,7 +70,10 @@ contract TraderCreditKeeper is IERC165, ITraderReportReceiver, ReentrancyGuard {
     );
 
     constructor(TraderCreditDesk desk_, Custody custody) {
-        if (address(desk_).code.length == 0 || (block.chainid != 31337 && block.chainid != 11155111)) {
+        if (
+            address(desk_).code.length == 0
+                || (block.chainid != 31337 && block.chainid != 11155111 && block.chainid != ArcTestnet.CHAIN_ID)
+        ) {
             revert InvalidConfiguration();
         }
         desk = desk_;

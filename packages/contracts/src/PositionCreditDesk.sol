@@ -6,6 +6,7 @@ import {IERC1155} from "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 import {IERC1155Receiver} from "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
 import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import {TraderCreditDesk} from "./TraderCreditDesk.sol";
+import {ArcTestnet} from "./ArcTestnet.sol";
 
 interface IConditionalTokens is IERC1155 {
     function getOutcomeSlotCount(bytes32 conditionId) external view returns (uint256);
@@ -52,8 +53,8 @@ contract PositionCreditDesk is TraderCreditDesk, IERC1155Receiver {
         bytes32 conditionId_
     ) TraderCreditDesk(asset_, forwarder_, workflowOwner_, workflowId_) {
         if (
-            block.chainid != 31337 || address(positionToken_).code.length == 0 || conditionId_ == bytes32(0)
-                || positionToken_.getOutcomeSlotCount(conditionId_) != 2
+            !ArcTestnet.supportsPositionCollateral(address(asset_)) || address(positionToken_).code.length == 0
+                || conditionId_ == bytes32(0) || positionToken_.getOutcomeSlotCount(conditionId_) != 2
         ) revert InvalidConfiguration();
         positionToken = positionToken_;
         conditionId = conditionId_;

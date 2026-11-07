@@ -4,6 +4,7 @@ import { privateKeyToAccount } from 'viem/accounts';
 import { PositionCreditDeskAbi, TraderCreditDeskAbi } from '../packages/shared/src/abis.generated.js';
 import { chainFor, type Deployment } from '../packages/shared/src/chain.js';
 import { positionTokenAbi, SHARE_UNIT } from '../packages/shared/src/position-credit.js';
+import { readPositionMarket } from '../packages/shared/src/position-collateral.js';
 import { PnlApiOrigin } from '../services/underwriting/pnl-wire.js';
 
 const sepolia = process.argv.includes('--sepolia');
@@ -63,7 +64,7 @@ const currentPositions = manifest.traderCredit?.positionCollateral;
 const ledgerCode = currentLedger && await client.getCode({ address: currentLedger });
 const ledgerVerified = Boolean(ledgerCode && currentPositions && keccak256(ledgerCode) === manifest.codeHashes.PositionTokenLedger);
 if (existing && manifest.traderCredit?.mode === mode
-  && (manifest.traderCredit.buildHash === buildHash || (!sepolia && !withPositions && !currentPositions))) {
+  && (manifest.traderCredit.buildHash === buildHash || (!sepolia && withPositions === Boolean(currentPositions)))) {
   const code = await client.getCode({ address: existing });
   if (code && keccak256(code) === manifest.codeHashes.TraderCreditDesk) {
     const [sender, asset, author, currentId] = await Promise.all([
@@ -75,6 +76,13 @@ if (existing && manifest.traderCredit?.mode === mode
     if (sender.toLowerCase() === forwarder.toLowerCase() && author.toLowerCase() === owner.toLowerCase()
       && asset.toLowerCase() === manifest.contracts.CollateralToken.toLowerCase()
       && (sepolia || (currentId === workflowId && (!withPositions || ledgerVerified)))) {
+      if (withPositions && currentPositions) {
+        const market = await readPositionMarket(client, manifest, await client.getBlockNumber());
+        if (!market || market.conditionId !== currentPositions.conditionId
+          || market.yesTokenId !== currentPositions.yesTokenId || market.noTokenId !== currentPositions.noTokenId) {
+          throw new Error('Existing position terms do not match the manifest. Resolve the mismatch before deploying.');
+        }
+      }
       if (pin && currentId !== workflowId.toLowerCase()) {
         if (currentId !== zeroHash) throw new Error('The existing desk already pins a different workflow.');
         const simulation = await client.simulateContract({ account, address: existing, abi: TraderCreditDeskAbi, functionName: 'pinWorkflow', args: [workflowId] });

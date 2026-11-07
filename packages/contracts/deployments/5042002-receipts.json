@@ -1,0 +1,74 @@
+[
+  {
+    "step": "SharedObservationRegistry",
+    "hash": "0xec9c0dabe2a2cd5c412f9d29c17df3979ee605e77f974aa6f035b8cb179668f9",
+    "block": "71113215",
+    "address": "0x66f61711117d95538d20c0311d9ddd66402e0f07"
+  },
+  {
+    "step": "OutcomeMarketFactory",
+    "hash": "0xffc8dd5fcf2bb291c5debaf2f8662b7013ae31d563ae82b3bb2beee42accde6b",
+    "block": "71113218",
+    "address": "0xafb97d35979dde8903fc16f30ec96733bee611e9"
+  },
+  {
+    "step": "FloorVerifier",
+    "hash": "0x2686d3a692e9875737433a5eb12234dfa13d69afdbcf8097c2576973e5c7ab10",
+    "block": "71113222",
+    "address": "0x41c175055f65de814cf8303b69890c3ac12b82f5"
+  },
+  {
+    "step": "FloorVault",
+    "hash": "0xd7a5df57ddd7795d808fc3bdd61fdcf4d241b400d2b6af1555a5511d38671b3a",
+    "block": "71113233",
+    "address": "0x1b9eaf6016b2171ca7c77d4a81a1dee6fc99ee9b"
+  },
+  {
+    "step": "CreditDesk",
+    "hash": "0x128fb6b61114437e3567ead28ab0198a74c7f0a294494be11082ae6f2703af89",
+    "block": "71113237",
+    "address": "0x78b06b9f20d777a5a2162ad94c2a6d18e14644bb"
+  },
+  {
+    "step": "BindFloorCreditDesk",
+    "hash": "0xa7f57f301dd81b2484f57b2aca718c04d75dc3f18011bf1de5f2be265236739a",
+    "block": "71113247",
+    "address": null
+  },
+  {
+    "step": "PositionTokenLedger",
+    "hash": "0x94721f293e215c6016e946c110d42c769d1d0d70b25502c62cbd0dee068d5d56",
+    "block": "71113258",
+    "address": "0xc498dd19cf93a96f8aba2323988b98537e336d7c"
+  },
+  {
+    "step": "PreparePositionCondition",
+    "hash": "0x5cf98de7a8af4d06595eca203eb172c02d832119b1bf77fe4ac42ac0f0dd9a1a",
+    "block": "71113268",
+    "address": null
+  },
+  {
+    "step": "ArcTestReportRelay",
+    "hash": "0x1ce70ba514fd1c70e53a31ed9b9bf09e6fa0ec814014c7de7772df7edc79a141",
+    "block": "71113272",
+    "address": "0x54b1b036dd019817351a33e600becfe7a0b09adc"
+  },
+  {
+    "step": "PositionCreditDesk",
+    "hash": "0xe53c63e5a0d23848b4bfce2a95628bacc1c987c51933115261e2e6221f516b77",
+    "block": "71113283",
+    "address": "0xb7c370af0ae7d40a524243ae05eab1b5978c929f"
+  },
+  {
+    "step": "MarginCreditDesk",
+    "hash": "0x939f64022a472fa48566aa6767677e775b6206387da19e9d0392071cefb84e85",
+    "block": "71113295",
+    "address": "0xf67bde39cf2dc4448e8da692ada233b43864788e"
+  },
+  {
+    "step": "TraderCreditKeeper",
+    "hash": "0xe8a827acd7a4450d78ec3a97cb5a1b9483bfc7bf983dc1cbf7be59a55aa3fa87",
+    "block": "71113298",
+    "address": "0x944fbf59045792f58b4b3732ee049bd6f3ac51ef"
+  }
+]

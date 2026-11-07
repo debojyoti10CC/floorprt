@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import type { Address, Hex } from 'viem';
+import { ARC_TESTNET_CHAIN_ID, ARC_TESTNET_USDC } from '../../packages/shared/src/arc';
 import { positionPledgeHash, type PositionPledge } from '../../packages/shared/src/position-collateral';
 import { quotePositionCredit } from '../../packages/shared/src/position-credit';
 import { serializeEvidence, verifyEvidence, type Evidence } from './policy';
@@ -10,7 +11,7 @@ const uint = z.string().regex(/^(0|[1-9]\d{0,77})$/);
 const amount = uint.refine(value => BigInt(value) < 2n ** 96n);
 const disclosure = z.object({
   source: z.enum(['POLYMARKET', 'LOCAL_FIXTURE']),
-  chainId: z.literal(31337),
+  chainId: z.union([z.literal(31337), z.literal(ARC_TESTNET_CHAIN_ID)]),
   desk: address,
   loanId: uint,
   borrower: address,
@@ -34,7 +35,8 @@ const disclosure = z.object({
   const bond = BigInt(value.bond);
   const pairs = BigInt(value.pairs);
   const quote = quotePositionCredit(principal, due, bond, pairs);
-  return pairs > 0n && principal > 0n && due >= principal && due <= quote.maxDue
+  return (value.chainId !== ARC_TESTNET_CHAIN_ID || (value.asset === ARC_TESTNET_USDC && value.source === 'POLYMARKET'))
+    && pairs > 0n && principal > 0n && due >= principal && due <= quote.maxDue
     && quote.gross.toString() === value.gross && quote.maxDue.toString() === value.maxDue
     && positionPledgeHash(value) === value.pledgeHash;
 }, 'Position report terms do not match the collateral policy.');

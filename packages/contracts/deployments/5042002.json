@@ -1,0 +1,63 @@
+{
+  "schema": "floor-deployment/v1",
+  "chainId": 5042002,
+  "chainName": "Arc Testnet",
+  "rpcUrl": "https://rpc.testnet.arc.io",
+  "explorerUrl": "https://explorer.testnet.arc.io",
+  "deploymentBlock": "71113215",
+  "deployedAt": "2026-11-07T00:31:54.000Z",
+  "contracts": {
+    "CollateralToken": "0x3600000000000000000000000000000000000000",
+    "SharedObservationRegistry": "0x66f61711117d95538d20c0311d9ddd66402e0f07",
+    "OutcomeMarketFactory": "0xafb97d35979dde8903fc16f30ec96733bee611e9",
+    "OutcomeTokens": "0xc00C4985678887C30946f83712dC78fC6e90Bb5e",
+    "FloorVerifier": "0x41c175055f65de814cf8303b69890c3ac12b82f5",
+    "FloorVault": "0x1b9eaf6016b2171ca7c77d4a81a1dee6fc99ee9b",
+    "CreditDesk": "0x78b06b9f20d777a5a2162ad94c2a6d18e14644bb",
+    "TraderCreditDesk": "0xb7c370af0ae7d40a524243ae05eab1b5978c929f",
+    "PositionTokenLedger": "0xc498dd19cf93a96f8aba2323988b98537e336d7c"
+  },
+  "codeHashes": {
+    "CollateralToken": "0xc9987bd3af6b26a030951faa7eacc017b68343aeedf3ce5fe68f821c4b93939d",
+    "SharedObservationRegistry": "0x6ab728a8183912cc4587a11fde6c73d9a7285e4347570166a00c1698e73e71fe",
+    "OutcomeMarketFactory": "0x20b1788ca593c14866389bda37ecb1eacb34b2462f34bf2ef3271316ade2eeba",
+    "OutcomeTokens": "0x92efe7aaeb11731af25fad49c5c6f80710eb6c542b4c74d139e50325da609170",
+    "FloorVerifier": "0x89bb525124b54345dd2e0ff56bc60a6900ae2dcefe94d5d203a230a838654cee",
+    "FloorVault": "0x3334428592092b10039a8aa8467e25665218eab4c56d1d452aa9796ae085a1cc",
+    "CreditDesk": "0xbea66a71d3aad69b1825b37f15553ef56b46b9ac488d8d241ea3476a94983dc5",
+    "TraderCreditDesk": "0x25604edcf5b68487fc6214b0f1d6759731b92e1d968695869af4413580c59c83",
+    "PositionTokenLedger": "0xadf1ee4719c637975ba08765e3a1187f2fb865c9b17386005960a81ff29cfcc7"
+  },
+  "roles": {
+    "curator": "0x0AeE42bEb8405b89c45C9Cc0FA59353df1Fa92B1",
+    "resolver": "0x0AeE42bEb8405b89c45C9Cc0FA59353df1Fa92B1",
+    "borrower": "0x0AeE42bEb8405b89c45C9Cc0FA59353df1Fa92B1",
+    "lender": "0x0AeE42bEb8405b89c45C9Cc0FA59353df1Fa92B1"
+  },
+  "mockCollateral": false,
+  "oracleMode": "TRUSTED_TEST_RESOLVER",
+  "traderCredit": {
+    "mode": "ARC_TEST_RELAY",
+    "deploymentBlock": "71113283",
+    "transactionHash": "0xe53c63e5a0d23848b4bfce2a95628bacc1c987c51933115261e2e6221f516b77",
+    "buildHash": "0x14c10df10a1b9b64f48b6c13c1412c5f23858b7d9f2593a4e8de30a601b9d7e7",
+    "testRelay": {
+      "address": "0x54b1b036dd019817351a33e600becfe7a0b09adc",
+      "codeHash": "0x7b0fb1872b23091f04e26c0aa04d3194986c94fdeb1050fa517a34bf229c866d",
+      "workflowId": "0x01d4e9aa02cbf03d8f193c8710464df24acbcde38369964d638416d1a485c564"
+    },
+    "positionCollateral": {
+      "conditionId": "0x2bc05d4f1944c7d7907365772fb4bdcf1de5a6e406fa6c94751f2f06aee8eaba",
+      "yesTokenId": "18756764180885293315681210525227697267303097806108900175066836750702382673814",
+      "noTokenId": "80213023736013541027119753326466146438991571977820716672688463607680218102475",
+      "title": "AQRA Arc Testnet binary position"
+    },
+    "arcMargin": {
+      "desk": "0xf67bde39cf2dc4448e8da692ada233b43864788e",
+      "deskCodeHash": "0x5e21e0c5ffbbcadde2468b9b809c712f6a898bee095d25a7d33e6e72b58923ea",
+      "keeper": "0x944fbf59045792f58b4b3732ee049bd6f3ac51ef",
+      "keeperCodeHash": "0x6ebc7c8843bd9f5e5258203ec705de5c5b7f6b2e0bb2e95228faeedd6dffbfb8",
+      "referenceTokenId": "93957887834338563974539451982699098159783757606297234361279958285677456300272"
+    }
+  }
+}
