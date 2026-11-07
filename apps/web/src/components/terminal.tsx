@@ -10,28 +10,34 @@ import {useProtocol,message,short} from '../lib/protocol';
 
 import {Button,Money,TxLink} from './ui';
 
-import {Markets,Portfolio,Settlements,Operations,Documentation} from './views';
-import {ARQOOverview,ARQOMarketDetail} from './aqra-overview';
-
-import {Composer,ProofInspector} from './composer';
-
-import {CreditDeskView} from './credit';
+import {TraderCredit, type TraderCreditSection} from './trader-credit';
 
 import {Identicon} from './identicon';
 import {ArqoLogo} from './ArqoLogo';
 
-const navigation=[{id:'terminal',name:'Overview',href:'/app/'},{id:'markets',name:'Markets',href:'/app/markets/'},{id:'portfolio',name:'Portfolio',href:'/app/portfolio/'},{id:'compose',name:'Portfolio Builder',href:'/app/compose/'},{id:'proof',name:'Proof Inspector',href:'/app/proofs/'},{id:'credit',name:'Credit Desk',href:'/app/credit/'}];
+const navigation=[{id:'Data',name:'Data',href:'/app/'},{id:'Risk',name:'Risk engine',href:'/app/risk/'},{id:'Borrow',name:'Borrow',href:'/app/borrow/'},{id:'Lend',name:'Lend',href:'/app/lend/'}] as const;
 
-export function Terminal({initialPage,marketId}:{initialPage:string;marketId?:string}){
+function sectionForPage(page:string):TraderCreditSection|'Risk'{
+  if(page==='borrow')return 'Borrow';
+  if(page==='lend')return 'Lend';
+  if(page==='risk')return 'Risk';
+  return 'Data';
+}
+
+export function Terminal({initialPage}:{initialPage:string}){
 
   const p=useProtocol();const [walletOpen,setWalletOpen]=useState(false),[mobileOpen,setMobileOpen]=useState(false),[walletError,setWalletError]=useState<string|null>(null);
+  const [activeSection,setActiveSection]=useState<TraderCreditSection|'Risk'>(()=>sectionForPage(initialPage));
+  const focusRiskSignal=initialPage==='risk'?1:0;
+
+  useEffect(()=>{setActiveSection(sectionForPage(initialPage));},[initialPage]);
 
   const dialogRef=useRef<HTMLElement>(null);
 
   useEffect(()=>{if(!walletOpen)return;const opener=document.activeElement as HTMLElement|null;const dialog=dialogRef.current;const items=()=>Array.from(dialog?.querySelectorAll<HTMLElement>('button:not(:disabled),a[href],input:not(:disabled),select:not(:disabled),textarea:not(:disabled),[tabindex="0"]')??[]);items()[0]?.focus();const key=(e:KeyboardEvent)=>{if(e.key==='Escape'){setWalletOpen(false);return}if(e.key!=='Tab')return;const all=items(),first=all[0],last=all.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last?.focus()}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first?.focus()}};document.addEventListener('keydown',key);return()=>{document.removeEventListener('keydown',key);opener?.focus()};},[walletOpen]);
 
-  const activePage=initialPage==='market-detail'?'markets':initialPage;
-  const current=navigation.find(n=>n.id===activePage)?.name??(initialPage==='terminal'?'ARQO Terminal':initialPage==='ops'?'Operations':initialPage==='settlements'?'Settlement audit':'Protocol docs');
+  const activePage=activeSection;
+  const current=activeSection==='Risk'?'Risk engine':activeSection;
 
   const connect=async(fn:()=>Promise<void>)=>{setWalletError(null);try{await fn();setWalletOpen(false)}catch(e){setWalletError(message(e))}};
 
@@ -45,8 +51,7 @@ export function Terminal({initialPage,marketId}:{initialPage:string;marketId?:st
         <Link href="/app/" className="aqra-brand" aria-label="ARQO home"><ArqoLogo variant="light" size={27}/></Link>
         <button className="aqra-menu-button" aria-label={mobileOpen?'Close navigation':'Open navigation'} aria-expanded={mobileOpen} onClick={()=>setMobileOpen(!mobileOpen)}><Menu size={18}/></button>
         <nav className={`aqra-nav ${mobileOpen?'open':''}`} aria-label="Main navigation">
-          {navigation.map(n=><Link key={n.id} href={n.href} aria-current={activePage===n.id?'page':undefined} className={activePage===n.id?'active':''} onClick={()=>setMobileOpen(false)}>{n.name}</Link>)}
-          <Link href="/app/settlements/" className="aqra-nav-extra" onClick={()=>setMobileOpen(false)}>Settlement audit</Link>
+          {navigation.map(n=><Link key={n.id} href={n.href} aria-current={activePage===n.id?'page':undefined} className={activePage===n.id?'active':''} onClick={()=>{setActiveSection(n.id);setMobileOpen(false)}}>{n.name}</Link>)}
         </nav>
         <div className="aqra-header-actions">
           {p.address&&p.online&&p.data?.source==='DIRECT_CHAIN'&&<span className="aqra-balance"><Money value={p.data.walletBalance??'0'}/><small>USDC</small></span>}
@@ -55,17 +60,21 @@ export function Terminal({initialPage,marketId}:{initialPage:string;marketId?:st
         </div>
       </header>
 
-      <div className="aqra-crumb"><span className="aqra-breadcrumb-label">ARQO / WEB TERMINAL</span><span>{current}</span><span className="aqra-testnet"><FlaskConical size={11}/> TESTNET</span></div>
+      <div className="aqra-crumb"><span className="aqra-breadcrumb-label">ARQO / TRADER CREDIT</span><span>{current}</span><span className="aqra-testnet"><FlaskConical size={11}/> TESTNET</span></div>
 
-      {!p.online&&<div className="connection-banner" role="status"><span className="status-dot amber"/>{p.data?'Recorded local-chain evidence. Connect the devnet for current balances and wallet transactions.':'Start the local devnet to read contract state. The proof calculator is available without a wallet.'}<Link href="/ops/">Connection settings<ArrowUpRight size={12}/></Link></div>}
+      {!p.online&&<div className="connection-banner" role="status"><span className="status-dot amber"/>Network unavailable · transactions paused<Link href="/ops/">Connection settings<ArrowUpRight size={12}/></Link></div>}
 
       <main id="main-content">
 
-        {initialPage==='terminal'&&<ARQOOverview/>}{initialPage==='market-detail'&&marketId&&<ARQOMarketDetail marketId={marketId}/>}{initialPage==='markets'&&<Markets/>}{initialPage==='compose'&&<Composer/>}{initialPage==='proof'&&<ProofInspector/>}{initialPage==='credit'&&<CreditDeskView/>}{initialPage==='portfolio'&&<Portfolio/>}{initialPage==='settlements'&&<Settlements/>}{initialPage==='ops'&&<Operations/>}{initialPage==='docs'&&<Documentation/>}
+        <TraderCredit
+          activeTab={activeSection==='Borrow'||activeSection==='Lend'?activeSection:'Data'}
+          focusRiskSignal={focusRiskSignal}
+          onTabChange={setActiveSection}
+        />
 
       </main>
 
-      <footer className="app-footer aqra-footer"><span>ARQO · OUTCOME COLLATERAL TERMINAL</span><a href="https://github.com/debojyoti10CC/floorprt/tree/main/docs" target="_blank" rel="noreferrer">Protocol documentation<ExternalLink size={12}/></a><Link href="/app/settlements/">Settlement audit<ArrowUpRight size={12}/></Link><span className="mono">{p.data?`${p.data.source==='DIRECT_CHAIN'?'RPC':'RECORDED'} · BLOCK ${p.data.blockNumber}`:'AWAITING RPC'}<span className={`status-dot ${p.online?'live':'amber'}`}/></span></footer>
+      <footer className="app-footer aqra-footer"><span>ARQO · TRADER CREDIT TERMINAL</span><a href="https://github.com/debojyoti10CC/floorprt/tree/main/docs" target="_blank" rel="noreferrer">Protocol documentation<ExternalLink size={12}/></a><span className="mono">{p.data?`${p.data.source==='DIRECT_CHAIN'?'RPC':'RECORDED'} · BLOCK ${p.data.blockNumber}`:'AWAITING RPC'}<span className={`status-dot ${p.online?'live':'amber'}`}/></span></footer>
 
     </div>
 

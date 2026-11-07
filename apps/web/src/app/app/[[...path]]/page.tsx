@@ -2,14 +2,18 @@ import { notFound } from 'next/navigation';
 import { Terminal } from '../../../components/terminal';
 
 const views: Record<string, string> = {
-  markets: 'markets',
-  portfolio: 'portfolio',
-  compose: 'compose',
-  proofs: 'proof',
-  credit: 'credit',
-  settlements: 'settlements',
-  ops: 'ops',
-  docs: 'docs',
+  risk: 'risk',
+  borrow: 'borrow',
+  lend: 'lend',
+  // Preserve existing deep links while routing them to the current credit workflow.
+  markets: 'data',
+  portfolio: 'borrow',
+  compose: 'borrow',
+  proofs: 'risk',
+  credit: 'borrow',
+  settlements: 'lend',
+  ops: 'risk',
+  docs: 'risk',
 };
 
 // The site is exported as static files, so every route needs a build-time page.
@@ -31,14 +35,14 @@ export default async function AppPage({
 }) {
   const { path = [] } = await params;
 
-  if (path.length === 0) return <Terminal initialPage="terminal" />;
+  if (path.length === 0) return <Terminal initialPage="data" />;
 
   if (path.length === 1 && views[path[0]]) {
     return <Terminal initialPage={views[path[0]]} />;
   }
 
   if (path.length === 2 && path[0] === 'markets' && marketIds.includes(path[1])) {
-    return <Terminal initialPage="market-detail" marketId={path[1]} />;
+    return <Terminal initialPage="data" />;
   }
 
   notFound();
