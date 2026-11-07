@@ -4,8 +4,7 @@
 
 # Product Requirements Document (PRD)
 
-**Product:** ARQO
-
+**Product:** Floor Protocol  
 **Release target:** v0 hackathon demonstrator; v1 testnet pilot  
 **Date:** 2026-11-05  
 **Decision owners:** product lead + protocol lead (to be assigned)  
@@ -22,7 +21,7 @@ Prediction markets tokenize event-contingent cashflows. A trader may hold severa
 ### Differentiation
 
 - Cumulant demonstrates structured markets on Arc with onchain vaults and parimutuel binary markets. It does **not** supply our specific atomic two-token, shared-observation, fixed-payout collateral proof and debt waterfall as its public product thesis.
-- Senthos packages baskets, tranches, PPNs and lending as a Solana market-risk experience. Its repository describes lending and tranches as sandbox/in-memory in the hackathon implementation. ARQO puts the *credit lifecycle* onchain in P0 and makes verifiable payout constraints—not estimated probability—the eligibility condition.
+- Senthos packages baskets, tranches, PPNs and lending as a Solana market-risk experience. Its repository describes lending and tranches as sandbox/in-memory in the hackathon implementation. Floor Protocol puts the *credit lifecycle* onchain in P0 and makes verifiable payout constraints—not estimated probability—the eligibility condition.
 - Academic work already studies logical outcome arbitrage; the novelty claim is **product synthesis and enforcement**, not discovery of the underlying tautology.
 
 ## 2. Customer segments and jobs-to-be-done

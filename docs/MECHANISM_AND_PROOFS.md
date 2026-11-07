@@ -128,4 +128,4 @@ Each successful proof inspector must show: `observationId`, asset, chain, price 
 
 ## 9. Research linkage
 
-The classification of logical outcome relationships and combinatorial arbitrage is established in research such as Saguillo et al., *Unravelling the Probabilistic Forest* (2025), and Shi & Zhai, *Combinatorial Arbitrage in Prediction Markets* (October 2026). ARQO applies the restrictive mathematical insight to collateral verification and lending. The original literature is about pricing/arbitrage, not proof of our implementation's safety. See SOURCE_AUDIT.
+The classification of logical outcome relationships and combinatorial arbitrage is established in research such as Saguillo et al., *Unravelling the Probabilistic Forest* (2025), and Shi & Zhai, *Combinatorial Arbitrage in Prediction Markets* (October 2026). Floor Protocol applies the restrictive mathematical insight to collateral verification and lending. The original literature is about pricing/arbitrage, not proof of our implementation's safety. See SOURCE_AUDIT.

@@ -1,4 +1,4 @@
-# Technical Architecture — ARQO
+# Technical Architecture — Floor Protocol
 
 **State:** proposed; no code deployed. **Baseline:** single EVM chain, local Anvil then one public testnet; custody is smart-contract-controlled, not server-key-controlled.
 
@@ -212,7 +212,7 @@ floor-protocol/
 └── turbo.json
 ```
 
-**Rationale:** Senthos separates frontend, Express services, Anchor programs and correlation artifacts; Cumulant separates Foundry contracts, Express backend and Next.js web. ARQO extends that pattern with explicitly isolated proof engine, indexer, and onchain oracle/credit boundaries. No source code is being transplanted.
+**Rationale:** Senthos separates frontend, Express services, Anchor programs and correlation artifacts; Cumulant separates Foundry contracts, Express backend and Next.js web. Floor Protocol extends that pattern with explicitly isolated proof engine, indexer, and onchain oracle/credit boundaries. No source code is being transplanted.
 
 ## 8. External data pipeline and freshness
 

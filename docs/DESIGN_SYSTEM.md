@@ -2,7 +2,7 @@
 
 ## Context and goals
 
-The interface must combine a readable outcome-risk terminal with Kimia's charcoal palette, Poppins typography, rounded shapes and inset/raised control depth. The product remains **ARQO**. The user's Kimia screenshots and supplied tokens are the visual reference; no Kimia logos, trading figures or brand assets are transplanted.
+The interface must combine a readable outcome-risk terminal with Kimia's charcoal palette, Poppins typography, rounded shapes and inset/raised control depth. The product remains **Floor Protocol**. The user's Kimia screenshots and supplied tokens are the visual reference; no Kimia logos, trading figures or brand assets are transplanted.
 
 The supplied extraction called the surface a documentation site and flagged that inference as low confidence. The screenshots depict trading and portfolio interfaces. These rules therefore cover Floor's terminal and its protocol documentation view.
 

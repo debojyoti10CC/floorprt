@@ -4,7 +4,7 @@
 
 # Codex Implementation Plan, Parallel Agents and Definition of Done
 
-**Goal:** convert this design package into a new functioning ARQO repository. The provided package is *not* source code or a proof that Codex has run anything.
+**Goal:** convert this design package into a new functioning Floor Protocol repository. The provided package is *not* source code or a proof that Codex has run anything.
 
 ## 1. Delivery modes
 
@@ -116,7 +116,7 @@ Only the UI shell and external research feed can progress independently before p
 ## 6. Ready-to-copy Codex master prompt
 
 ```text
-You are the principal engineer and integration lead for ARQO.
+You are the principal engineer and integration lead for FLOOR PROTOCOL.
 Read README.md, AGENTS.md, and ALL docs in docs/ BEFORE editing code.
 This is an original greenfield Ethereum/EVM app inspired by public Senthos and
 Cumulant architecture, not a clone or redistribution of their source.

@@ -1,4 +1,4 @@
-# Codex Agent Instructions — ARQO
+# Codex Agent Instructions — Floor Protocol
 
 Read `README.md` and every specification in `docs/` before implementation. The contract invariants and exact payout rules in `docs/MECHANISM_AND_PROOFS.md` take priority over design simplification, shortcut implementations and visual mockups. If a contradiction is found, stop the conflicting task, record a decision, and propose a safe spec change with tests.
 

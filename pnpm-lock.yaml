@@ -75,12 +75,6 @@ importers:
       echarts:
         specifier: 6.1.0
         version: 6.1.0
-      gsap:
-        specifier: ^3.15.1
-        version: 3.15.1
-      lenis:
-        specifier: ^1.3.27
-        version: 1.3.27(react@19.3.1)
       lucide-react:
         specifier: 0.468.0
         version: 0.468.0(react@19.3.1)
@@ -1120,9 +1114,6 @@ packages:
     engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
     os: [darwin]
 
-  gsap@3.15.1:
-    resolution: {integrity: sha512-63yjWRFWj3QRP1UOuD8kcidCcy3nxb1mMRpwHr/xJRvPfm9GtWOXFAYUiL0ro1fgPq2nY53LR+98pAgy9BumBg==}
-
   hono@4.13.16:
     resolution: {integrity: sha512-AOLOEhvrV+iH92xXCnFr/5+3KjPKcI3xP63XJtX5spAnkznPdHijlIsUTpi7/9EhWqrTCekw5c5zh1K+YsVw7A==}
     engines: {node: '>=16.9.0'}
@@ -1136,20 +1127,6 @@ packages:
     resolution: {integrity: sha512-I1fSfDCZL5P0v33sVqeTDSpcstAg/N+wF5HS033mogOVIp4B+oHC7oOCsA3axAbBSGTJ8QubbNmnIRN/h8U7hg==}
     peerDependencies:
       ws: '*'
-
-  lenis@1.3.27:
-    resolution: {integrity: sha512-QIHNH4LIfWyLfgH/5K0aTGZgyFJJ7GfHNcaH/AIgyKjb8gstLh5siNGvrVqz1w5ClLXzOvllBVk7vby8JzUVPQ==}
-    peerDependencies:
-      '@nuxt/kit': '>=3.0.0'
-      react: '>=17.0.0'
-      vue: '>=3.0.0'
-    peerDependenciesMeta:
-      '@nuxt/kit':
-        optional: true
-      react:
-        optional: true
-      vue:
-        optional: true
 
   lucide-react@0.468.0:
     resolution: {integrity: sha512-6koYRhnM2N0GGZIdXzSeiNwguv1gt/FAjZOiPl76roBi3xKEXa4WmfpxgQwTTL4KipXjefrnf3oV4IsYhi4JFA==}
@@ -2223,8 +2200,6 @@ snapshots:
   fsevents@2.3.3:
     optional: true
 
-  gsap@3.15.1: {}
-
   hono@4.13.16: {}
 
   isomorphic-ws@5.0.0(ws@8.21.0):
@@ -2234,10 +2209,6 @@ snapshots:
   isows@1.0.7(ws@8.21.0):
     dependencies:
       ws: 8.21.0
-
-  lenis@1.3.27(react@19.3.1):
-    optionalDependencies:
-      react: 19.3.1
 
   lucide-react@0.468.0(react@19.3.1):
     dependencies:
