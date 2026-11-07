@@ -151,7 +151,7 @@ export function TraderCredit({ activeTab = 'Data', focusRiskSignal = 0, onTabCha
   };
   return <div className="trader-workspace">
     <div className="page-heading trader-card-head">
-      <div><span className="eyebrow">AQRA / {activeTab === 'Data' ? 'PERFORMANCE UNDERWRITING' : activeTab === 'Borrow' ? 'BORROW DESK' : 'LENDER DESK'}</span><h1>{activeTab === 'Data' ? 'Performance-based lending' : activeTab}</h1>{activeTab === 'Data' && <p className="trader-note">Prediction-market performance metrics determine pilot eligibility; lenders choose whether to fund each bonded request.</p>}</div>
+      <div><span className="eyebrow">ARQO / {activeTab === 'Data' ? 'PERFORMANCE UNDERWRITING' : activeTab === 'Borrow' ? 'BORROW DESK' : 'LENDER DESK'}</span><h1>{activeTab === 'Data' ? 'Performance-based lending' : activeTab}</h1>{activeTab === 'Data' && <p className="trader-note">Prediction-market performance metrics determine pilot eligibility; lenders choose whether to fund each bonded request.</p>}</div>
       {deployment?.traderCredit && <Badge tone="amber">TEST NETWORK</Badge>}
     </div>
     {activeTab !== 'Data' && !deployment?.traderCredit?.positionCollateral && <LocalDemoPanel requestId={demoRequestId} status={demoStatus} loading={demoStatusLoading} onRefresh={() => void refreshDemoStatus()} onOpen={openDemoRequest} />}

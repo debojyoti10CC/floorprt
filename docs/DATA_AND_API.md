@@ -150,7 +150,7 @@ The Senthos implementation uses a backend-driven curated Polymarket feed for mar
 
 ### Strict separation
 
-External markets can populate searchable cards and 'candidate logical relationship' graphs. They cannot be used in `lockPair` because they are not the approved ERC-1155 tokens with shared observation ID and payout/cancel policy on Floor Protocol's chain. A future Polygon adapter requires exact onchain CTF condition/oracle verification and independent custody testing.
+External markets can populate searchable cards and 'candidate logical relationship' graphs. They cannot be used in `lockPair` because they are not the approved ERC-1155 tokens with shared observation ID and payout/cancel policy on ARQO's chain. A future Polygon adapter requires exact onchain CTF condition/oracle verification and independent custody testing.
 
 ## 7. Event indexing (example)
 
