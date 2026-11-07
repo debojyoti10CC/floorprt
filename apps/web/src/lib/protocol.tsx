@@ -4,7 +4,7 @@ import React,{createContext,useContext,useEffect,useState,useCallback,useRef} fr
 
 import {createWalletClient,custom,http,type Abi,type Address,type EIP1193Provider,type Hash,type Hex,keccak256,isAddress,numberToHex,type TransactionReceipt} from 'viem';
 
-import {abis,MockUSDCAbi,chainFor,publicClientFor,readSnapshot,contractNames,latestEligiblePair,type Deployment,type Snapshot,type ContractName} from '@floor/shared';
+import {ARC_TESTNET_CHAIN_ID,ARC_TESTNET_USDC,abis,MockUSDCAbi,chainFor,publicClientFor,readSnapshot,contractNames,latestEligiblePair,type Deployment,type Snapshot,type ContractName} from '@floor/shared';
 
 declare global{interface Window{ethereum?:EIP1193Provider}}
 
@@ -57,15 +57,18 @@ export function ProtocolProvider({children}:{children:React.ReactNode}){
 
       const settings=saved?JSON.parse(saved):null;
 
-      const manifestFile = process.env.NEXT_PUBLIC_AQRA_POSITIONS_DEV === 'true' ? '/deployment.positions.local.json' : '/deployment.json';
+      const arc = process.env.NEXT_PUBLIC_AQRA_ARC_DEV === 'true';
+      const manifestFile = arc ? '/deployment.arc.json'
+        : process.env.NEXT_PUBLIC_AQRA_POSITIONS_DEV === 'true' ? '/deployment.positions.local.json' : '/deployment.json';
       const response=await fetch(manifestFile,{cache:'no-store'});
 
-      if(!response.ok)throw new Error('Deployment manifest is missing. Run pnpm deploy:local.');
+      if(!response.ok)throw new Error(arc ? 'Arc deployment manifest is missing.' : 'Deployment manifest is missing. Run pnpm deploy:local.');
 
       let manifest=await response.json();
       if(settings?.manifest){try{validateManifest(settings.manifest);manifest=settings.manifest}catch{localStorage.removeItem('floor-connection')}}
 
       validateManifest(manifest);
+      if (arc && manifest.chainId !== ARC_TESTNET_CHAIN_ID) throw new Error('Select an Arc Testnet deployment for this profile.');
 
       if(cancelled)return;
 
@@ -291,21 +294,34 @@ export function short(value:string|undefined|null){return value?value.slice(0,6)
 
 export function validateManifest(d:Deployment){
 
-  if(d.schema!=='floor-deployment/v1'||![31337,11155111].includes(d.chainId)||typeof d.mockCollateral!=='boolean'||!['TRUSTED_TEST_RESOLVER','CHAINLINK_HISTORICAL'].includes(d.oracleMode))throw new Error('Unsupported Floor deployment manifest.');
+  if(d.schema!=='floor-deployment/v1'||![31337,11155111,ARC_TESTNET_CHAIN_ID].includes(d.chainId)||typeof d.mockCollateral!=='boolean'||!['TRUSTED_TEST_RESOLVER','CHAINLINK_HISTORICAL'].includes(d.oracleMode))throw new Error('Unsupported Floor deployment manifest.');
 
   for(const name of contractNames)if(!isAddress(d.contracts?.[name])||!/^0x[0-9a-fA-F]{64}$/.test(d.codeHashes?.[name]??''))throw new Error(`Invalid ${name} address or code hash`);
+  const arc = d.chainId === ARC_TESTNET_CHAIN_ID;
+  const hex32 = /^0x[0-9a-f]{64}$/i;
   if (d.traderCredit || d.contracts.TraderCreditDesk) {
-    const mode = d.chainId === 31337 ? 'LOCAL_FORWARDER' : 'CHAINLINK_CRE';
+    const mode = arc ? 'ARC_TEST_RELAY' : d.chainId === 31337 ? 'LOCAL_FORWARDER' : 'CHAINLINK_CRE';
     if (d.traderCredit?.mode !== mode || !/^\d+$/.test(d.traderCredit.deploymentBlock)
       || !isAddress(d.contracts.TraderCreditDesk ?? '') || !/^0x[0-9a-fA-F]{64}$/.test(d.codeHashes.TraderCreditDesk ?? '')) {
       throw new Error('Invalid trader credit deployment.');
     }
   }
+  if (arc) {
+    const relay = d.traderCredit?.testRelay;
+    const margin = d.traderCredit?.arcMargin;
+    if (d.mockCollateral || d.contracts.CollateralToken.toLowerCase() !== ARC_TESTNET_USDC
+      || !d.traderCredit?.positionCollateral || !relay || !isAddress(relay.address)
+      || !hex32.test(relay.codeHash) || !hex32.test(relay.workflowId)
+      || !margin || !isAddress(margin.desk) || !isAddress(margin.keeper)
+      || !hex32.test(margin.deskCodeHash) || !hex32.test(margin.keeperCodeHash)
+      || !/^\d{1,78}$/.test(margin.referenceTokenId)) {
+      throw new Error('Invalid Arc Testnet lending deployment.');
+    }
+  }
   if (d.traderCredit?.positionCollateral || d.contracts.PositionTokenLedger) {
     const position = d.traderCredit?.positionCollateral;
-    if (d.chainId !== 31337 || !d.mockCollateral || !position || !isAddress(d.contracts.PositionTokenLedger ?? '')
-      || !/^0x[0-9a-f]{64}$/i.test(d.codeHashes.PositionTokenLedger ?? '')
-      || !/^0x[0-9a-f]{64}$/i.test(position.conditionId)
+    if ((!arc && (d.chainId !== 31337 || !d.mockCollateral)) || !position || !isAddress(d.contracts.PositionTokenLedger ?? '')
+      || !hex32.test(d.codeHashes.PositionTokenLedger ?? '') || !hex32.test(position.conditionId)
       || !/^\d{1,78}$/.test(position.yesTokenId) || !/^\d{1,78}$/.test(position.noTokenId)) {
       throw new Error('Invalid position collateral deployment.');
     }

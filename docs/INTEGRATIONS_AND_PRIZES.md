@@ -14,7 +14,7 @@ The directional replay advances 50 tUSDC with 51 tUSDC due. The borrower locks 1
 |---|---|---|---|
 | **Chainlink CRE** | Scheduled CRE reads EVM escrow and Polymarket price history, then produces the reports that trigger early liquidation and share delivery. | The official CLI ran all three stages. The local chain confirms lender payment and collateral delivery. | Show the reproducible simulation and its local receipts to judges. |
 | **Arkiv + Swarm** | Lenders find borrower-owned listings and verify the Swarm assessment before funding. | A local two-wallet run verifies publication, discovery after reload, file verification, funding and repayment. | Public Rabdi run and Continuity eligibility are still open. |
-| **Arc — not presently eligible from this repo alone** | A direct USDC loan could fit an onchain-finance product. | There is no Arc deployment, Circle-supported settlement flow, Arc Studio project URL or Arc receipt in this repository. | Every Arc prize requires Arc Studio as the starting point, a shareable project URL, showing Studio in the demo, working frontend/backend and an architecture diagram. The Continuity prize additionally requires Continuity participation. Do not present the current Sepolia or Anvil flow as an Arc build. |
+| **Arc — Best Smart Contracts with Advanced Stablecoin Logic in Arc Studio** | Conditional USDC escrow, price-triggered liquidation and separate share delivery fit a new project submission. This prize accepts a new or existing web app. | The deployed Arc Testnet desk paid 1.02 test USDC to a lender and released 2.4 shares to the prefunded backstop. [Public receipts](RELEASE_EVIDENCE.md#arc-testnet-liquidation) | Use Arc Studio as the starting point to build, test and deploy the submitted contracts. Connect them to the app through Studio and include a shareable Studio URL, working frontend and backend, an architecture diagram, a video and the repo link. |
 
 The separate Chainlink **CCIP** prize requires CCIP to cause an onchain state change. It is not the CRE prize, and AQRA has no CCIP integration. Adding a bridge without a necessary cross-chain user flow would dilute this submission.
 
@@ -43,7 +43,7 @@ ENS discovers the wallet group; it is not a credit signal or proof of common con
 - A simulated CRE workflow is not a public DON transaction. A Chainlink Data Feed read alone does not qualify for a Mumbai sponsor track.
 - A local Anvil transaction is not mainnet/testnet settlement with real-value USDC.
 - An Arkiv/Swarm code path is not evidence of a public write/read, writer address, live content pair or event eligibility.
-- A Sepolia or mock collateral demo is not an Arc integration; only a shareable Arc Studio project and its working Arc flow address that track.
+- The Arc Testnet receipts cover the public settlement flow. Arc Studio provenance is a separate submission requirement.
 
 ## Prior winner research
 

@@ -36,6 +36,10 @@ The [Chainlink CRE replay](docs/TRADER_CREDIT.md#run-the-official-cre-replay) lo
 
 For a local historical-evidence request that stops before borrower consent and funding, run `pnpm underwriting:demo --pending` against the local stack. It records local receipts at `work/underwriting/local-credit-demo.json`. This uses a historical public wallet under Anvil impersonation and must not be used to bypass the interactive public-report consent flow.
 
+### Arc Testnet
+
+Run `pnpm dev:arc` and open [AQRA on Arc Testnet](http://127.0.0.1:3003/). The profile connects to chain `5042002` and Circle's six-decimal test USDC. **Borrow** supports wallet-signed issuance of test outcome pairs. **Lend** verifies public receipts for a directional liquidation replay that recovered **1.02 test USDC** and released **2.4 outcome shares**. The replay uses Chainlink CRE CLI simulation and an operator-restricted Arc relay. [Arc setup and reproduction](docs/TRADER_CREDIT.md#arc-testnet) · [Liquidation receipt](https://explorer.testnet.arc.io/tx/0x6c24c3197fc52c96f45c86bbe6c3734dddf5b6f3042996b4be65cac8606e5475)
+
 ## Reproduce the benchmark
 
 The expanded dataset covers November 2025 through October 2026. Its fixed sample schedules up to 768 BTC/ETH 15-minute Polymarket sessions and samples activity and large-win wallets. The checked-in capture manifest records gaps, sample limits and Polygon month-boundary block checks.

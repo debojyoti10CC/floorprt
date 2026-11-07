@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { Fingerprint, FlaskConical, Layers3, ShieldCheck, Wallet } from 'lucide-react';
 import { formatUnits, isAddress, zeroHash, type Address as EvmAddress, type Hex } from 'viem';
 import { parseAmount } from '@floor/proof-engine';
-import { PositionCreditDeskAbi, quotePositionCredit } from '@floor/shared';
+import { ARC_TESTNET_CHAIN_ID, CollateralTokenAbi, PositionCreditDeskAbi, quotePositionCredit } from '@floor/shared';
 import type { Evidence } from '../../../../services/underwriting/policy';
 import type { PolymarketPortfolio } from '../../../../services/underwriting/polymarket';
 import { linkContext } from '../../../../services/underwriting/reports';
@@ -61,6 +61,7 @@ export function TraderBorrow({ onRequest, onConnectWallet }: {
   const terms = loanTerms(principal, bond, days);
   const wallet = p.address;
   const { deployment, rpcUrl, online } = p;
+  const arc = deployment?.chainId === ARC_TESTNET_CHAIN_ID;
   const requestBlockTag = deployment?.chainId === 31337 ? 'pending' : undefined;
   const blockNumber = p.data?.blockNumber;
   const positionMarket = deployment?.traderCredit?.positionCollateral;
@@ -218,7 +219,7 @@ export function TraderBorrow({ onRequest, onConnectWallet }: {
         functionName: 'maximumPositionDue', args: [terms.bond, pairs] });
       if (terms.due > limit) throw new Error('Total repayment exceeds the onchain collateral limit.');
       if (!pledged.approved) {
-        await p.transact('Approve the desk for local Conditional Tokens', 'PositionTokenLedger', 'setApprovalForAll', [contract.address, true]);
+        await p.transact('Approve Conditional Tokens escrow', 'PositionTokenLedger', 'setApprovalForAll', [contract.address, true]);
       }
     }
     await approveTraderCredit(p, terms.bond);
@@ -238,6 +239,24 @@ export function TraderBorrow({ onRequest, onConnectWallet }: {
     const id = eventArgs(receipt, 'TraderCreditDesk', 'TraderCreditRequested').loanId as bigint;
     setConsent(null);
     onRequest(id, fixture);
+  };
+
+  const mintMissingPairs = async () => {
+    if (!arc || !deployment || !wallet || !p.walletReady || pairs <= 0n) {
+      throw new Error('Connect a wallet on Arc Testnet and enter a positive pair quantity.');
+    }
+    const inventory = await positionInventory(p, wallet);
+    if (!inventory) throw new Error('Position collateral is unavailable.');
+    const missing = pairs - inventory.pairs;
+    if (missing <= 0n) return;
+    const { client } = await traderDesk(p);
+    const asset = deployment.contracts.CollateralToken;
+    const { ledger, conditionId } = inventory.market;
+    const allowance = await client.readContract({ address: asset, abi: CollateralTokenAbi, functionName: 'allowance', args: [wallet, ledger] });
+    if (allowance < missing) await p.transact('Approve test USDC for outcome pairs', 'CollateralToken', 'approve', [ledger, missing]);
+    await p.transact('Mint Arc outcome pairs', 'PositionTokenLedger', 'splitPosition', [asset, zeroHash, conditionId, [1n, 2n], missing]);
+    const updated = await positionInventory(p, wallet);
+    if (updated) setInventory({ owner: wallet, data: updated });
   };
 
   return <div className="trader-loan-layout trader-borrow-layout">
@@ -323,7 +342,7 @@ export function TraderBorrow({ onRequest, onConnectWallet }: {
           <Button variant={usePositions ? 'secondary' : 'ghost'} aria-pressed={usePositions} disabled={action.busy} onClick={() => setUsePositions(true)}><Layers3 size={14} /> Positions + bond</Button>
         </div>}
         {usePositions && positionMarket && <div className="poly-collateral-box">
-          <div className="trader-inline"><strong>{positionMarket.title}</strong><Badge tone="amber">LOCAL CTF</Badge></div>
+          <div className="trader-inline"><strong>{positionMarket.title}</strong><Badge tone="amber">{arc ? 'ARC TESTNET' : 'LOCAL CTF'}</Badge></div>
           {inventoryError && <div className="error-box" role="alert">{inventoryError}</div>}
           <dl className="trader-metrics">
             <div><dt>Free YES</dt><dd>{currentInventory ? formatUnits(currentInventory.yes, 6) : '—'}</dd></div>
@@ -334,6 +353,10 @@ export function TraderBorrow({ onRequest, onConnectWallet }: {
             <input inputMode="decimal" value={quantity} onChange={event => setQuantity(event.target.value)} disabled={action.busy} />
           </label>
           {currentInventory && pairs > currentInventory.pairs && <p className="trader-note" role="status">Available balance is below the requested pair quantity.</p>}
+          {arc && currentInventory && pairs > currentInventory.pairs && <Button variant="secondary"
+            disabled={action.busy || !p.walletReady} onClick={() => void action.run(mintMissingPairs)}>
+            Mint {formatUnits(pairs - currentInventory.pairs, 6)} pairs with test USDC
+          </Button>}
           {!wallet && <p className="trader-note">Connect a signer to check the position ledger.</p>}
         </div>}
         <div className="trader-controls">

@@ -23,7 +23,7 @@ export async function underwritingApi<T>(path: string, signal?: AbortSignal, ini
   const configured = process.env.NEXT_PUBLIC_FLOOR_API_URL?.trim().replace(/\/+$/, '');
   const { hostname, port } = window.location;
   const localApi = ['127.0.0.1', 'localhost'].includes(hostname)
-    ? 'http://127.0.0.1:' + (port === '3002' ? '8788' : '8787')
+    ? 'http://127.0.0.1:' + (port === '3003' ? '8789' : port === '3002' ? '8788' : '8787')
     : '';
   const base = configured || localApi;
   const response = await fetch(base + '/api/v1/underwriting' + path, { ...init, signal, cache: 'no-store' })

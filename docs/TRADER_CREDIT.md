@@ -69,7 +69,7 @@ For Sepolia, provision a manifest with `pnpm deploy:sepolia` and approved testne
 
 ### Directional collateral and automatic recovery
 
-The separate local margin desk holds one approved Conditional Tokens outcome plus a cash bond. Funding requires a qualifying score, a committed assessment, a fresh price report and debt LTV at or below 80%. A market maker must escrow a one-use purchase bid before the borrower can pledge. The bond and bid together must cover principal plus fee. A committed bid stays locked until the loan closes.
+The directional margin desk on Anvil and Arc Testnet holds one approved Conditional Tokens outcome plus a cash bond. Funding requires a qualifying score, a committed assessment, a fresh price report and debt LTV at or below 80%. A market maker must escrow a one-use purchase bid before the borrower can pledge. The bond and bid together must cover principal plus fee. A committed bid stays locked until the loan closes.
 
 Trigger 1 runs each minute when configured with a keeper. CRE reads the contract's bounded loan window and checks token custody and cash. For directional collateral it fetches the referenced Polymarket order book, values held shares against bid depth and assigns zero to shares beyond that depth. Missing, stale or mismatched books leave the previous quote untouched. The report binds the observation to the configured chain, desk, loan, token and source hash. [CRE Cron Trigger](https://docs.chain.link/cre/guides/workflow/using-triggers/cron-trigger) · [Polymarket order book](https://docs.polymarket.com/api-reference/market-data/get-order-book)
 
@@ -83,6 +83,14 @@ Debt LTV is the fixed amount due divided by the bond plus marked share value. Th
 4. Open [the local position profile](http://127.0.0.1:3002/) with `pnpm dev:positions` and select **Lend**. The **CRE liquidation replay** reads the local chain receipts. The full simulator results and receipt pointers are written to `work/cre-margin/`.
 
 The replay uses two historical Polymarket prices, a labeled test borrower score and test ERC-1155 collateral. The script delivers the official CLI's reports using the pinned local test account. The lender and borrower sign their separate test transactions. This run establishes the liquidation and recovery path with a funded bid. Public DON delivery and custody of actual Polygon positions require a separate deployment and collateral design. [CRE simulation](https://docs.chain.link/cre/guides/operations/simulating-workflows) · [Polymarket price history](https://docs.polymarket.com/api-reference/markets/get-prices-history) · [Recorded results](RELEASE_EVIDENCE.md#chainlink-cre-margin-replay)
+
+## Arc Testnet
+
+1. Run `pnpm dev:arc`. Open [AQRA](http://127.0.0.1:3003/) and select **Lend**. The read API runs on port `8789`. Both use the checked-in Arc manifest. The two Anvil profiles keep their own ports, token balances and requests.
+2. To try the paired-share request flow, add Arc Testnet to a browser wallet and get test USDC from Circle. On **Borrow**, choose **Positions + bond**, enter an affordable quantity and mint any missing pairs. One test USDC backs each newly issued pair. A request with qualifying Polymarket evidence escrows these Arc shares and its bond. [Arc network settings](https://docs.arc.io/arc/references/rpc-endpoints) · [Circle faucet](https://faucet.circle.com/)
+3. To reproduce the directional replay against the published deployment, use its dedicated operator signer and configure Bee as above. Set `DEPLOYER_PRIVATE_KEY` outside the repo, install the official CRE CLI and Bun, and run `pnpm cre:arc:demo --capture`. The command spends test USDC, provisions distinct test actors, checks the historical Polymarket response against its hash, runs three CRE simulations and waits for the public receipts. A new operator can instead fund a separate deployer wallet and run `pnpm deploy:arc` before replaying. Keep that wallet's deployment journal to resume an interrupted deploy.
+
+The Arc deployment pins Circle's ERC-20 test USDC contract `0x3600000000000000000000000000000000000000`. Native gas uses 18-decimal USDC and ERC-20 amounts use six decimals. Paired-share attestation uses the `arc-simulation` CRE target and an operator relay. The replay uses an operator-delivered simulation and an explicitly labeled test score. Its funding, liquidation and share delivery are Arc transactions. Live DON delivery requires a separately configured and activated deployment. Polygon holdings are read-only. [Arc USDC events](https://docs.arc.io/integrate/infrastructure/indexing-events) · [Arc replay evidence](RELEASE_EVIDENCE.md#arc-testnet-liquidation)
 
 ## Arkiv and Swarm
 

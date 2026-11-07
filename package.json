@@ -19,6 +19,7 @@
     "docs:dev": "cd docs/mintlify && npx --yes mint@4.2.1205 dev --port 3001 --no-open",
     "dev": "node scripts/dev.mjs",
     "dev:positions": "node scripts/dev.mjs --positions",
+    "dev:arc": "node scripts/dev.mjs --arc",
     "dev:web": "pnpm --filter @floor/web dev",
     "dev:api": "tsx apps/api/src/server.ts",
     "chain": "node scripts/foundry.mjs anvil --host 127.0.0.1 --port 8545 --chain-id 31337 --silent",
@@ -41,6 +42,8 @@
     "verify": "node scripts/verify.mjs",
     "sepolia:check": "tsx scripts/check-sepolia.ts",
     "deploy:sepolia": "tsx scripts/deploy.ts",
+    "deploy:arc": "pnpm contracts:build && pnpm abi && tsx scripts/deploy-arc.ts",
+    "cre:arc:demo": "tsx scripts/cre-margin-demo.ts --arc",
     "test:fork": "node scripts/test-fork.mjs"
   },
   "dependencies": {

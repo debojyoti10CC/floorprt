@@ -24,6 +24,19 @@ Chromium verified the funding and liquidation LTVs and the exact recovery on **L
 
 The official CLI transcripts record the market observations, report payloads and successful results. [Funding mark](https://github.com/debojyoti10CC/floorprt/blob/main/evidence/logs/cre-margin-funding.log) · [Liquidation mark](https://github.com/debojyoti10CC/floorprt/blob/main/evidence/logs/cre-margin-liquidation.log) · [Share release](https://github.com/debojyoti10CC/floorprt/blob/main/evidence/logs/cre-margin-release.log)
 
+## Arc Testnet liquidation
+
+CRE CLI v1.39.0 replayed the same hash-verified historical Polymarket marks against the public Arc Testnet deployment on chain `5042002`. A test borrower locked 2.4 Arc outcome shares and 0.25 test USDC. A backstop escrowed 0.77 test USDC, and a separate lender advanced 1.00 test USDC. At 69.76% debt LTV the request funded. The second mark moved LTV to 406.05% and the desk liquidated before maturity. The lender received the entire 1.02 test USDC due and the backstop received the 2.4 shares on the next simulated keeper pass.
+
+| Step | Public receipt |
+| --- | --- |
+| Position pledge | [Arc Explorer](https://explorer.testnet.arc.io/tx/0xb64958bf1e3efb189b369d07f2d0d890b4649ecc2b596b6d0470e4b695f26523) |
+| Loan funding | [Arc Explorer](https://explorer.testnet.arc.io/tx/0x6a1aee7172243198bcdffb267fc7ddacd5cc930bd0dd930161834c58252565f3) |
+| Early liquidation and lender payment | [Arc Explorer](https://explorer.testnet.arc.io/tx/0x6c24c3197fc52c96f45c86bbe6c3734dddf5b6f3042996b4be65cac8606e5475) |
+| Delivery of shares | [Arc Explorer](https://explorer.testnet.arc.io/tx/0x5cd10ff9b206fa6244aff3435ba01de6653c476c098bcb868569db04ccd73b39) |
+
+The simulation relay is restricted to the Arc test operator. The run used a labeled test score and verified read-back from local Bee. The Arc browser profile verifies the receipts against the pinned margin desk. [Deployment receipts](../packages/contracts/deployments/5042002-receipts.json) · [CRE outputs and receipt hashes](../apps/web/public/cre-margin.arc.json)
+
 ## Position credit browser run
 
 Chromium completed request #2 at desk `0x322813fd9a801c5507c9de605d63cea4f2ce6c44` on the isolated local lending chain. The borrower pledged 120 complete Conditional Tokens pairs plus 25 test USDC against 102 test USDC due. After Arkiv publication, the test reloaded the app, discovered the entity again and verified the report from Bee before funding. After repayment and release, the wallet held 150 YES and 150 NO shares. The desk held zero of both.
