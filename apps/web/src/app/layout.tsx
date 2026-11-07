@@ -5,7 +5,6 @@ import './kimia.css';
 import './trading-terminal.css';
 import './arkiv.css';
 import './trader-credit.css';
-import './aqra.css';
 import './terminal-skin.css';
 import './landing.css';
 import { ProtocolProvider } from '../lib/protocol';

@@ -4,7 +4,7 @@ import Link from 'next/link';
 
 import {useState,useEffect,useRef} from 'react';
 
-import {ArrowRight,ArrowUpRight,Check,ChevronDown,ExternalLink,FlaskConical,Menu,RefreshCw,Wallet,X} from 'lucide-react';
+import {ArrowRight,ArrowUpRight,Check,ExternalLink,FlaskConical,Menu,RefreshCw,Wallet,X} from 'lucide-react';
 
 import {useProtocol,message,short} from '../lib/protocol';
 
@@ -39,7 +39,7 @@ export function Terminal({initialPage,marketId}:{initialPage:string;marketId?:st
 
   return <div className="app-shell aqra-shell">
 
-    <div className="app-main aqra-app-main">
+    <div className="aqra-app-main">
 
       <header className="aqra-topbar">
         <Link href="/app/" className="aqra-brand" aria-label="ARQO home"><ArqoLogo variant="light" size={27}/></Link>
@@ -49,7 +49,6 @@ export function Terminal({initialPage,marketId}:{initialPage:string;marketId?:st
           <Link href="/app/settlements/" className="aqra-nav-extra" onClick={()=>setMobileOpen(false)}>Settlement audit</Link>
         </nav>
         <div className="aqra-header-actions">
-          <Link href="/app/ops/" className="aqra-network" title="Open network configuration"><i className={p.online?'live':''}/><span>{p.deployment?.chainName??(p.data?`Chain ${p.data.chainId}`:'Network offline')}</span><ChevronDown size={12}/></Link>
           {p.address&&p.online&&p.data?.source==='DIRECT_CHAIN'&&<span className="aqra-balance"><Money value={p.data.walletBalance??'0'}/><small>USDC</small></span>}
           <button className="aqra-refresh" aria-label="Refresh chain state" onClick={()=>void p.refresh()}><RefreshCw size={15} className={p.loading?'spin':''}/></button>
           <button className="aqra-wallet" data-testid="wallet-menu" onClick={()=>setWalletOpen(true)}>{p.address?<Identicon address={p.address} size={25}/>:<Wallet size={14}/>} {p.address?<><span className="capitalize">{role??'Wallet'}</span><span className="mono">{short(p.address)}</span></>:<>Connect wallet<ArrowRight size={14}/></>}</button>

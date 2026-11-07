@@ -36,7 +36,7 @@
   },
   {
     "action": "registerObservation",
-    "transactionHash": "0x051ca7cb5e0dc0e5dd4166b615c3575465d21131821605e41e3a56dc56c41004",
+    "transactionHash": "0xbd4fa18a7f9909a5325c95396d4df53f284ac78768ce959c7c5d95dfe17bd309",
     "blockNumber": "8"
   },
   {
@@ -61,7 +61,7 @@
   },
   {
     "action": "registerObservation",
-    "transactionHash": "0x446f4c9a3a3c91e38cb623e41e0b0bfb7077850fb5ec648f857e4a9885601869",
+    "transactionHash": "0x3f269236c97f94db24338e9d394a44f917fcf1c1438601d37414153c23cbe071",
     "blockNumber": "13"
   },
   {
@@ -86,7 +86,7 @@
   },
   {
     "action": "registerObservation",
-    "transactionHash": "0xbea104223281dd9efc3be953d81783b343aae182eb40bab91da386593c93db21",
+    "transactionHash": "0x981a7c7c78bae281f277354898561b1668ce09dc7560cd9fa691d5b02fc23969",
     "blockNumber": "18"
   },
   {

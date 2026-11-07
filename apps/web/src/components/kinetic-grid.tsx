@@ -16,6 +16,7 @@ const RIPPLE_DURATION = 720;
 const RIPPLE_DISPLACEMENT = 1.8;
 
 type GridPoint = { x: number; y: number };
+type GridField = GridPoint & { field: number; ripple: number };
 
 export function KineticGrid({ className = '' }: KineticGridProps) {
   const layerRef = useRef<HTMLDivElement>(null);
@@ -31,8 +32,6 @@ export function KineticGrid({ className = '' }: KineticGridProps) {
 
     const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
     const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)');
-    const accent = parseHex(getComputedStyle(section).getPropertyValue('--home-gold').trim()) ?? [232, 213, 117];
-
     let width = 0;
     let height = 0;
     let dpr = 1;
@@ -55,7 +54,7 @@ export function KineticGrid({ className = '' }: KineticGridProps) {
     let rippleActive = false;
     let rippleReturning = false;
 
-    const rgb = `${accent[0]}, ${accent[1]}, ${accent[2]}`;
+    const rgb = '255, 255, 255';
 
     const fitCanvas = () => {
       const rect = section.getBoundingClientRect();
@@ -108,10 +107,9 @@ export function KineticGrid({ className = '' }: KineticGridProps) {
       const target = event.target;
       if (!(target instanceof Element)) return;
       if (target.closest('a, button, input, textarea, select, iframe, [role="button"]')) return;
-      // Keep ripples in the open decorative background. Text, artwork, and the
-      // story layout remain ordinary click targets and never produce a ripple.
-      const isOpenBackground = target === section || Boolean(target.closest('.hero-glow, .hero-lines'));
-      if (!isOpenBackground) return;
+      // Only clicks landing on the section's open background create ripples.
+      // Content, artwork, and controls keep their ordinary pointer behavior.
+      if (target !== section) return;
       const rect = section.getBoundingClientRect();
       rippleX = event.clientX - rect.left;
       rippleY = event.clientY - rect.top;
@@ -150,6 +148,7 @@ export function KineticGrid({ className = '' }: KineticGridProps) {
         const baseX = (index % columns) * cellSize;
         const baseY = Math.floor(index / columns) * cellSize;
         let field = 0;
+        let rippleField = 0;
         let targetX = baseX;
         let targetY = baseY;
 
@@ -175,6 +174,7 @@ export function KineticGrid({ className = '' }: KineticGridProps) {
             const displacement = wave * RIPPLE_DISPLACEMENT;
             targetX += (dx / distance) * displacement;
             targetY += (dy / distance) * displacement;
+            rippleField = wave;
             field = Math.max(field, wave * 0.45);
           }
         }
@@ -187,7 +187,7 @@ export function KineticGrid({ className = '' }: KineticGridProps) {
         if (Math.abs(targetX - x) >= 0.12 || Math.abs(targetY - y) >= 0.12) needsAnotherFrame = true;
         point.x = x;
         point.y = y;
-        return { x, y, field };
+        return { x, y, field, ripple: rippleField };
       });
 
       drawingContext.lineWidth = 0.65;
@@ -208,7 +208,8 @@ export function KineticGrid({ className = '' }: KineticGridProps) {
       for (const point of fields) {
         const active = Math.max(point.field, 0);
         drawingContext.beginPath();
-        drawingContext.fillStyle = `rgba(${rgb}, ${active < 0.015 ? 0.022 : 0.04 + active * 0.18})`;
+        const nodeOpacity = Math.min(0.85, 0.12 + active * 0.73 + point.ripple * 0.13);
+        drawingContext.fillStyle = `rgba(${rgb}, ${nodeOpacity})`;
         drawingContext.arc(point.x, point.y, active < 0.015 ? 0.65 : 0.8 + Math.min(active, 0.9) * 0.65, 0, Math.PI * 2);
         drawingContext.fill();
       }
@@ -217,12 +218,16 @@ export function KineticGrid({ className = '' }: KineticGridProps) {
       if (rippleActive || rippleReturning || needsAnotherFrame) requestDraw();
     }
 
-    function drawSegment(from: GridPoint & { field: number }, to: GridPoint & { field: number }) {
+    function drawSegment(from: GridField, to: GridField) {
       const active = Math.max(from.field, to.field);
+      const ripple = Math.max(from.ripple, to.ripple);
       drawingContext.beginPath();
       drawingContext.moveTo(from.x, from.y);
       drawingContext.lineTo(to.x, to.y);
-      drawingContext.strokeStyle = `rgba(${rgb}, ${0.042 + active * 0.105})`;
+      const lineOpacity = ripple > 0
+        ? Math.min(0.25, 0.06 + active * 0.39 + ripple * 0.25)
+        : Math.min(0.45, 0.06 + active * 0.39);
+      drawingContext.strokeStyle = `rgba(${rgb}, ${lineOpacity})`;
       drawingContext.stroke();
     }
 
@@ -254,7 +259,6 @@ export function KineticGrid({ className = '' }: KineticGridProps) {
     section.addEventListener('pointerleave', pointerLeave, { passive: true });
     section.addEventListener('click', click);
     window.addEventListener('scroll', scroll, { passive: true });
-    window.addEventListener('resize', fitCanvas, { passive: true });
     finePointer.addEventListener('change', setInteractionMode);
     motionPreference.addEventListener('change', setInteractionMode);
     setInteractionMode();
@@ -269,7 +273,6 @@ export function KineticGrid({ className = '' }: KineticGridProps) {
       section.removeEventListener('pointerleave', pointerLeave);
       section.removeEventListener('click', click);
       window.removeEventListener('scroll', scroll);
-      window.removeEventListener('resize', fitCanvas);
       finePointer.removeEventListener('change', setInteractionMode);
       motionPreference.removeEventListener('change', setInteractionMode);
     };
@@ -280,11 +283,4 @@ export function KineticGrid({ className = '' }: KineticGridProps) {
       <canvas ref={canvasRef} className="kinetic-grid-canvas" />
     </div>
   );
-}
-
-function parseHex(value: string): [number, number, number] | null {
-  const match = value.match(/^#([\da-f]{3}|[\da-f]{6})$/i);
-  if (!match) return null;
-  const hex = match[1].length === 3 ? [...match[1]].map((part) => part + part).join('') : match[1];
-  return [0, 2, 4].map((offset) => Number.parseInt(hex.slice(offset, offset + 2), 16)) as [number, number, number];
 }
