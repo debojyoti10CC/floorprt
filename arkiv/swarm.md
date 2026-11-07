@@ -26,6 +26,8 @@ SWARM_BEE_API_TOKEN=<optional reverse-proxy bearer token>
 NEXT_PUBLIC_ARKIV_ACCESS_KEY=<origin-restricted Rabdi access key>
 ```
 
+Uploading requires a usable postage batch. Reading an already published report requires only `SWARM_BEE_URL` and an optional service token, not a batch; `/storage-status` exposes separate read-configuration and upload-readiness flags. Retrieval failure remains an explicit error, with no silent gateway fallback.
+
 The Bee URL, postage batch and optional API token are server-only. Do not prefix them with `NEXT_PUBLIC_`. Restart `pnpm dev` or the API after changing the file. The web app reports Swarm unconfigured if the URL or batch ID is missing. A configured value is not a live availability guarantee; upload and retrieval report actual errors.
 
 The borrower needs a wallet that can sign the release and publish the Arkiv entity on Rabdi. The app uses Arkiv's SDK-provided Rabdi chain and a keyless RPC URL in the wallet configuration; its access key is used only by AQRA's own public query client.
@@ -52,7 +54,17 @@ With those services running, set `AQRA_E2E_POSITIONS=true` and run `pnpm exec pl
 - `POST /api/v1/underwriting/assessment-publication/:loanId` — verifies the borrower signature, uploads through `@ethersphere/bee-js`, reads the reference back and verifies it.
 - `GET /api/v1/underwriting/assessment/:reference?sha256=...` — downloads the public file as a bounded stream, verifies SHA-256 and report integrity, then returns it to the lender.
 
+Implementation files: `services/underwriting/swarm.ts` uploads and downloads with `@ethersphere/bee-js`; `apps/api/src/underwriting.ts` verifies signed release consent before upload and serves verified reads; `apps/web/src/lib/assessment-evidence.ts` independently checks the browser hash; `apps/web/src/lib/credit-packet-schema.ts` defines the public `reportRef` and `reportHash` entity fields. `scripts/verify-storage.ts` performs a read-only Rabdi/chain/Swarm join without a signer. Run `pnpm storage:verify --help` for arguments.
+
 The upload uses a usable postage batch and local pinning. Network Bee uses direct upload. The loopback Bee dev profile uses deferred upload for local storage. AQRA verifies actual retrieval before exposing the reference as publishable and rechecks availability when a lender inspects it. [Swarm upload and download](https://docs.ethswarm.org/docs/develop/upload-and-download/) · [Swarm pinning](https://docs.ethswarm.org/docs/develop/tools-and-features/pinning/)
+
+## Required public bonus proof
+
+The public **entity key → Swarm reference/openable link**, **postage batch ID and buyer/provider**, **Bee service**, and **demo-video timestamp** are still pending. Fill the [submission evidence checklist](submission.md#public-proof-checklist) after a real network-backed upload and Rabdi publication; do not relabel the local development references as public proof. That runbook covers one consented upload, one independent read and expected results. Expiring the Arkiv entity does not delete public Swarm copies. Never place an encrypted Swarm reference (which embeds its key) in a public entity.
+
+This is an existing project: the basic upload/read/commit/list flow predates this completion work. Only verified event-new commits can be entered, subject to Continuity acceptance. The [work boundary and AI disclosure](submission.md) must be reviewed by the team.
+
+Current Swarm friction: provisioning and maintaining a usable postage batch and a reachable Bee service are external prerequisites. No new public Swarm failure or performance result was measured in this implementation session. Unit tests exercise expired-batch/upload errors, unavailable reads, altered bytes, malformed JSON and oversized streams using mocks, not the Swarm network.
 
 ## Failure behavior
 

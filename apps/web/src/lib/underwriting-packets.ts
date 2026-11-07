@@ -1,30 +1,14 @@
 import { createPublicClient as createEvmClient, custom, defineChain, http, type Address, type Hex, type Transport } from 'viem';
 import { mnemonicToAccount, type HDAccount } from 'viem/accounts';
-import { createPublicClient, createWalletClient, defineSchema, ExpirationTime } from '@arkiv-network/sdk';
+import { createWalletClient, ExpirationTime } from '@arkiv-network/sdk';
 import { rabdi } from '@arkiv-network/sdk/chains';
-import { and, eq } from '@arkiv-network/sdk/query';
 import { addr, str, u64 } from '@arkiv-network/sdk/schema';
+import { creditPackets as packets, queryCreditPackets, plainCreditPacket, type ArkivPacket } from './credit-packet-schema';
+import { CREDIT_PACKET_APP as tag, CREDIT_PACKET_RETENTION, creditPacketMatches, type AssessmentCommitment } from '../../../../services/underwriting/credit-packet';
+export type { ArkivPacket } from './credit-packet-schema';
 import { positionPledgeHash, quotePositionCredit, type PositionPledge } from '@floor/shared';
 import { createArkivDevEntity, queryArkivDevnet } from './arkiv-devnet';
 import { sameWallet, type TraderLoan } from './trader-credit';
-
-const tag = 'aqra.trader.credit.v2';
-const packets = defineSchema(tag, {
-  app: str().indexed(),
-  lendingChain: u64().indexed(),
-  desk: addr().indexed(),
-  loanId: u64().indexed(),
-  score: u64().indexed(),
-  fundBy: u64().indexed(),
-  asOf: u64(),
-  evidence: str(),
-  group: str(),
-  reportRef: str(),
-  reportHash: str(),
-  pledge: str().optional(),
-  principal: u64().optional(),
-  maxDue: str().optional(),
-});
 
 const loopback = (host: string) => ['127.0.0.1', 'localhost', '[::1]'].includes(host);
 const localEndpoint = process.env.NEXT_PUBLIC_AQRA_LOCAL_ARKIV_URL?.trim();
@@ -35,26 +19,12 @@ const arkivChain = arkivLocal ? defineChain({
   id: 1337, name: 'Arkiv local devnet', nativeCurrency: { name: 'Test GLM', symbol: 'tGLM', decimals: 18 },
   rpcUrls: { default: { http: [localEndpoint!] } }, testnet: true,
 }) : rabdi({ accessKey: process.env.NEXT_PUBLIC_ARKIV_ACCESS_KEY?.trim() ?? '' });
-const RECORD_RETENTION_SECONDS = 90 * 24 * 60 * 60;
+
 export const arkivExplorer = 'https://rabdi.explorer.arkiv.network';
 export const arkivAccessKeyConfigured = Boolean(process.env.NEXT_PUBLIC_ARKIV_ACCESS_KEY?.trim());
-const fields = {
-  $key: true, $owner: true, loanId: true, score: true, fundBy: true, asOf: true, evidence: true, group: true,
-  reportRef: true, reportHash: true, pledge: true, principal: true, maxDue: true,
-} as const;
-
-async function readRabdiPackets(chainId: number, desk: Address, id?: bigint) {
-  const client = createPublicClient({ chain: arkivChain, transport: http(undefined, { timeout: 6000, retryCount: 0 }) });
-  const scope = and(eq('app', tag), eq('lendingChain', u64(BigInt(chainId))), eq('desk', addr(desk)));
-  const filter = id === undefined ? scope : and(scope, eq('loanId', u64(id)));
-  const result = await client.select(fields).from(packets).where(filter).limit(id === undefined ? 60 : 10).fetch();
-  return result.entities;
-}
-
-export type ArkivPacket = Awaited<ReturnType<typeof readRabdiPackets>>[number];
 
 export async function readPackets(chainId: number, desk: Address, id?: bigint): Promise<readonly ArkivPacket[]> {
-  if (!arkivLocal) return readRabdiPackets(chainId, desk, id);
+  if (!arkivLocal) return queryCreditPackets(chainId, desk, id, process.env.NEXT_PUBLIC_ARKIV_ACCESS_KEY?.trim() ?? '');
   const entries = await queryArkivDevnet(arkivChain, tag, chainId, desk, id);
   return entries.flatMap(({ key, owner, attributes: a }) => {
     try {
@@ -75,17 +45,11 @@ function positionCap(loan: TraderLoan, pledge: PositionPledge) {
   return quotePositionCredit(principal, due, bond, BigInt(pledge.pairs)).maxDue.toString();
 }
 
-export function packetMatches(packet: ArkivPacket, loan: TraderLoan, now: bigint, pledge?: PositionPledge | null) {
-  const positionMatches = pledge
-    ? !pledge.released && packet.pledge?.value.toLowerCase() === positionPledgeHash(pledge)
-      && packet.principal?.value === loan.terms.principal && packet.maxDue?.value === positionCap(loan, pledge)
-    : !packet.pledge;
-  return loan.state === 1 && loan.score >= 60 && loan.fundBy > now && positionMatches
-    && sameWallet(packet.$owner, loan.borrower) && packet.score.value === BigInt(loan.score)
-    && packet.fundBy.value === loan.fundBy && packet.asOf.value === loan.terms.asOf
-    && packet.evidence.value.toLowerCase() === loan.terms.evidenceDigest.toLowerCase()
-    && packet.group.value.toLowerCase() === loan.walletSetHash.toLowerCase()
-    && /^[0-9a-f]{64}$/i.test(packet.reportRef.value) && /^[0-9a-f]{64}$/i.test(packet.reportHash.value);
+export function packetMatches(
+  packet: ArkivPacket, loan: TraderLoan, now: bigint, pledge?: PositionPledge | null,
+  id: bigint = packet.loanId.value, commitment?: AssessmentCommitment,
+) {
+  return creditPacketMatches(plainCreditPacket(packet), id, loan, now, pledge, commitment);
 }
 
 export type AssessmentPointer = { reference: string; sha256: string; pledge?: PositionPledge | null };
@@ -118,7 +82,7 @@ export async function publishPacket(
         pledge: positionPledgeHash(report.pledge), principal: loan.terms.principal, maxDue: positionCap(loan, report.pledge),
       } : {}),
     };
-    const expiresAt = loan.fundBy + BigInt(RECORD_RETENTION_SECONDS);
+    const expiresAt = loan.fundBy + CREDIT_PACKET_RETENTION;
     const receipt = arkivLocal ? await createArkivDevEntity(arkivChain, transport, account, data, expiresAt)
       : await createWalletClient({ chain: arkivChain, account, transport }).createEntity(packets, {
         ...data, lendingChain: u64(data.lendingChain), desk: addr(desk), loanId: u64(data.loanId),

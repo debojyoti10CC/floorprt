@@ -14,7 +14,7 @@ import { readPnlHistory } from '../../../services/underwriting/sources.js';
 import { PolymarketRateLimitError, readPolymarketPortfolio, readPublicPolymarketSample } from '../../../services/underwriting/polymarket.js';
 import { demoEvidence } from '../../../services/underwriting/demo-evidence.js';
 import { positionDisclosure, type PositionDisclosure } from '../../../services/underwriting/position-assessment.js';
-import { assessmentSha256, readAssessment, swarmConfigured, swarmStorageStatus, uploadAssessment, type SwarmAssessment } from '../../../services/underwriting/swarm.js';
+import { assessmentSha256, readAssessment, swarmConfigured, swarmReadConfigured, swarmStorageStatus, uploadAssessment, type SwarmAssessment } from '../../../services/underwriting/swarm.js';
 import type { ApiRuntime } from './deployment.js';
 
 const AddressSchema = z.string().refine(value => isAddress(value, { strict: false })).transform(value => value.toLowerCase() as Address);
@@ -294,7 +294,7 @@ export function createUnderwritingApi() {
     const sha256 = c.req.query('sha256') ?? '';
     if (!/^[0-9a-f]{64}$/i.test(reference)) return c.json({ error: 'Invalid Swarm report reference.' }, 422);
     if (!/^[0-9a-f]{64}$/i.test(sha256)) return c.json({ error: 'Invalid Swarm report SHA-256.' }, 422);
-    if (!swarmConfigured()) return c.json({ error: 'Swarm evidence storage is not configured on this AQRA API.' }, 503);
+    if (!swarmReadConfigured()) return c.json({ error: 'Swarm report retrieval needs a configured Bee endpoint.' }, 503);
     try {
       const report = await readAssessment(reference, sha256);
       return c.json(report);

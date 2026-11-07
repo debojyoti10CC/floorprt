@@ -1,5 +1,7 @@
 /* Final visual foundations supplied by the user. Component rules use semantic tokens. */
 :root{
+  /* Landing-only roles from the user's dot-matrix / violet reference. */
+  --color-landing-accent:#938bff;--color-landing-paper:#f1f0f5;--color-landing-muted:#a5a5ae;--color-landing-grid:rgba(255,255,255,.035);--color-landing-glow:rgba(147,139,255,.06);
   --color-text-primary:#f4f4f5;--color-text-secondary:#8b8b93;--color-text-tertiary:oklab(0.967428 0.000417888 -0.00125271 / .8);--color-text-inverse:oklab(0.967428 0.000417888 -0.00125271 / .9);
   --color-surface-base:#000;--color-surface-muted:#1f1f24;--color-surface-raised:#101013;--color-surface-strong:oklab(0.241417 0.00256452 -0.00909808 / .6);--color-surface-overlay:rgba(16,16,19,.96);--color-border-default:#2a2a30;
   --color-accent:#b4c7f5;--color-accent-hover:#c8d6fa;--color-accent-active:#a1b4e4;--color-on-accent:#101013;--color-positive:#00d26a;--color-negative:#fa8298;--color-warning:#e8c480;

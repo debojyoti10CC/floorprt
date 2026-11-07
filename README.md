@@ -2,6 +2,8 @@
 
 AQRA is a **prediction-market performance-metrics-based, bond-backed lending protocol pilot**. Dated trader activity, realized P&L efficiency, repeat profitability and drawdown determine whether a borrower meets the pilot's request policy. The borrower posts USDC collateral, and a separate lender chooses whether to fund. Performance metrics are not repayment proof or collateral.
 
+The landing page is at `/`; **Launch app** opens the working interface at `/underwriting/`. The whitepaper is at `/whitepaper/`.
+
 The working interface has four navigation destinations:
 
 - **Data** — observed monthly wallet outcomes, cohort comparisons and dated wallet evidence.
@@ -14,6 +16,19 @@ The first visit to the credit desk opens a Borrower/Lender chooser; the mode swi
 The current $100 demo advance has $102 due and a $25 bond: up to $75 of principal remains uncovered assuming full bond recovery. Full bond recovery is not guaranteed if token, contract or operational failures occur. AQRA has no mature loan outcomes, calibrated probability of default, or live lending pool; pool underwriting stays rejected. Full limits are in [`docs/RISK_ENGINE.md`](docs/RISK_ENGINE.md) and [`docs/FEATURES_AND_LIMITATIONS.md`](docs/FEATURES_AND_LIMITATIONS.md).
 
 New funding requires a borrower-committed Swarm reference and SHA-256 in the lending contract. The lender UI discovers the v2 request on Arkiv, fetches the actual Swarm report, verifies its bytes and recomputes the evidence before enabling funding. To exercise that flow, copy `.env.example` to `.env`, configure a Bee node and funded postage batch plus a Rabdi access key, and restart `pnpm dev`. Without Swarm configuration, users can inspect/request and cancel, but cannot originate a funded loan; repayment/default for already-funded loans remains onchain and independent of storage. Setup and current proof status are in [`arkiv/swarm.md`](arkiv/swarm.md).
+
+## Arkiv + Swarm track
+
+The borrower publishes a wallet-owned, expiring `aqra.trader.credit.v2` listing on **Arkiv Rabdi (7794095)**. It points to the exact consented assessment on **Swarm**; lenders query Arkiv, retrieve the file and verify it against the lending contract before funding. Balances and debt remain onchain, not in Arkiv.
+
+- [Submission setup, query and evidence checklist](arkiv/submission.md)
+- [Ownership, indexed fields and expiry](arkiv/schema.md) · [Swarm upload/read and failure behavior](arkiv/swarm.md)
+- **Lend → Inspect assessment evidence → Download storage proof** exports a point-in-time verification bundle.
+- `pnpm storage:verify --help` describes the independent, read-only Rabdi/Swarm verification command. Readers need a Bee endpoint, not a postage batch or wallet key.
+
+**Public writer addresses, Rabdi entity/transaction, openable Swarm reference and batch provenance: pending.** Local receipts do not meet those public-proof requirements. This is an existing repository; Continuity acceptance and event-new work must be confirmed before entering the existing-project track and bonus. The basic storage flow existed before this completion change; [the runbook](arkiv/submission.md#track-and-timing--human-verification-required) records the work boundary. No from-scratch eligibility is claimed.
+
+**AI use:** this completion change used an AI coding assistant for inspection, implementation, tests and documentation; maintainers must review it and provide the team's full event disclosure.
 
 ## Run the demo
 
@@ -38,7 +53,11 @@ For a local historical-evidence request that stops before borrower consent and f
 
 ### Arc Testnet
 
-Run `pnpm dev:arc` and open [AQRA on Arc Testnet](http://127.0.0.1:3003/). The profile connects to chain `5042002` and Circle's six-decimal test USDC. **Borrow** supports wallet-signed issuance of test outcome pairs. **Lend** verifies public receipts for a directional liquidation replay that recovered **1.02 test USDC** and released **2.4 outcome shares**. The replay uses Chainlink CRE CLI simulation and an operator-restricted Arc relay. [Arc setup and reproduction](docs/TRADER_CREDIT.md#arc-testnet) · [Liquidation receipt](https://explorer.testnet.arc.io/tx/0x6c24c3197fc52c96f45c86bbe6c3734dddf5b6f3042996b4be65cac8606e5475)
+Run `pnpm dev:arc` and open [AQRA on Arc Testnet](http://127.0.0.1:3003/underwriting/). The profile connects to chain `5042002` and Circle's six-decimal test USDC. **Borrow** supports wallet-signed issuance of test outcome pairs. **Lend** verifies public receipts for a directional liquidation replay that recovered **1.02 test USDC** and released **2.4 outcome shares**. The replay uses Chainlink CRE CLI simulation and an operator-restricted Arc relay. [Arc setup and reproduction](docs/TRADER_CREDIT.md#arc-testnet) · [Liquidation receipt](https://explorer.testnet.arc.io/tx/0x6c24c3197fc52c96f45c86bbe6c3734dddf5b6f3042996b4be65cac8606e5475)
+
+Read-only settlement check: `pnpm arc:verify` verifies the pinned deployment, canonical replay receipts and historical USDC/share balance deltas without a key. [Arc + Chainlink architecture and runbook](docs/ARC_CHAINLINK.md) · [Arc Studio handoff](arc/README.md).
+
+**Arc Studio remains pending:** a public Arc transaction is not proof of a Studio build/test/deploy. `pnpm arc:studio:prepare` creates a fingerprinted, key-free source/test handoff; open the [Studio prompt](arc/STUDIO_PROMPT.md) in your authenticated project and record its actual shareable URL and deployment evidence. The advanced-stablecoin prize accepts an existing frontend, but prior work/event eligibility must still be disclosed and confirmed.
 
 ## Reproduce the benchmark
 
@@ -75,6 +94,9 @@ pnpm typecheck
 pnpm build
 pnpm docs:generate
 pnpm docs:check
+pnpm exec playwright test --config=playwright.landing.config.ts
 ```
+
+The landing-page browser checks start only the web server; they do not require a local chain.
 
 AQRA is unaudited local/testnet software. No production liquidity pool, external Polymarket position custody, public CRE execution receipt or mainnet lending is claimed.

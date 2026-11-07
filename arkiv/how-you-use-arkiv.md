@@ -2,13 +2,15 @@
 
 ## Borrower evidence and lender discovery
 
-Borrower flow: after the report workflow attests an open request, AQRA shows the exact fields that will be public. The borrower checks the disclosure and signs a short-lived, loan-specific message. The server uploads that evidence JSON to a configured Bee node, downloads it again, and checks its SHA-256 and internal evidence digest. The borrower then publishes `aqra.trader.credit.v2` from their Rabdi browser wallet and commits the report hash and Swarm reference to the loan contract.
+Borrower flow: after the report workflow attests an open request, AQRA shows the exact fields that will be public. The borrower checks the disclosure and signs a short-lived, loan-specific message. The server uploads that evidence JSON to a configured Bee node, downloads it again, and checks its SHA-256 and internal evidence digest. The borrower commits the report hash and Swarm reference to the loan contract, then publishes `aqra.trader.credit.v2` from their Rabdi browser wallet.
 
 Lender flow: **Discover on Arkiv** queries the indexed namespace, chain and desk. AQRA reads each candidate's loan state and report commitment from the lending chain. Only matching open, unexpired requests are shown as fundable. **Inspect assessment evidence** fetches the listed Swarm file through the AQRA API; the server and browser check the SHA-256, AQRA recomputes the report decision and digest, and the component compares the wallet group, score, cutoff, report hash and Swarm reference to the lender-chain commitment. Funding is disabled until those checks pass.
 
 The API never sends a Bee node URL, postage batch or token to the browser. The Arkiv access key is public and should be origin-restricted. Each packet is borrower-owned and read-only. `fundBy` controls origination validity; the Arkiv entity is set to expire 90 days later. Repayment and default settlement use the loan contract and do not call Arkiv or Swarm.
 
-The current implementation supports this path only when `SWARM_BEE_URL`, `SWARM_POSTAGE_BATCH_ID`, a funded Rabdi wallet and `NEXT_PUBLIC_ARKIV_ACCESS_KEY` are configured. No live entity receipt is recorded in this repository yet.
+Publication needs `SWARM_BEE_URL`, a usable `SWARM_POSTAGE_BATCH_ID` and a funded Rabdi borrower wallet. `NEXT_PUBLIC_ARKIV_ACCESS_KEY` is optional but recommended to avoid public-RPC limits. Reading an existing report needs only a Bee endpoint, not postage. No public entity receipt is recorded in this repository yet.
+
+The shared SDK query is in `apps/web/src/lib/credit-packet-schema.ts`; both the lender UI and `pnpm storage:verify` use it. The command scopes the query by namespace, lending chain, desk and loan ID and independently joins the result to chain state and Swarm bytes. **Download storage proof** exports the lender's verified read observation, including the chain block/hash and report reference/hash. See [the reproducible runbook](submission.md#independent-reproducible-query-and-read). These artifacts do not replace an actual Rabdi create transaction or second-wallet browser demonstration.
 
 ## Outcome strategy recipes
 

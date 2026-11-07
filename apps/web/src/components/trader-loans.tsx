@@ -4,7 +4,8 @@ import { useEffect, useState } from 'react';
 import { ArrowUpRight, Check, Layers3, Radio, RefreshCw } from 'lucide-react';
 import { formatUnits, zeroHash, type Address as EvmAddress, type Hex } from 'viem';
 import { quotePositionCredit, type PositionPledge } from '@floor/shared';
-import { walletSetHash } from '../../../../services/underwriting/reports';
+import { assertAssessmentEvidence, storageProofBundle } from '../../../../services/underwriting/storage-proof';
+import { plainCreditPacket } from '../lib/credit-packet-schema';
 import { serializeAssessment } from '../../../../services/underwriting/position-assessment';
 import { message, useProtocol } from '../lib/protocol';
 import { approveTraderCredit, repaySeededLocalDemo, sameWallet, traderDesk, underwritingApi, type TraderLoan } from '../lib/trader-credit';
@@ -15,7 +16,7 @@ import { usd } from './trader-replay';
 import { Address, Badge, Button, Panel, TxLink } from './ui';
 
 type Row = { id: bigint; loan: TraderLoan; pledge: PositionPledge | null; packet?: ArkivPacket };
-type SwarmStatus = { swarmConfigured: boolean; swarmReady: boolean; swarmMode: 'LOCAL_BEE' | 'NETWORK_BEE' };
+type SwarmStatus = { swarmConfigured: boolean; swarmReadConfigured?: boolean; swarmReady: boolean; swarmMode: 'LOCAL_BEE' | 'NETWORK_BEE' };
 const states = ['Missing', 'Requested', 'Funded', 'Repaid', 'Defaulted', 'Cancelled'];
 const eventNames: Record<string, string> = {
   TraderCreditRequested: 'Request', ScoreAttested: 'Score', TraderLoanFunded: 'Funding',
@@ -34,6 +35,7 @@ function LoanCard({ row, now, active, demoRequestId, swarm, onChange }: {
   const [performanceOpen, setPerformanceOpen] = useState(false);
   const [performanceLoading, setPerformanceLoading] = useState(false);
   const [performanceEvidence, setPerformanceEvidence] = useState<PublicAssessment | null>(null);
+  const [storageProof, setStorageProof] = useState<ReturnType<typeof storageProofBundle> | null>(null);
   const [releasePreview, setReleasePreview] = useState<AssessmentChallenge | null>(null);
   const [publicConsent, setPublicConsent] = useState(false);
   const [uploaded, setUploaded] = useState<PublicAssessment | null>(null);
@@ -82,20 +84,22 @@ function LoanCard({ row, now, active, demoRequestId, swarm, onChange }: {
       try {
         const report = await retrieveAssessment(packet.reportRef.value, packet.reportHash.value);
         const live = await traderDesk(p);
-        const [wallets, current, currentPledge] = await Promise.all([
+        const [wallets, current, currentPledge, hash, reference] = await Promise.all([
           live.client.readContract({ ...live.contract, functionName: 'traderWallets', args: [id] }),
           live.loan(id), live.pledge(id),
+          live.client.readContract({ ...live.contract, functionName: 'assessmentHashOf', args: [id] }),
+          live.client.readContract({ ...live.contract, functionName: 'assessmentReferenceOf', args: [id] }),
         ]);
-        const evidence = report.evidence;
-        if (evidence.asOf !== Number(loan.terms.asOf)
-          || evidence.digest.toLowerCase() !== loan.terms.evidenceDigest.toLowerCase()
-          || evidence.decision.score !== loan.score
-          || walletSetHash(evidence.wallets as EvmAddress[]).toLowerCase() !== loan.walletSetHash.toLowerCase()
-          || evidence.wallets.length !== wallets.length
-          || evidence.wallets.some((wallet, index) => wallet.toLowerCase() !== wallets[index]?.toLowerCase())) {
-          throw new Error('The retrieved Swarm report does not match the borrower, wallet group and score attested to this loan.');
+        if (!packetMatches(packet, current, live.block.timestamp, currentPledge, id, { hash, reference })) {
+          throw new Error('The Arkiv listing no longer matches the open request and its onchain report commitment.');
         }
+        assertAssessmentEvidence(report.evidence, current, wallets);
         checkPosition(report.position, current, currentPledge);
+        setStorageProof(storageProofBundle({
+          arkivChainId: arkivLocal ? 1337 : 7794095, lendingChainId: p.deployment!.chainId, desk: live.address,
+          packet: plainCreditPacket(packet), lendingBlock: live.block.number, lendingBlockHash: live.block.hash,
+          reportBytes: report.bytes, publicationTx: published?.txHash,
+        }));
         setPerformanceEvidence(report);
         setPerformanceOpen(true);
       } finally {
@@ -125,7 +129,7 @@ function LoanCard({ row, now, active, demoRequestId, swarm, onChange }: {
           || performanceEvidence.reference.toLowerCase() !== packet.reportRef.value.toLowerCase()) {
           throw new Error('The Arkiv listing and inspected Swarm bytes no longer match the onchain report commitment.');
         }
-        if (!packetMatches(packet, current, live.block.timestamp, currentPledge)) throw new Error('Arkiv does not match the current loan.');
+        if (!packetMatches(packet, current, live.block.timestamp, currentPledge, id, { hash: committedHash, reference: committedReference })) throw new Error('Arkiv does not match the current loan.');
         checkPosition(performanceEvidence.position, current, currentPledge);
       }
       if (fn === 'repay' && (current.state !== 2 || current.maturity <= live.block.timestamp)) {
@@ -275,6 +279,12 @@ function LoanCard({ row, now, active, demoRequestId, swarm, onChange }: {
         </dl>
         <p className="trader-note">Score components · consistency {performanceEvidence.evidence.decision.components.consistency}/40 · efficiency {performanceEvidence.evidence.decision.components.efficiency}/35 · drawdown {performanceEvidence.evidence.decision.components.drawdown}/25</p>
         <p className="trader-note">This report informs the pilot eligibility policy. It is not repayment history, borrower income or a probability of default.</p>
+        {storageProof && <Button variant="secondary" onClick={() => {
+          const url = URL.createObjectURL(new Blob([JSON.stringify(storageProof, null, 2) + '\n'], { type: 'application/json' }));
+          const link = document.createElement('a');
+          link.href = url; link.download = `aqra-storage-proof-${id}.json`; link.click();
+          setTimeout(() => URL.revokeObjectURL(url), 1000);
+        }}>Download storage proof</Button>}
       </>}
     </div>}
     {canReviewFunding && <label className="trader-inline trader-risk">
@@ -408,7 +418,7 @@ export function TraderLoans({ mine = false, selectedId, demoRequestId }: { mine?
           for (const { packet, row, reportHash, reportReference } of checked) {
             const artifactMatches = reportHash.toLowerCase() === `0x${packet.reportHash.value.toLowerCase()}`
               && reportReference.toLowerCase() === `0x${packet.reportRef.value.toLowerCase()}`;
-            if (artifactMatches && packetMatches(packet, row.loan, current, row.pledge)) {
+            if (artifactMatches && packetMatches(packet, row.loan, current, row.pledge, row.id, { hash: reportHash, reference: reportReference })) {
               matched.set(packet.loanId.value, packet);
               ids.add(packet.loanId.value);
             }
@@ -441,7 +451,7 @@ export function TraderLoans({ mine = false, selectedId, demoRequestId }: { mine?
         <div className="arkiv-credit-status-meta">
           <Badge tone={packetCount && packetCount > 0 ? 'green' : packetCount === 0 ? 'muted' : 'amber'}>{packetCount === null ? discover ? loading ? 'QUERYING' : 'NOT VERIFIED' : 'NOT QUERIED' : `${packetCount} LISTING${packetCount === 1 ? '' : 'S'}`}</Badge>
           <Badge tone={arkivLocal || arkivAccessKeyConfigured ? 'green' : 'amber'}>{arkivLocal ? 'LOCAL ARKIV NODE' : arkivAccessKeyConfigured ? 'RABDI KEY SET' : 'PUBLIC RABDI RPC'}</Badge>
-          <Badge tone={swarm?.swarmReady ? 'green' : swarm ? 'amber' : 'muted'}>{swarm?.swarmReady ? swarm.swarmMode === 'LOCAL_BEE' ? 'LOCAL BEE READY' : 'SWARM READY' : swarm ? 'SWARM UNAVAILABLE' : 'CHECKING SWARM'}</Badge>
+          <Badge tone={swarm?.swarmReady ? 'green' : swarm ? 'amber' : 'muted'}>{swarm?.swarmReady ? swarm.swarmMode === 'LOCAL_BEE' ? 'LOCAL BEE READY' : 'SWARM READY' : swarm?.swarmReadConfigured ? 'BEE READ CONFIGURED' : swarm ? 'SWARM UNAVAILABLE' : 'CHECKING SWARM'}</Badge>
           {!arkivLocal && <a href={arkivExplorer} target="_blank" rel="noreferrer" className="text-link">Arkiv explorer <ArrowUpRight size={12} /></a>}
         </div>
       </div>}

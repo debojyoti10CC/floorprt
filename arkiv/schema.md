@@ -21,7 +21,7 @@ AQRA uses one wallet-owned, expiring credit packet to make an open loan request 
 | `principal` | optional uint64 | no | Position-backed request principal in micro-USDC |
 | `maxDue` | optional string | no | Position-backed debt cap in micro-USDC |
 
-The actual Arkiv `$owner` must equal the borrower in `getLoan(loanId)`. The lender query filters indexed `app`, `lendingChain` and `desk`. The selected request is checked against the loan ID, owner, contract state, score, funding deadline, cutoff, evidence digest, wallet-set hash and the contract's `assessmentHashOf` and `assessmentReferenceOf` values. The optional position fields must match the current onchain pledge and debt cap before a position loan appears as fundable. `apps/web/src/lib/underwriting-packets.ts` defines and queries the schema.
+The actual Arkiv `$owner` must equal the borrower in `getLoan(loanId)`. The lender query filters indexed `app`, `lendingChain` and `desk`. The selected request is checked against the loan ID, owner, contract state, score, funding deadline, cutoff, evidence digest, wallet-set hash and the contract's `assessmentHashOf` and `assessmentReferenceOf` values. The optional position fields must match the current onchain pledge and debt cap before a position loan appears as fundable. `apps/web/src/lib/credit-packet-schema.ts` defines and queries the schema for both the UI and read-only verifier. `apps/web/src/lib/underwriting-packets.ts` publishes from the borrower wallet and adapts the local devnet. `services/underwriting/credit-packet.ts` checks candidate identity and commitments.
 
 Assessment validity and record retention are separate: `fundBy` is the validity deadline for originating this loan; the Arkiv packet expires 90 days after `fundBy` to leave a review period. Contract loan state remains authoritative after packet expiry. The application does not currently extend Arkiv entities or publish settlement events.
 
@@ -33,7 +33,7 @@ After Swarm upload and read-back verification, the borrower calls `commitAssessm
 
 ## Live evidence status
 
-The same schema is used by the [local position demo](swarm.md#local-position-demo). A public Rabdi transaction requires a separately funded wallet.
+The same schema is used by the [local position demo](swarm.md#local-position-demo). A public Rabdi transaction requires a separately funded wallet. [The submission runbook](submission.md) records the required public evidence and exact reproducible credit-listing query. Neither an empty read nor a local devnet write counts as the required public publication.
 
 ## Legacy trader credit packet v1 (pre-Swarm)
 

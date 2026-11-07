@@ -36,11 +36,11 @@ The metrics are the protocol's underwriting input, but they have only been bench
 ## Demo and integrations
 
 - **Local Anvil:** test USDC and named borrower/lender/curator accounts. The pending-request helper impersonates a sampled wallet only on loopback Anvil and stops before report release/funding; it is not a real borrower's consent or production credit decision.
-- **Chainlink CRE:** workflow source is present. A successful `cre workflow simulate` output or a live CRE deployment is not yet recorded; do not call a report CRE-attested until that evidence exists.
+- **Chainlink CRE:** official CLI simulation transcripts and local settlement receipts are recorded. The Arc replay uses operator-relayed simulation payloads and a test score, not live DON delivery. The current Arc config requires explicit simulation mode; no new CLI run was performed by the read-only verifier.
 - **Arkiv and Swarm:** borrower-signed public report release, Bee upload/read-back, SHA-256 + report recomputation, immutable report hash/reference on the loan, expiring Arkiv v2 listing, and lender retrieval are implemented. This checkout has no Bee URL, postage batch, Rabdi writer, public receipt or second-wallet proof. These artifacts are not collateral or payment.
 - **Multi-market data:** source access was researched for OPINION, Predict.fun, Limitless, Kalshi, Gemini Predictions and Manifold. The benchmark still contains Polymarket only; no cross-venue row is implied by the source study. See [`MULTI_MARKET_DATA.md`](MULTI_MARKET_DATA.md).
 - **ENS:** helps discover linked addresses. It does not prove common beneficial ownership or replace controller signatures.
-- **Arc:** no Arc Studio artifact, Arc deployment or Arc transaction exists in this repo's evidence.
+- **Arc:** a pinned public Arc Testnet deployment and directional settlement receipts are present. `pnpm arc:verify` independently checks 1.02 test USDC recovery and delivery of 2.4 issued test shares. No Studio project/build/test/deploy provenance or live DON delivery is established; the current Arc workflow explicitly returns simulation payloads for a restricted operator relay. See [Arc + CRE](ARC_CHAINLINK.md).
 
 ## Boundaries
 

@@ -37,6 +37,14 @@ CRE CLI v1.39.0 replayed the same hash-verified historical Polymarket marks agai
 
 The simulation relay is restricted to the Arc test operator. The run used a labeled test score and verified read-back from local Bee. The Arc browser profile verifies the receipts against the pinned margin desk. [Deployment receipts](../packages/contracts/deployments/5042002-receipts.json) · [CRE outputs and receipt hashes](../apps/web/public/cre-margin.arc.json)
 
+### Independent Arc verification
+
+`pnpm arc:verify --output work/arc-testnet/verification.json` passed at finalized block `71119906` (hash `0x4e1ebf0d13e36c849c9e524c51ef43f91d7d1f06486d35d0cf130f6a46cff230`). It rechecked pinned code/relay/workflow/keeper bindings, canonical receipt order and lifecycle events, then compared historical ERC-20 and ERC-1155 balance deltas: exactly `1020000` micro-USDC to the lender and `2400000` share units to the backstop. [Read-verification artifact](../evidence/arc-verification.json)
+
+The Arc Chromium case also passed against public RPC after opening `/underwriting/`; it checks LTVs, exact recovery, explorer links, explicit simulation/operator-relay disclosure and the non-demo Borrow profile. Five offline Arc integration tests pass for canonical-USDC restrictions, unauthorized/wrong-workflow delivery, stale/replayed marks, full recovery, repayment and one-time share release. These tests use mock bytecode at the canonical address and do not replace public execution evidence.
+
+No new public transaction or official CRE CLI run was performed in this verification. No Studio project URL/build/test/deploy provenance exists yet. [Arc + Chainlink runbook and architecture](ARC_CHAINLINK.md)
+
 ## Position credit browser run
 
 Chromium completed request #2 at desk `0x322813fd9a801c5507c9de605d63cea4f2ce6c44` on the isolated local lending chain. The borrower pledged 120 complete Conditional Tokens pairs plus 25 test USDC against 102 test USDC due. After Arkiv publication, the test reloaded the app, discovered the entity again and verified the report from Bee before funding. After repayment and release, the wallet held 150 YES and 150 NO shares. The desk held zero of both.

@@ -15,6 +15,8 @@ Floor's protocol, application code, CSS, SVG mark and proof engine were independ
 - forge-std — MIT / Apache-2.0; vendored test library with its original license files. https://github.com/foundry-rs/forge-std
 - Next.js — MIT; React / React DOM — MIT. https://github.com/vercel/next.js and https://github.com/facebook/react
 - viem — MIT. https://github.com/wevm/viem
+- @arkiv-network/sdk 1.0.1 — MIT, copyright 2025 Arkiv Network; schema/query and wallet-owned entity SDK. Original license is distributed with the installed package. https://github.com/Arkiv-Network
+- @ethersphere/bee-js 13.2.0 — BSD-3-Clause; Swarm file upload/download client. Original license is distributed with the installed package. https://github.com/ethersphere/bee-js
 - React Flow / @xyflow/react — MIT; its visible attribution is preserved. https://github.com/xyflow/xyflow
 - Apache ECharts — Apache-2.0. https://github.com/apache/echarts
 - Lucide icons — ISC. https://github.com/lucide-icons/lucide

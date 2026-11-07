@@ -36,6 +36,9 @@ export async function uploadConsentedAssessment(id: bigint, challengeId: string,
 export async function retrieveAssessment(reference: string, sha256: string) {
   const params = new URLSearchParams({ sha256 });
   const report = await underwritingApi<PublicAssessment>(`/assessment/${encodeURIComponent(reference)}?${params}`);
+  if (report.reference.toLowerCase() !== reference.toLowerCase()) {
+    throw new Error('The retrieved Swarm reference differs from the requested report.');
+  }
   const evidence = verifyEvidence(report.evidence);
   const position = report.position == null ? null : verifyPositionDisclosure(report.position);
   const bytes = new TextEncoder().encode(serializeAssessment(evidence, position));

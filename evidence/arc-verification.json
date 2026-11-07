@@ -1,0 +1,27 @@
+{
+  "schema": "aqra.arc-verification/v1",
+  "observedAt": "2026-11-07T01:28:51.241Z",
+  "chainId": 5042002,
+  "block": "71119906",
+  "blockHash": "0x4e1ebf0d13e36c849c9e524c51ef43f91d7d1f06486d35d0cf130f6a46cff230",
+  "desk": "0xf67bde39cf2dc4448e8da692ada233b43864788e",
+  "loanId": "1",
+  "delivery": "CRE_SIMULATION_OPERATOR_RELAY",
+  "scoreSource": "LABELED_TEST_FIXTURE",
+  "priceSource": "RECORDED_POLYMARKET_HISTORY",
+  "principal": "1000000",
+  "due": "1020000",
+  "lender": "0x3be549F004F636E5F91663C01676de2ACD984468",
+  "recovered": "1020000",
+  "backstop": "0x117e56C03c89894CB7aCeb857374E87241CEFe08",
+  "releasedShares": "2400000",
+  "receipts": {
+    "request": "0xb64958bf1e3efb189b369d07f2d0d890b4649ecc2b596b6d0470e4b695f26523",
+    "initialMark": "0xe5fbd7d93e07570c3b83b49c07f9362d39ed024ddabcd37740aef087666f63df",
+    "fund": "0x6a1aee7172243198bcdffb267fc7ddacd5cc930bd0dd930161834c58252565f3",
+    "liquidation": "0x6c24c3197fc52c96f45c86bbe6c3734dddf5b6f3042996b4be65cac8606e5475",
+    "shares": "0x5cd10ff9b206fa6244aff3435ba01de6653c476c098bcb868569db04ccd73b39"
+  },
+  "studioProvenance": "NOT_VERIFIED_BY_THIS_COMMAND",
+  "limits": "Public testnet settlement verification. Not a new CRE CLI run, live DON delivery, mainnet safety, or Arc Studio provenance."
+}

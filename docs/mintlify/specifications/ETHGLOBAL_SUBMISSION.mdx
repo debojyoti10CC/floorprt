@@ -83,7 +83,7 @@ The risk engine lets a user vary assumed PD, default dependence, recovery haircu
 | --- | --- |
 | **Chainlink CRE** | The official CLI completed three Cron simulations using local EVM escrow and the Polymarket API. Applying the reports produced confirmed local liquidation and release transactions. The run uses the simulation route in the prize criteria. |
 | **Arkiv + Swarm** | A local two-wallet run verifies publication, discovery after reload, Swarm read-back, funding and repayment. Public Rabdi evidence and Continuity eligibility remain open. |
-| **Arc** | No Arc integration exists here. Every Arc prize requires an Arc Studio-originated project, a shareable Studio project URL and showing Studio in the demo, plus a working app/backend, architecture diagram and presentation. Arc Continuity additionally requires Continuity registration. Do not claim Arc eligibility yet. |
+| **Arc** | The public Arc Testnet replay recovered 1.02 test USDC and delivered 2.4 shares; `pnpm arc:verify` checks receipts, runtime bindings and historical balance deltas. Target the advanced-stablecoin-contracts prize only after actual Studio build/test/deploy and app connection, a shareable Studio URL and event/prior-work eligibility confirmation. Existing frontend permission does not waive those gates. See [Arc + CRE](https://github.com/debojyoti10CC/floorprt/blob/main/docs/ARC_CHAINLINK.md). |
 
 Official requirements: [ETHGlobal Mumbai prizes](https://ethglobal.com/events/mumbai/prizes), [Arc prizes](https://ethglobal.com/events/mumbai/prizes/arc), [Chainlink CRE](https://docs.chain.link/cre), [Arkiv Rabdi](https://docs.arkiv.network/networks/rabdi/).
 
@@ -102,5 +102,5 @@ Official requirements: [ETHGlobal Mumbai prizes](https://ethglobal.com/events/mu
 - Say **prediction-market performance-metrics-based lending**, **policy-gated borrower request**, **bond-backed direct loan**, and **lender-accepted shortfall**.
 - Do not say that trader history predicts repayment, that the 70% outcome is credit accuracy, or that the loan is safe because of the bond.
 - Do not describe the local impersonation demo as real borrower consent or real funds.
-- Do not describe a CRE simulation as a live oracle write, an Arkiv code path as a confirmed transaction, or the current repo as an Arc project.
+- Do not describe a CRE simulation as live DON delivery, an Arkiv code path as a confirmed transaction, or the existing Arc deployment as Studio-originated. Arc settlement uses a restricted simulation relay; the test score and recorded prices remain explicit.
 - Treat registration in ETHGlobal's Continuity program as unknown until the team verifies it.

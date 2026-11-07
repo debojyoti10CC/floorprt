@@ -4,36 +4,20 @@ import {
   type EVMLog, type HTTPSendRequester, type Runtime,
 } from '@chainlink/cre-sdk';
 import {
-  decodeEventLog, decodeFunctionResult, encodeFunctionData, isAddress, toEventSelector,
+  decodeEventLog, decodeFunctionResult, encodeFunctionData, toEventSelector,
   zeroAddress, type Address,
 } from 'viem';
-import { z } from 'zod';
-import { ARC_TESTNET_CHAIN_ID } from '../../../packages/shared/src/arc.js';
+import type { Config } from './config.js';
+export { configSchema, type Config } from './config.js';
 import { TraderCreditDeskAbi } from '../../../packages/shared/src/abis.generated.js';
 import { monthOf, offsetMonth } from '../../underwriting/calendar.js';
 import { boundaryBlockMaxima, evidenceBoundaries, evidenceFromHistories, type AccountHistory } from '../../underwriting/policy.js';
-import { parsePnlWindow, PnlApiOrigin } from '../../underwriting/pnl-wire.js';
+import { parsePnlWindow } from '../../underwriting/pnl-wire.js';
 import { scoreReport } from '../../underwriting/reports.js';
 import { verifyControllers } from '../../underwriting/controllers.js';
 import { onLoanSweep } from './lifecycle.js';
 import { lendingSelector } from './network.js';
 
-const contractAddress = z.string().refine(value => isAddress(value) && value !== zeroAddress).transform(value => value as Address);
-export const configSchema = z.object({
-  desk: contractAddress,
-  chainId: z.union([z.literal(31337), z.literal(11155111), z.literal(ARC_TESTNET_CHAIN_ID)]),
-  arcSimulation: z.literal(true).optional(),
-  keeper: contractAddress.optional(),
-  pnlApiUrl: PnlApiOrigin.optional(),
-  replayAt: z.number().int().positive().optional(),
-  replayRelayPort: z.number().int().min(1024).max(65535).optional(),
-}).refine(config => config.arcSimulation === undefined || config.chainId === ARC_TESTNET_CHAIN_ID)
-  .refine(config => config.replayAt === undefined
-  ? config.replayRelayPort === undefined
-  : (config.chainId === 31337 || config.arcSimulation) && config.keeper !== undefined)
-  .refine(config => config.chainId === 31337 || config.arcSimulation || config.pnlApiUrl?.startsWith('https://'),
-    'Configure an HTTPS AQRA read API for public CRE delivery.');
-export type Config = z.infer<typeof configSchema>;
 const requestedTopic = toEventSelector('TraderCreditRequested(uint256,address,bytes32)');
 const polygonSelector = EVMClient.SUPPORTED_CHAIN_SELECTORS['polygon-mainnet'];
 

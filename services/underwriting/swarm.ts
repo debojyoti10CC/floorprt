@@ -18,8 +18,12 @@ export type SwarmAssessment = {
 export const assessmentSha256 = (evidence: Evidence, position: PositionDisclosure | null = null) =>
   createHash('sha256').update(serializeAssessment(evidence, position)).digest('hex');
 
+export function swarmReadConfigured() {
+  return Boolean(process.env.SWARM_BEE_URL?.trim());
+}
+
 export function swarmConfigured() {
-  return Boolean(process.env.SWARM_BEE_URL?.trim() && referencePattern.test(process.env.SWARM_POSTAGE_BATCH_ID?.trim() ?? ''));
+  return swarmReadConfigured() && referencePattern.test(process.env.SWARM_POSTAGE_BATCH_ID?.trim() ?? '');
 }
 
 function swarmDevMode() {
@@ -47,7 +51,7 @@ export async function swarmStorageStatus() {
       // A missing or unreachable Bee remains unavailable in the lender status.
     }
   }
-  return { swarmConfigured: swarmConfiguredNow, swarmReady, swarmMode: swarmDevMode() ? 'LOCAL_BEE' : 'NETWORK_BEE' };
+  return { swarmConfigured: swarmConfiguredNow, swarmReadConfigured: swarmReadConfigured(), swarmReady, swarmMode: swarmDevMode() ? 'LOCAL_BEE' : 'NETWORK_BEE' };
 }
 
 function beeClient() {
@@ -105,7 +109,7 @@ function verifyBytes(bytes: Uint8Array, expectedHash: string) {
 
 export async function uploadAssessment(evidence: Evidence, position: PositionDisclosure | null = null): Promise<SwarmAssessment> {
   const batch = process.env.SWARM_POSTAGE_BATCH_ID?.trim();
-  if (!batch) throw new Error('Swarm storage is not configured: set SWARM_POSTAGE_BATCH_ID.');
+  if (!swarmConfigured() || !batch) throw new Error('Swarm upload requires a Bee endpoint and a valid postage batch ID.');
   const bytes = new TextEncoder().encode(serializeAssessment(evidence, position));
   if (bytes.byteLength > MAX_REPORT_BYTES) throw new Error('Assessment report exceeds the AQRA size limit.');
   const result = await beeClient().file.upload(batch, bytes, `aqra-assessment-${evidence.digest.slice(2, 14)}.json`, {
@@ -127,6 +131,7 @@ export async function uploadAssessment(evidence: Evidence, position: PositionDis
 }
 
 export async function readAssessment(reference: string, expectedHash: string): Promise<SwarmAssessment> {
+  if (!hashPattern.test(expectedHash)) throw new Error('Invalid assessment SHA-256.');
   const bytes = await downloadBytes(reference);
   return { reference, sha256: expectedHash.toLowerCase(), bytes: bytes.byteLength, ...verifyBytes(bytes, expectedHash) };
 }
