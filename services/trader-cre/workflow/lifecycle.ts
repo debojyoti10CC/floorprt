@@ -11,8 +11,8 @@ import { z } from 'zod';
 import { MarginCreditDeskAbi, TraderCreditKeeperAbi } from '../../../packages/shared/src/abis.generated.js';
 import { parsePnlHistory, pnlUrl } from '../../underwriting/pnl-wire.js';
 import type { Config } from './workflow.js';
+import { lendingSelector } from './network.js';
 
-const lendingSelector = EVMClient.SUPPORTED_CHAIN_SELECTORS['ethereum-testnet-sepolia'];
 const MARK_SCHEMA = keccak256(stringToHex('aqra-market-mark-v1'));
 const markParameters = parseAbiParameters('bytes32, uint256, address, uint256, uint256, uint96, uint64, bytes32');
 const sweepParameters = parseAbiParameters('uint256, address, address, uint256, uint256, uint64, bytes32');
@@ -99,7 +99,7 @@ function fetchActivityAudit(send: HTTPSendRequester, trader: string) {
 export function onLoanSweep(runtime: Runtime<Config>): LoanSweepResult {
   const { desk, chainId, keeper, replayAt, replayRelayPort } = runtime.config;
   if (!keeper) throw new Error('The scheduled workflow requires a desk-bound keeper.');
-  const client = new EVMClient(lendingSelector);
+  const client = new EVMClient(lendingSelector(chainId));
   const http = new HTTPClient();
   const atBlock = chainId === 31337 ? LATEST_BLOCK_NUMBER : LAST_FINALIZED_BLOCK_NUMBER;
   const read = (to: Hex, data: Hex) => bytesToHex(client.callContract(runtime, {
@@ -163,11 +163,17 @@ export function onLoanSweep(runtime: Runtime<Config>): LoanSweepResult {
   for (const mark of marks) runtime.log('Loan ' + mark.loanId + ' · LTV ' + mark.debtLtvBps + ' bps · liquidate ' + mark.liquidate);
 
   const output = { observedAt: observedAt.toString(), audit, actions, marks, ...(sweep ? { sweep } : {}) };
-  if (chainId === 31337 || !sweep) return output;
-  const report = runtime.report({
-    encodedPayload: hexToBase64(sweep), encoderName: 'evm', signingAlgo: 'ecdsa', hashingAlgo: 'keccak256',
-  }).result();
-  const result = client.writeReport(runtime, { receiver: keeper, report, gasConfig: { gasLimit: '1800000' } }).result();
-  if (result.txStatus !== TxStatus.SUCCESS) throw new Error('Loan servicing failed: ' + result.errorMessage);
-  return { ...output, tx: result.txHash ? bytesToHex(result.txHash) : '0x' };
+  if (chainId === 31337 || runtime.config.arcSimulation) return output;
+  const submit = (receiver: Hex, payload: Hex) => {
+    const report = runtime.report({
+      encodedPayload: hexToBase64(payload), encoderName: 'evm', signingAlgo: 'ecdsa', hashingAlgo: 'keccak256',
+    }).result();
+    const result = client.writeReport(runtime, { receiver, report, gasConfig: { gasLimit: '1800000' } }).result();
+    if (result.txStatus !== TxStatus.SUCCESS) throw new Error('Loan servicing failed: ' + result.errorMessage);
+    return result.txHash ? bytesToHex(result.txHash) : '0x' as const;
+  };
+  let tx: Hex | undefined;
+  for (const mark of marks) tx = submit(desk, mark.payload);
+  if (sweep) tx = submit(keeper, sweep);
+  return { ...output, ...(tx ? { tx } : {}) };
 }

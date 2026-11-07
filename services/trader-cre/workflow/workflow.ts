@@ -8,6 +8,7 @@ import {
   zeroAddress, type Address,
 } from 'viem';
 import { z } from 'zod';
+import { ARC_TESTNET_CHAIN_ID } from '../../../packages/shared/src/arc.js';
 import { TraderCreditDeskAbi } from '../../../packages/shared/src/abis.generated.js';
 import { monthOf, offsetMonth } from '../../underwriting/calendar.js';
 import { boundaryBlockMaxima, evidenceBoundaries, evidenceFromHistories, type AccountHistory } from '../../underwriting/policy.js';
@@ -15,23 +16,25 @@ import { parsePnlWindow, PnlApiOrigin } from '../../underwriting/pnl-wire.js';
 import { scoreReport } from '../../underwriting/reports.js';
 import { verifyControllers } from '../../underwriting/controllers.js';
 import { onLoanSweep } from './lifecycle.js';
+import { lendingSelector } from './network.js';
 
 const contractAddress = z.string().refine(value => isAddress(value) && value !== zeroAddress).transform(value => value as Address);
 export const configSchema = z.object({
   desk: contractAddress,
-  chainId: z.union([z.literal(31337), z.literal(11155111)]),
+  chainId: z.union([z.literal(31337), z.literal(11155111), z.literal(ARC_TESTNET_CHAIN_ID)]),
+  arcSimulation: z.literal(true).optional(),
   keeper: contractAddress.optional(),
   pnlApiUrl: PnlApiOrigin.optional(),
   replayAt: z.number().int().positive().optional(),
   replayRelayPort: z.number().int().min(1024).max(65535).optional(),
-}).refine(config => config.replayAt === undefined
+}).refine(config => config.arcSimulation === undefined || config.chainId === ARC_TESTNET_CHAIN_ID)
+  .refine(config => config.replayAt === undefined
   ? config.replayRelayPort === undefined
-  : config.chainId === 31337 && config.keeper !== undefined)
-  .refine(config => config.chainId === 31337 || config.pnlApiUrl?.startsWith('https://'),
-    'Configure an HTTPS AQRA read API for Sepolia.');
+  : (config.chainId === 31337 || config.arcSimulation) && config.keeper !== undefined)
+  .refine(config => config.chainId === 31337 || config.arcSimulation || config.pnlApiUrl?.startsWith('https://'),
+    'Configure an HTTPS AQRA read API for public CRE delivery.');
 export type Config = z.infer<typeof configSchema>;
 const requestedTopic = toEventSelector('TraderCreditRequested(uint256,address,bytes32)');
-const sepoliaSelector = EVMClient.SUPPORTED_CHAIN_SELECTORS['ethereum-testnet-sepolia'];
 const polygonSelector = EVMClient.SUPPORTED_CHAIN_SELECTORS['polygon-mainnet'];
 
 function fetchHistory(send: HTTPSendRequester, origin: string, wallet: Address, month: string) {
@@ -51,7 +54,7 @@ export async function onLoanRequested(runtime: Runtime<Config>, log: EVMLog) {
     topics: log.topics.map(bytesToHex) as [Address, ...Address[]],
   });
   const { loanId, borrower, evidenceDigest } = decoded.args;
-  const lending = new EVMClient(sepoliaSelector);
+  const lending = new EVMClient(lendingSelector(chainId));
   const polygon = new EVMClient(polygonSelector);
   if (!log.blockNumber) throw new Error('Request log is missing its block number.');
   const requestBlock = blockNumber(protoBigIntToBigint(log.blockNumber));
@@ -103,8 +106,8 @@ export async function onLoanRequested(runtime: Runtime<Config>, log: EVMLog) {
     desk, chainId, id: loanId, borrower, walletSetHash: loan.walletSetHash, evidenceDigest, asOf: loan.terms.asOf,
   }, evidence);
   // Anvil uses its own local forwarder. Return the exact receiver payload for comparison in CRE simulation.
-  if (chainId === 31337) {
-    runtime.log('Local score ' + evidence.decision.score + ' · request ' + loanId + ' · payload ' + payload);
+  if (chainId === 31337 || runtime.config.arcSimulation) {
+    runtime.log('Simulated score ' + evidence.decision.score + ' · request ' + loanId + ' · payload ' + payload);
     return payload;
   }
   const report = runtime.report({
@@ -121,7 +124,7 @@ export async function onLoanRequested(runtime: Runtime<Config>, log: EVMLog) {
 }
 
 export function initWorkflow(config: Config) {
-  const client = new EVMClient(sepoliaSelector);
+  const client = new EVMClient(lendingSelector(config.chainId));
   return [
     cre.handler(client.logTrigger({
       addresses: [hexToBase64(config.desk)],

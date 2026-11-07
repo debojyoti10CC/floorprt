@@ -23,3 +23,11 @@ margin-simulation:
     workflow-path: ./main.ts
     config-path: ./config.margin.local.json
     secrets-path: ""
+
+arc-simulation:
+  user-workflow:
+    workflow-name: aqra-arc-testnet
+  workflow-artifacts:
+    workflow-path: ./main.ts
+    config-path: ./config.arc.local.json
+    secrets-path: ""
