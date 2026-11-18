@@ -27,3 +27,5 @@ services/trader-cre/workflow/config.margin*.local.json
 services/trader-cre/workflow/margin*.local.wasm
 services/trader-cre/workflow/margin*.local.js
 !packages/contracts/deployments/
+.DS_Store
+Thumbs.db
