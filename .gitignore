@@ -29,3 +29,5 @@ services/trader-cre/workflow/margin*.local.js
 !packages/contracts/deployments/
 .DS_Store
 Thumbs.db
+.vscode/
+.idea/
